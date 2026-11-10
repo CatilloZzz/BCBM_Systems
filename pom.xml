@@ -38,6 +38,19 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Persistencia con Hibernate ORM -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.6.11.Final</version>
+        </dependency>
+
+        <!-- Driver de PostgreSQL utilizado por Hibernate -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -60,9 +73,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>
-                                edu.ni.uam.proyectofinalferrogest/edu.ni.uam.proyectofinalferrogest.HelloApplication
-                            </mainClass>
+                            <mainClass>edu.ni.uam.proyectofinalferrogest/edu.ni.uam.proyectofinalferrogest.MainApp</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
