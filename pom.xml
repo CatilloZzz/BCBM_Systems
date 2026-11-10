@@ -38,6 +38,19 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Persistencia con Hibernate ORM -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.6.11.Final</version>
+        </dependency>
+
+        <!-- Driver de PostgreSQL utilizado por Hibernate -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version>
+        </dependency>
     </dependencies>
 
     <build>

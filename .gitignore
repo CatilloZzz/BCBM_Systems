@@ -11,7 +11,8 @@ target/
 .idea/libraries/
 target/
 .idea/
-src/main/resources/config.properties
+src/main/resources/hibernate.properties
+
 *.iws
 *.iml
 *.ipr
