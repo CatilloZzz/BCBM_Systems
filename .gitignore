@@ -11,6 +11,7 @@ target/
 .idea/libraries/
 target/
 .idea/
+src/main/resources/config.properties
 *.iws
 *.iml
 *.ipr
