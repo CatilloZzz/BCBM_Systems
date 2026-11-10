@@ -32,4 +32,3 @@ public class MantenimientoEquipo {
     public void setRegistradoPor(Usuario value) { this.registradoPor = value; }
     @Override public String toString() { return fecha + " - " + descripcion; }
 }
-```

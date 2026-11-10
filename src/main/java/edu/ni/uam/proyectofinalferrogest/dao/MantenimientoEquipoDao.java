@@ -10,4 +10,3 @@ public class MantenimientoEquipoDao extends BaseDao<MantenimientoEquipo> {
                 .setParameter("id", equipoId).getResultList();
     }
 }
-```

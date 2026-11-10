@@ -42,4 +42,3 @@ public final class HibernateUtil {
     }
     public static synchronized void close() { if (factory != null) { factory.close(); factory = null; } }
 }
-```
