@@ -19,6 +19,6 @@
         <Label text="Sistema de Gestión de Emergencias para Bomberos"
                style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
 
-        <Label text="Aplicación iniciada correctamente"/>
+        <fx:include fx:id="emergencias" source="emergencias.fxml" VBox.vgrow="ALWAYS"/>
 
     </VBox>
