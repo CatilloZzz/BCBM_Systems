@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="page-scroll" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.InicioController" stylesheets="@../css/bcbm.css">
+    <content>
+        <VBox styleClass="page" spacing="20" minHeight="-Infinity">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="5">
+                    <Label text="RESUMEN INSTITUCIONAL" styleClass="eyebrow"/>
+                    <Label fx:id="saludo" styleClass="page-title"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+                <Button text="Actualizar" onAction="#actualizar" styleClass="secondary"/>
+            </HBox>
+            <VBox styleClass="welcome-banner" spacing="10">
+                <Label text="PERSONAL E INVENTARIO" styleClass="brand-eyebrow"/>
+                <Label text="Personal y recursos,&#10;en un mismo lugar." styleClass="welcome-title"/>
+                <Label text="Consulta la disponibilidad del personal y mantén al día el cuidado de los equipos." styleClass="brand-copy" wrapText="true"/>
+            </VBox>
+            <HBox spacing="16">
+                <VBox styleClass="metric-card" spacing="10" HBox.hgrow="ALWAYS" prefWidth="250">
+                    <Label fx:id="alcancePersonal" text="Personal registrado" styleClass="metric-label"/>
+                    <Label fx:id="totalPersonal" text="—" styleClass="metric-value"/>
+                    <Label fx:id="personalDisponible" text="Consultando disponibilidad" styleClass="metric-note"/>
+                </VBox>
+                <VBox styleClass="metric-card" spacing="10" HBox.hgrow="ALWAYS" prefWidth="250">
+                    <Label text="Inventario de equipos" styleClass="metric-label"/>
+                    <Label fx:id="totalEquipos" text="—" styleClass="metric-value"/>
+                    <Label text="Registros de equipos y grupos" styleClass="muted"/>
+                </VBox>
+                <VBox styleClass="metric-card, metric-warning" spacing="10" HBox.hgrow="ALWAYS" prefWidth="250">
+                    <Label text="Equipos en reparación" styleClass="metric-label"/>
+                    <Label fx:id="equiposReparacion" text="—" styleClass="metric-value"/>
+                    <Label text="Para seguimiento de mantenimiento" styleClass="muted" wrapText="true"/>
+                </VBox>
+            </HBox>
+            <Label text="Accesos rápidos" styleClass="section-title"/>
+            <HBox spacing="16">
+                <VBox styleClass="quick-card" spacing="12" HBox.hgrow="ALWAYS" prefWidth="250">
+                    <Label text="Personal" styleClass="card-title"/>
+                    <Label text="Consulta fichas, rangos y disponibilidad." styleClass="muted" wrapText="true"/>
+                    <Button text="Ver personal  →" onAction="#verPersonal" styleClass="text-button"/>
+                </VBox>
+                <VBox styleClass="quick-card" spacing="12" HBox.hgrow="ALWAYS" prefWidth="250">
+                    <Label text="Equipos" styleClass="card-title"/>
+                    <Label text="Revisa el inventario y sus unidades." styleClass="muted" wrapText="true"/>
+                    <Button text="Ver equipos  →" onAction="#verEquipos" styleClass="text-button"/>
+                </VBox>
+                <VBox styleClass="quick-card" spacing="12" HBox.hgrow="ALWAYS" prefWidth="250">
+                    <Label text="Mantenimiento" styleClass="card-title"/>
+                    <Label text="Consulta los trabajos y próximas fechas." styleClass="muted" wrapText="true"/>
+                    <Button text="Ver historial  →" onAction="#verMantenimiento" styleClass="text-button"/>
+                </VBox>
+            </HBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label text="Los datos de personal y las acciones disponibles se ajustan a los permisos de tu cuenta." styleClass="footnote" wrapText="true"/>
+        </VBox>
+    </content>
+</ScrollPane>

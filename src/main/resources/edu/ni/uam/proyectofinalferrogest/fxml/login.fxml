@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="login-root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.LoginController" stylesheets="@../css/bcbm.css">
+    <VBox styleClass="login-brand" prefWidth="490" minWidth="420" maxWidth="540" spacing="24" HBox.hgrow="ALWAYS">
+        <Label text="BENEMÉRITO CUERPO DE BOMBEROS" styleClass="brand-eyebrow" wrapText="true"/>
+        <Region VBox.vgrow="ALWAYS"/>
+        <StackPane styleClass="logo-tile" maxWidth="184" minHeight="184" prefHeight="184">
+            <ImageView fitWidth="160" fitHeight="160" preserveRatio="true" smooth="true">
+                <image>
+                    <Image url="@../images/logo-bcbm.png"/>
+                </image>
+            </ImageView>
+        </StackPane>
+        <VBox spacing="10">
+            <Label text="Al servicio de&#10;Managua." styleClass="login-title"/>
+            <Region styleClass="gold-rule" minHeight="4" prefHeight="4" maxWidth="62"/>
+            <Label text="Personas, equipos y compromiso&#10;al servicio de nuestra comunidad." styleClass="brand-copy" wrapText="true"/>
+        </VBox>
+        <Region VBox.vgrow="ALWAYS"/>
+        <VBox spacing="8">
+            <Label text="HONOR · DISCIPLINA · ABNEGACIÓN" styleClass="brand-motto"/>
+            <Label text="MANAGUA, NICARAGUA" styleClass="brand-caption"/>
+        </VBox>
+    </VBox>
+    <StackPane styleClass="login-content" HBox.hgrow="ALWAYS" minWidth="500">
+        <VBox maxWidth="410" spacing="18" alignment="CENTER_LEFT">
+            <Label text="BCBM / ACCESO INSTITUCIONAL" styleClass="eyebrow"/>
+            <VBox spacing="8">
+                <Label text="Bienvenido de nuevo" styleClass="login-heading"/>
+                <Label text="Ingresa a tu espacio de trabajo." styleClass="subtitle"/>
+            </VBox>
+            <Region minHeight="12"/>
+            <VBox spacing="8">
+                <Label text="Usuario" labelFor="$usuario" styleClass="field-label"/>
+                <TextField fx:id="usuario" promptText="Escribe tu usuario" styleClass="login-input" onAction="#acceder"/>
+            </VBox>
+            <VBox spacing="8">
+                <Label text="Contraseña" labelFor="$clave" styleClass="field-label"/>
+                <PasswordField fx:id="clave" promptText="Escribe tu contraseña" styleClass="login-input" onAction="#acceder"/>
+            </VBox>
+            <Label fx:id="error" styleClass="inline-error" wrapText="true" maxWidth="1.7976931348623157E308"/>
+            <Button text="Iniciar sesión" onAction="#acceder" defaultButton="true" styleClass="primary, login-submit" maxWidth="1.7976931348623157E308"/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ProgressIndicator fx:id="cargando" prefWidth="20" prefHeight="20"/>
+                <Label text="Usa la cuenta asignada por tu administrador." styleClass="muted" wrapText="true"/>
+            </HBox>
+            <Separator/>
+            <TitledPane text="Configuración inicial" expanded="false" animated="false" styleClass="setup-pane">
+                <VBox spacing="10">
+                    <Label text="Solo si todavía no existen usuarios en el sistema." styleClass="muted" wrapText="true"/>
+                    <Button text="Crear primer administrador" onAction="#primerAdmin" styleClass="secondary"/>
+                </VBox>
+            </TitledPane>
+        </VBox>
+    </StackPane>
+</HBox>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" prefWidth="440" headerText="Crear primer administrador" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.PrimerAdminController" stylesheets="@../css/bcbm.css">
+    <content>
+        <VBox spacing="14" styleClass="dialog-form">
+            <Label text="La cuenta se llamará admin. Solo se puede crear si todavía no existen usuarios." wrapText="true" styleClass="muted"/>
+            <VBox spacing="6">
+                <Label text="Contraseña" styleClass="field-label"/>
+                <PasswordField fx:id="clave" promptText="Mínimo 8 caracteres"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Repetir contraseña" styleClass="field-label"/>
+                <PasswordField fx:id="repetir" promptText="Escribe nuevamente la contraseña"/>
+            </VBox>
+            <Label fx:id="error" styleClass="inline-error" wrapText="true"/>
+        </VBox>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:constant="OK"/>
+        <ButtonType fx:constant="CANCEL"/>
+    </buttonTypes>
+</DialogPane>

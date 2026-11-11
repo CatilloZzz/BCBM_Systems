@@ -1,0 +1,131 @@
+/* BCBM · Rojo institucional, dorado del escudo y superficies de trabajo claras. */
+.root {
+    -fx-font-family: "Segoe UI"; -fx-font-size: 13px;
+    -fx-base: #ffffff; -fx-background: #f3f5f7; -fx-control-inner-background: #ffffff;
+    -fx-accent: #b8242c; -fx-focus-color: #b8242c; -fx-faint-focus-color: #b8242c20;
+    -fx-text-background-color: #20282f;
+}
+.label { -fx-text-fill: #20282f; }
+.app-shell, .page { -fx-background-color: #f3f5f7; }
+.page { -fx-padding: 26 26 18 26; }
+.eyebrow { -fx-text-fill: #a6232a; -fx-font-size: 10px; -fx-font-weight: bold; }
+.page-title { -fx-font-family: "Bahnschrift"; -fx-font-size: 30px; -fx-text-fill: #20282f; }
+.subtitle { -fx-text-fill: #697580; -fx-font-size: 13px; }
+.muted { -fx-text-fill: #697580; -fx-font-size: 12px; }
+.footnote { -fx-text-fill: #73808a; -fx-font-size: 11px; }
+.card-title, .section-title { -fx-font-family: "Bahnschrift"; -fx-font-size: 18px; -fx-text-fill: #25313b; }
+.field-label { -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #42505b; }
+.button { -fx-cursor: hand; -fx-padding: 10 16; -fx-background-radius: 6; -fx-border-radius: 6; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-color: #e8edf1; -fx-text-fill: #35434e; }
+.button:focused { -fx-border-color: #b8242c; -fx-border-width: 1; -fx-border-insets: -3; }
+.primary { -fx-background-color: #bc252d; -fx-text-fill: white; }
+.primary:hover { -fx-background-color: #9d1b23; }
+.primary:pressed { -fx-background-color: #7f1820; }
+.secondary { -fx-background-color: #ffffff; -fx-border-color: #d8dfe5; -fx-border-width: 1; -fx-text-fill: #42515c; }
+.secondary:hover { -fx-background-color: #edf1f4; }
+.text-button { -fx-background-color: transparent; -fx-text-fill: #af2029; -fx-padding: 5 0; }
+.text-button:hover { -fx-text-fill: #75171d; -fx-underline: true; }
+.danger-outline { -fx-background-color: #fff7f7; -fx-text-fill: #ab252d; -fx-border-color: #ebc8cc; -fx-border-width: 1; -fx-padding: 10 9; }
+.danger-outline:hover { -fx-background-color: #fce8e9; }
+.text-field, .password-field, .combo-box, .date-picker, .text-area {
+    -fx-background-color: #ffffff; -fx-background-radius: 5; -fx-border-radius: 5;
+    -fx-border-color: #d9e0e6; -fx-border-width: 1; -fx-prompt-text-fill: #89949e;
+    -fx-text-fill: #24313b; -fx-font-size: 12px;
+}
+.text-field, .password-field { -fx-padding: 10 11; }
+.text-field:focused, .password-field:focused, .text-area:focused, .combo-box:focused, .date-picker:focused { -fx-border-color: #b8242c; -fx-effect: dropshadow(gaussian,#b8242c18,4,0,0,0); }
+.combo-box .list-cell { -fx-padding: 9 10; -fx-text-fill: #34424d; -fx-background-color: transparent; }
+.combo-box-popup .list-cell { -fx-background-color: white; -fx-text-fill: #34424d; }
+.combo-box-popup .list-cell:hover, .combo-box-popup .list-cell:filled:selected { -fx-background-color: #f9e9ea; -fx-text-fill: #931e26; }
+.combo-box .arrow-button, .date-picker .arrow-button { -fx-background-color: transparent; -fx-padding: 8; }
+.date-picker .text-field { -fx-border-width: 0; -fx-background-color: transparent; }
+.text-area .content { -fx-background-color: #ffffff; -fx-padding: 10; }
+.text-area { -fx-padding: 0; }
+.check-box .box { -fx-background-color: white; -fx-border-color: #cbd4db; -fx-border-radius: 3; -fx-background-radius: 3; -fx-padding: 4; }
+.check-box:selected .box { -fx-background-color: #b8242c; -fx-border-color: #b8242c; }
+.check-box:selected .mark { -fx-background-color: white; }
+.separator .line { -fx-border-color: #e7ebee; -fx-border-width: 1 0 0 0; }
+.progress-indicator { -fx-progress-color: #b8242c; }
+.list-card, .metric-card, .quick-card, .equipment-picker { -fx-background-color: #ffffff; -fx-background-radius: 9; -fx-border-color: #e0e5e9; -fx-border-radius: 9; -fx-border-width: 1; }
+.list-card { -fx-padding: 18; }
+.form-panel { -fx-background-color: #ffffff; -fx-background-radius: 9; -fx-border-color: #e0e5e9; -fx-border-radius: 9; -fx-border-width: 1; -fx-padding: 1; }
+.form-scroll { -fx-background-color: #ffffff; -fx-padding: 0; }
+.form-scroll > .viewport { -fx-background-color: #ffffff; }
+.form-card { -fx-padding: 20 18; -fx-background-color: #ffffff; }
+.form-actions { -fx-padding: 14 18 18; -fx-border-color: #e7ebee; -fx-border-width: 1 0 0 0; }
+.page-scroll, .page-scroll > .viewport { -fx-background-color: #f3f5f7; -fx-padding: 0; }
+.search-field { -fx-background-color: #f6f8fa; -fx-border-color: #e5eaee; }
+.count-label { -fx-font-size: 11px; -fx-text-fill: #7b8790; -fx-min-width: 80; }
+.feedback { -fx-font-size: 12px; -fx-text-fill: #576b5f; }
+.table-view { -fx-background-color: transparent; -fx-border-color: #e7ecef; -fx-border-width: 1 0 1 0; -fx-padding: 0; }
+.table-view .column-header-background, .table-view .column-header, .table-view .filler { -fx-background-color: #f5f7f9; -fx-border-width: 0; }
+.table-view .column-header { -fx-size: 40; }
+.table-view .column-header .label { -fx-font-size: 11px; -fx-text-fill: #657582; -fx-alignment: CENTER_LEFT; -fx-padding: 0 10; -fx-font-weight: bold; }
+.table-cell { -fx-border-color: transparent transparent #edf0f3 transparent; -fx-padding: 0 10; -fx-alignment: CENTER_LEFT; -fx-font-size: 12px; -fx-text-fill: #34414c; }
+.table-row-cell { -fx-background-color: white; -fx-background-insets: 0; }
+.table-row-cell:odd { -fx-background-color: #fcfdfe; }
+.table-row-cell:filled:hover { -fx-background-color: #f5f7fa; }
+.table-row-cell:filled:selected { -fx-background-color: #f9e9eb; }
+.table-row-cell:filled:selected .table-cell { -fx-text-fill: #642128; }
+.table-row-cell:empty .table-cell { -fx-border-color: transparent; }
+.table-view .placeholder .label { -fx-text-fill: #7b8790; }
+.status-badge { -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 8; -fx-background-radius: 4; }
+.status-ok { -fx-background-color: #eaf3ee; -fx-text-fill: #337453; }
+.status-danger { -fx-background-color: #fce5e7; -fx-text-fill: #b12c38; }
+.status-warning { -fx-background-color: #fff3d5; -fx-text-fill: #88661a; }
+.status-neutral { -fx-background-color: #edf0f5; -fx-text-fill: #586b81; }
+.scroll-bar:horizontal, .scroll-bar:vertical { -fx-background-color: #f6f8fa; -fx-pref-width: 10; -fx-pref-height: 10; }
+.scroll-bar .thumb { -fx-background-color: #c8d1d9; -fx-background-radius: 8; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-padding: 2; -fx-background-color: transparent; }
+.sidebar { -fx-background-color: #651a21; -fx-padding: 24 15 18; }
+.sidebar-brand { -fx-padding: 0 0 18; }
+.logo-tile { -fx-background-color: white; -fx-background-radius: 14; }
+.sidebar-title { -fx-font-family: "Bahnschrift"; -fx-font-size: 19px; -fx-text-fill: #ffffff; }
+.sidebar-subtitle { -fx-font-size: 12px; -fx-text-fill: #e0bfc2; }
+.sidebar-divider .line { -fx-border-color: #843b40; }
+.nav-section { -fx-font-size: 9px; -fx-text-fill: #d2a3a8; -fx-font-weight: bold; -fx-padding: 14 12 8; }
+.nav-button { -fx-alignment: CENTER_LEFT; -fx-padding: 12 13; -fx-graphic-text-gap: 12; -fx-background-color: transparent; -fx-text-fill: #f2dfe1; -fx-font-size: 13px; -fx-font-weight: normal; }
+.nav-icon { -fx-fill: #dcbec1; }
+.nav-button:hover { -fx-background-color: #7a2b32; -fx-text-fill: white; }
+.nav-active { -fx-background-color: #8e333b; -fx-border-color: #e3b447; -fx-border-width: 0 0 0 3; -fx-border-radius: 0 5 5 0; -fx-background-radius: 0 5 5 0; -fx-text-fill: white; -fx-font-weight: bold; }
+.nav-active .nav-icon { -fx-fill: #edc773; }
+.nav-button:focused, .logout-button:focused { -fx-border-color: #edc773; }
+.session-block { -fx-padding: 6 12 12; -fx-background-color: #59161c; -fx-background-radius: 6; }
+.session-block .nav-section { -fx-padding: 7 0 2; }
+.session-name { -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; }
+.logout-button { -fx-background-color: transparent; -fx-text-fill: #f1d6d9; -fx-alignment: CENTER_LEFT; -fx-padding: 10 13; }
+.logout-button:hover { -fx-background-color: #7a2b32; }
+.sidebar-footer { -fx-font-size: 9px; -fx-text-fill: #bd8e94; -fx-padding: 12 10 0; }
+.topbar { -fx-background-color: #ffffff; -fx-padding: 17 26; -fx-border-color: #e2e7eb; -fx-border-width: 0 0 1 0; }
+.topbar-brand { -fx-font-family: "Bahnschrift"; -fx-font-size: 14px; -fx-text-fill: #a3242d; }
+.topbar-section { -fx-font-size: 12px; -fx-text-fill: #465560; }
+.welcome-banner { -fx-background-color: #7b2028; -fx-background-radius: 10; -fx-padding: 25 30; -fx-border-color: #e3b447; -fx-border-width: 0 0 0 5; -fx-border-radius: 0 10 10 0; }
+.welcome-title { -fx-font-family: "Bahnschrift"; -fx-font-size: 31px; -fx-text-fill: white; }
+.brand-eyebrow { -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #edc773; }
+.brand-copy { -fx-font-size: 13px; -fx-text-fill: #efd5d8; -fx-line-spacing: 4; }
+.metric-card { -fx-padding: 20; }
+.metric-label { -fx-font-size: 12px; -fx-text-fill: #64727d; }
+.metric-value { -fx-font-family: "Bahnschrift"; -fx-font-size: 38px; -fx-text-fill: #273640; }
+.metric-note { -fx-text-fill: #3d7a5a; -fx-font-size: 12px; }
+.metric-warning { -fx-border-color: #e7d8b0; }
+.metric-warning .metric-value { -fx-text-fill: #9d7120; }
+.quick-card { -fx-padding: 20; }
+.equipment-picker { -fx-padding: 14 18; }
+.detail-note { -fx-background-color: #f5f7fa; -fx-padding: 12; -fx-text-fill: #687884; -fx-font-size: 12px; -fx-background-radius: 5; }
+.login-root { -fx-background-color: #ffffff; }
+.login-brand { -fx-background-color: #751b24; -fx-padding: 42 46; }
+.login-title { -fx-font-family: "Bahnschrift"; -fx-font-size: 47px; -fx-text-fill: white; }
+.gold-rule { -fx-background-color: #e3b447; }
+.brand-motto { -fx-font-size: 10px; -fx-text-fill: #edc773; -fx-font-weight: bold; }
+.brand-caption { -fx-font-size: 10px; -fx-text-fill: #d1a5aa; }
+.login-content { -fx-padding: 45; -fx-background-color: #fcfdfd; }
+.login-heading { -fx-font-family: "Bahnschrift"; -fx-font-size: 32px; }
+.login-input { -fx-padding: 14 13; -fx-font-size: 14px; }
+.login-submit { -fx-padding: 14; -fx-font-size: 14px; }
+.inline-error { -fx-background-color: #fcebee; -fx-text-fill: #a32636; -fx-padding: 11; -fx-background-radius: 5; -fx-font-size: 12px; }
+.setup-pane > .title { -fx-background-color: transparent; -fx-padding: 8 0; }
+.setup-pane > .title > .text { -fx-fill: #70808b; -fx-font-size: 11px; }
+.setup-pane > .content { -fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 8 0; }
+.dialog-pane { -fx-background-color: #ffffff; }
+.dialog-pane .header-panel { -fx-background-color: #f6f8fa; }
+.dialog-pane .header-panel .label { -fx-font-size: 18px; -fx-font-family: "Bahnschrift"; }
+.dialog-form { -fx-padding: 18; }
