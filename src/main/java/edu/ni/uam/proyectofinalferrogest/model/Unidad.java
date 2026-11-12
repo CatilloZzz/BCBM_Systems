@@ -6,12 +6,6 @@ import jakarta.persistence.*;
 @Table(name = "unidad")
 public class Unidad {
 
-    public enum Estado {
-        DISPONIBLE,
-        EN_EMERGENCIA,
-        MANTENIMIENTO
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,18 +18,17 @@ public class Unidad {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Estado estado = Estado.DISPONIBLE;
+    private EstadoUnidad estado = EstadoUnidad.DISPONIBLE;
 
     public Unidad() {
     }
 
-    public Unidad(String codigo, String tipo) {
-        this.codigo = codigo;
-        this.tipo = tipo;
-    }
-
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getCodigo() {
@@ -54,11 +47,11 @@ public class Unidad {
         this.tipo = tipo;
     }
 
-    public Estado getEstado() {
+    public EstadoUnidad getEstado() {
         return estado;
     }
 
-    public void setEstado(Estado estado) {
+    public void setEstado(EstadoUnidad estado) {
         this.estado = estado;
     }
 
