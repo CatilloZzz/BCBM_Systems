@@ -2,26 +2,66 @@ package edu.ni.uam.proyectofinalferrogest.model;
 
 import jakarta.persistence.*;
 
-
 @Entity
-@Table(name="unidad")
+@Table(name = "unidad")
 public class Unidad {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    public Unidad() {}
-    public Unidad(String codigo, String tipo) { this.codigo = codigo; this.tipo = tipo; }
-    public Integer getId() { return id; }
-    @Column(nullable=false, unique=true, length=20)
+
+    @Column(nullable = false, unique = true, length = 20)
     private String codigo;
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String value) { this.codigo = value; }
-    @Column(nullable=false, length=30)
+
+    @Column(nullable = false, length = 30)
     private String tipo;
-    public String getTipo() { return tipo; }
-    public void setTipo(String value) { this.tipo = value; }
-    @Enumerated(EnumType.STRING) @Column(nullable=false, length=20)
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private EstadoUnidad estado = EstadoUnidad.DISPONIBLE;
-    public EstadoUnidad getEstado() { return estado; }
-    public void setEstado(EstadoUnidad value) { this.estado = value; }
-    @Override public String toString() { return codigo; }
+
+    public Unidad() {
+    }
+
+    public Unidad(String codigo, String tipo) {
+        this.codigo = codigo;
+        this.tipo = tipo;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public EstadoUnidad getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoUnidad estado) {
+        this.estado = estado;
+    }
+
+    @Override
+    public String toString() {
+        return codigo + " - " + tipo;
+    }
 }
