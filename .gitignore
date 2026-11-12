@@ -37,3 +37,13 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Archivos locales de trabajo y conexión ###
+/.local/
+/config.properties
+/src/main/resources/hibernate.properties
+
+### Cachés de herramientas auxiliares ###
+__pycache__/
+*.pyc
+*.pyo
