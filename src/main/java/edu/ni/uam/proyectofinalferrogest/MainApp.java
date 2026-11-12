@@ -1,30 +1,22 @@
 package edu.ni.uam.proyectofinalferrogest;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import edu.ni.uam.proyectofinalferrogest.controller.*;
+import edu.ni.uam.proyectofinalferrogest.util.HibernateUtil;
 
-import java.io.IOException;
-
+/** Arranque de apoyo para ejecutar la entrega de Rafael por separado. */
 public class MainApp extends Application {
-
-    @Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                MainApp.class.getResource(
-                        "/edu/ni/uam/proyectofinalferrogest/fxml/hello-view.fxml"
-                )
-        );
-
-        Scene scene = new Scene(loader.load(), 1000, 650);
-
-        stage.setTitle("Sistema de Gestión de Emergencias para Bomberos");
-        stage.setScene(scene);
-        stage.show();
+    private Stage stage;
+    @Override public void start(Stage stage) {
+        this.stage=stage; stage.setTitle("BCBM Systems · Personal e inventario");
+        stage.setMinWidth(1000); stage.setMinHeight(720); login(); stage.show();
     }
-
-    public static void main(String[] args) {
-        launch(args);
+    private void login() {
+        stage.setScene(new Scene(new LoginController().vista(sesion ->
+                stage.setScene(new Scene(new MenuController().vista(sesion,this::login),1180,820))),1180,820));
     }
+    @Override public void stop() { Ui.cerrar(); HibernateUtil.close(); }
+    public static void main(String[] args) { launch(args); }
 }
