@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.MantenimientoController" stylesheets="@../css/bcbm.css">
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="5">
+            <Label text="CUIDADO DE LOS RECURSOS" styleClass="eyebrow"/>
+            <Label text="Mantenimiento" styleClass="page-title"/>
+            <Label text="Consulta el historial y registra los trabajos realizados." styleClass="subtitle"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+        <Button text="Actualizar equipos" onAction="#cargarEquipos" styleClass="secondary"/>
+    </HBox>
+    <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="14">
+        <Label text="Equipo" styleClass="field-label"/>
+        <ComboBox fx:id="equipo" promptText="Selecciona un equipo" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Button text="Consultar historial" onAction="#historial" styleClass="primary"/>
+    </HBox>
+    <HBox spacing="18" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Historial de trabajos" styleClass="card-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="contador" styleClass="count-label"/>
+            </HBox>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="48">
+                <placeholder>
+                    <Label text="Selecciona un equipo y consulta su historial." styleClass="muted" wrapText="true"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="colFecha" text="Fecha" prefWidth="105"/>
+                    <TableColumn fx:id="colDescripcion" text="Trabajo realizado" prefWidth="235"/>
+                    <TableColumn fx:id="colProxima" text="Próxima fecha" prefWidth="115"/>
+                    <TableColumn fx:id="colAutor" text="Registrado por" prefWidth="110"/>
+                </columns>
+            </TableView>
+            <Label fx:id="detalle" text="Selecciona una fila para leer la descripción completa." styleClass="detail-note" wrapText="true" maxWidth="1.7976931348623157E308"/>
+        </VBox>
+        <VBox fx:id="formulario" styleClass="form-panel" minWidth="300" prefWidth="300" maxWidth="300">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll" minHeight="0" prefHeight="0" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox styleClass="form-card" spacing="14">
+                        <Label text="Registrar mantenimiento" styleClass="card-title"/>
+                        <Label text="El trabajo se asociará al equipo seleccionado." styleClass="muted" wrapText="true"/>
+                        <Separator/>
+                        <VBox spacing="6">
+                            <Label text="Fecha del trabajo *" styleClass="field-label"/>
+                            <DatePicker fx:id="fecha" maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Descripción del trabajo *" styleClass="field-label"/>
+                            <TextArea fx:id="descripcion" promptText="Describe la revisión, reparación o trabajo realizado…" wrapText="true" prefRowCount="5"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Próximo mantenimiento" styleClass="field-label"/>
+                            <DatePicker fx:id="proxima" promptText="Opcional" maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+            <VBox styleClass="form-actions" spacing="10">
+                <Button text="Registrar mantenimiento" onAction="#guardar" styleClass="primary" maxWidth="1.7976931348623157E308"/>
+                <Button text="Limpiar formulario" onAction="#limpiar" styleClass="secondary" maxWidth="1.7976931348623157E308"/>
+                <Label text="El historial conserva el autor y la fecha de cada trabajo." styleClass="footnote" wrapText="true"/>
+            </VBox>
+        </VBox>
+    </HBox>
+    <Label fx:id="mensaje" styleClass="feedback" wrapText="true"/>
+</VBox>

@@ -12,7 +12,7 @@ public class TipoEmergencia {
     @Version
     private long version;
 
-    @Column(nullable = false, length = 80)
+    @Column(nullable = false, length = 60, unique = true)
     private String nombre;
 
     protected TipoEmergencia() {
@@ -23,8 +23,8 @@ public class TipoEmergencia {
     }
 
     public void renombrar(String nombre) {
-        if (nombre == null || nombre.isBlank() || nombre.strip().length() > 80) {
-            throw new IllegalArgumentException("Ingrese un nombre de tipo de hasta 80 caracteres.");
+        if (nombre == null || nombre.isBlank() || nombre.strip().length() > 60) {
+            throw new IllegalArgumentException("Ingrese un nombre de tipo de hasta 60 caracteres.");
         }
         this.nombre = nombre.strip();
     }

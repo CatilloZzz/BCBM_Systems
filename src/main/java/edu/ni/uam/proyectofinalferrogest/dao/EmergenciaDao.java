@@ -20,7 +20,7 @@ public class EmergenciaDao {
             select e, u.username
             from Emergencia e
             join fetch e.tipo
-            join Usuario u on u.id = e.usuarioId
+            left join Usuario u on u.id = e.usuarioId
             """;
 
     private final SessionFactory factory;
