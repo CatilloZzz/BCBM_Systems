@@ -42,6 +42,17 @@ public class Emergencia {
 
     public LocalDateTime getFechaCierre() { return fechaCierre; }
 
+    private Double latitud;
+    private Double longitud;
+    public Double getLatitud() { return latitud; }
+    public Double getLongitud() { return longitud; }
+    public void ubicar(Double latitud, Double longitud) {
+        if ((latitud == null) != (longitud == null) || (latitud != null &&
+                (!Double.isFinite(latitud) || Math.abs(latitud)>90 || !Double.isFinite(longitud) || Math.abs(longitud)>180)))
+            throw new IllegalArgumentException("Coordenadas inválidas.");
+        this.latitud = latitud;
+        this.longitud = longitud;
+    }
     protected Emergencia() {
     }
 

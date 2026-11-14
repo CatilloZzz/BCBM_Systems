@@ -33,6 +33,17 @@ public class InicioController {
             equiposReparacion.setText(""+r.equipos().stream().filter(e -> e.getEstado()==EstadoEquipo.EN_REPARACION).count());
         });
     }
+    @FXML private Label clima, estadoClima;
+    @FXML private Button consultarClima;
+    @FXML private void actualizarClima() {
+        consultarClima.setDisable(true);
+        estadoClima.setText("Consultando Open-Meteo…");
+        ConsultasCabina.clima().whenComplete((datos, error) -> javafx.application.Platform.runLater(() -> {
+            consultarClima.setDisable(false);
+            if (error == null) clima.setText(datos);
+            estadoClima.setText(error == null ? "" : "No se pudo actualizar. Revisa la hora del último dato.");
+        }));
+    }
     @FXML private void verPersonal() { personal.run(); }
     @FXML private void verEquipos() { equipos.run(); }
     @FXML private void verMantenimiento() { mantenimiento.run(); }

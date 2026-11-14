@@ -54,4 +54,5 @@ ALTER TABLE emergencia ADD CONSTRAINT ck_emergencia_fecha_cierre
     CHECK (fecha_cierre IS NULL OR fecha_cierre >= fecha_hora);
 ALTER TABLE emergencia ADD CONSTRAINT ck_emergencia_cerrada_fecha
     CHECK (estado <> 'CERRADA' OR fecha_cierre IS NOT NULL);
+ALTER TABLE emergencia ADD COLUMN latitud DOUBLE PRECISION, ADD COLUMN longitud DOUBLE PRECISION;
 COMMIT;

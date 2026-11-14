@@ -150,6 +150,7 @@ public class EmergenciasController {
     }
 
     private void formularioEmergencia(Emergencia emergencia) {
+        var ubicacion = new BuscadorUbicacion(emergencia);
         var direccion = new TextField();
         var descripcion = new TextArea();
         descripcion.setPrefRowCount(3);
@@ -175,14 +176,15 @@ public class EmergenciasController {
         campos.addRow(1, etiqueta("Tipo", categoria), categoria);
         campos.addRow(2, etiqueta("Prioridad", prioridad), prioridad);
         campos.addRow(3, etiqueta("Descripción", descripcion), descripcion);
+        campos.add(ubicacion, 0, 4, 2, 1);
         guardarEnDialogo(emergencia == null ? "Registrar emergencia" : "Editar emergencia", campos, () -> {
             Integer tipoId = categoria.getValue() == null ? null : categoria.getValue().getId();
             if (emergencia == null) {
                 emergencias.registrar(direccion.getText(), descripcion.getText(),
-                        tipoId, prioridad.getValue(), usuarioActual.get());
+                        tipoId, prioridad.getValue(), usuarioActual.get(), ubicacion.latitud(), ubicacion.longitud());
             } else {
                 emergencias.actualizar(emergencia.getId(), emergencia.getVersion(), direccion.getText(),
-                        descripcion.getText(), tipoId, prioridad.getValue());
+                        descripcion.getText(), tipoId, prioridad.getValue(), ubicacion.latitud(), ubicacion.longitud());
             }
         });
     }
@@ -202,6 +204,8 @@ public class EmergenciasController {
                     new Label("Estado · " + e.getEstado()), new Label("Prioridad · " + e.getPrioridad()),
                     new Label("Registro · " + FECHA.format(e.getFechaRegistro()) + " · " + registro.usuario()),
                     descripcion, new Label("Recursos asignados"));
+            if (e.getLatitud() != null)
+                datos.getChildren().add(1, new Label("Ubicación · " + e.getLatitud() + ", " + e.getLongitud()));
             if (emergencias.asignacionesDisponibles()) {
                 var recursos = new TableView<EmergenciaDao.RecursoAsignado>();
                 var unidad = new TableColumn<EmergenciaDao.RecursoAsignado, String>("Unidad");

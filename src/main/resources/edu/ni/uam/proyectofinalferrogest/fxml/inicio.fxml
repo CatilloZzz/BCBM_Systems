@@ -38,6 +38,12 @@
                     <Label text="Para seguimiento de mantenimiento" styleClass="muted" wrapText="true"/>
                 </VBox>
             </HBox>
+            <VBox styleClass="metric-card" spacing="8">
+                <Label text="Tiempo en Managua" styleClass="section-title"/>
+                <Label fx:id="clima" text="Fuente: Open-Meteo · Consulta pendiente" wrapText="true"/>
+                <Label fx:id="estadoClima" wrapText="true"/>
+                <Button fx:id="consultarClima" text="Actualizar clima · Open-Meteo" onAction="#actualizarClima"/>
+            </VBox>
             <Label text="Accesos rápidos" styleClass="section-title"/>
             <HBox spacing="16">
                 <VBox styleClass="quick-card" spacing="12" HBox.hgrow="ALWAYS" prefWidth="250">

@@ -5,6 +5,8 @@ module edu.ni.uam.proyectofinalferrogest {
 
     // Servicios de Java utilizados por la persistencia
     requires java.sql;
+    requires java.net.http;
+    requires com.google.gson;
     requires java.logging;
     requires java.naming;
 
@@ -22,6 +24,7 @@ module edu.ni.uam.proyectofinalferrogest {
 
     // Hibernate necesita acceder por reflexión a las entidades
     opens edu.ni.uam.proyectofinalferrogest.model;
+    opens edu.ni.uam.proyectofinalferrogest.dao to org.hibernate.orm.core;
 
     // Clase principal accesible para JavaFX
     exports edu.ni.uam.proyectofinalferrogest;
