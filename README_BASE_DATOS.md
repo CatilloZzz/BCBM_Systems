@@ -2,9 +2,9 @@
 
 ## Conexión local preparada
 
-La base `bomberos_db` está creada en PostgreSQL local, puerto `5432`. El sistema usa el usuario dedicado `bcbm_app`, que es propietario de esta base y no tiene permisos de superusuario, crear bases ni crear roles.
+La base `bomberos_db` está creada en PostgreSQL local, puerto `5432`. El usuario de conexión depende de la configuración local de cada integrante.
 
-La conexión está en `config.properties`, en la raíz del proyecto, junto a `pom.xml`. `HibernateUtil` lee ese archivo; no utiliza el archivo de ejemplo ubicado en `src/main/resources`. La contraseña de PostgreSQL es local y está excluida de Git, al igual que la carpeta `.local/`. El archivo `config.properties.example` puede compartirse con el equipo.
+La conexión puede configurarse en `config.properties`, en la raíz, o en el archivo local `src/main/resources/hibernate.properties`. Las variables `BCBM_DB_*` tienen prioridad, seguidas de `db.*` en `config.properties` y de las propiedades Hibernate. Los archivos de credenciales están excluidos de Git. El archivo `config.properties.example` puede compartirse con el equipo. Se admite contraseña vacía cuando PostgreSQL local lo permite.
 
 Para abrir el sistema usa JDK 21 y ejecuta desde esta carpeta:
 
@@ -39,7 +39,7 @@ Como ya existen usuarios, no hace falta pulsar «Crear primer administrador».
 | equipo | 15 |
 | mantenimiento_equipo | 3 |
 
-`database/schema.sql` contiene las siete tablas del esquema compartido y la octava tabla de mantenimiento, junto con restricciones de fechas de cierre. `database/datos_prueba.sql` conserva los datos ficticios compartidos, corrige los hashes de las tres cuentas y agrega tres mantenimientos ficticios. Las fechas de asignación se alinearon con la fecha de cada emergencia.
+`database/schema.sql` contiene las tablas del esquema compartido, mantenimiento, ubicación y las tres tablas de despacho y otros servicios (`otro_servicio`, `salida_unidad`, `salida_participante`). `database/datos_prueba.sql` conserva los datos ficticios compartidos, corrige los hashes de las tres cuentas y agrega tres mantenimientos ficticios. Las fechas de asignación se alinearon con la fecha de cada emergencia.
 
 Los 15 registros de `equipo` representan grupos con su propia cantidad, no un total de 15 piezas.
 
@@ -52,6 +52,8 @@ Los 15 registros de `equipo` representan grupos con su propia cantidad, no un to
 5. Iniciar el sistema con Java 21.
 
 En este equipo los scripts ya fueron ejecutados. El script de datos rechaza cargar registros si las tablas ya tienen información; no incluye el TRUNCATE del archivo original y no reinicia los datos.
+
+Para actualizar una base existente, aplicar en orden las migraciones pendientes de `database/migrations`: `001_integracion_emergencias.sql`, `002_ubicacion_emergencia.sql` y `003_despacho_servicios.sql`. La 003 se ejecuta una sola vez; no repetirla si las tres tablas nuevas ya existen. Mantener `hibernate.hbm2ddl.auto=validate`. Consultar `DESPACHO.md` para el uso de las pantallas y la API compartida con Emergencias y Consolidado.
 
 En pgAdmin, actualiza el nodo Databases para ver `bomberos_db`. Sus tablas están en Schemas → public → Tables. Puedes utilizar tu conexión habitual de administrador para inspeccionar la base.
 
