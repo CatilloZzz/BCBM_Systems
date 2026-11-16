@@ -1,0 +1,5 @@
+# Copiar como config.properties en la raíz del proyecto.
+# La configuración real es local y está excluida de Git.
+db.url=jdbc:postgresql://localhost:5432/bomberos_db
+db.user=bcbm_app
+db.password=TU_CONTRASENA_LOCAL

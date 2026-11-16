@@ -12,6 +12,8 @@ target/
 target/
 .idea/
 src/main/resources/hibernate.properties
+/config.properties
+/.local/
 
 *.iws
 *.iml

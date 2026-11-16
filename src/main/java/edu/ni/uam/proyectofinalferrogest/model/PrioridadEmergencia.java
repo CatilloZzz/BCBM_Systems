@@ -1,7 +1,7 @@
 package edu.ni.uam.proyectofinalferrogest.model;
 
 public enum PrioridadEmergencia {
-    BAJA("Baja"), MEDIA("Media"), ALTA("Alta");
+    BAJA("Baja"), MEDIA("Media"), ALTA("Alta"), CRITICA("Crítica");
 
     private final String etiqueta;
 

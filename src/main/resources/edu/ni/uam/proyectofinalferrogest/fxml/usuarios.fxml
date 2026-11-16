@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.UsuarioController" stylesheets="@../css/bcbm.css">
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="5">
+            <Label text="GESTIÓN INSTITUCIONAL" styleClass="eyebrow"/>
+            <Label text="Usuarios y acceso" styleClass="page-title"/>
+            <Label text="Administra las cuentas y los permisos del sistema." styleClass="subtitle"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+        <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
+    </HBox>
+    <HBox spacing="18" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <TextField fx:id="buscar" promptText="Buscar usuario, rol o bombero…" HBox.hgrow="ALWAYS" styleClass="search-field"/>
+                <Label fx:id="contador" styleClass="count-label"/>
+            </HBox>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="46">
+                <placeholder>
+                    <Label text="No hay registros para mostrar." styleClass="muted"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="125"/>
+                    <TableColumn fx:id="colRol" text="Rol" prefWidth="145"/>
+                    <TableColumn fx:id="colBombero" text="Bombero asociado" prefWidth="195"/>
+                    <TableColumn fx:id="colActivo" text="Acceso" prefWidth="100"/>
+                </columns>
+            </TableView>
+            <Label text="Selecciona una fila para consultar sus datos." styleClass="footnote"/>
+        </VBox>
+        <VBox fx:id="formulario" styleClass="form-panel" minWidth="300" prefWidth="300" maxWidth="300">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll" minHeight="0" prefHeight="0" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox styleClass="form-card" spacing="14">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label fx:id="tituloForm" text="Nuevo usuario" styleClass="card-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="Nuevo" onAction="#limpiar" styleClass="text-button"/>
+                        </HBox>
+                        <Label text="El rol Bombero requiere una ficha asociada. Para desactivar una cuenta, desmarca Cuenta activa." styleClass="muted" wrapText="true"/>
+                        <Separator/>
+                        <VBox spacing="6">
+                            <Label text="Usuario *" styleClass="field-label"/>
+                            <TextField fx:id="username" promptText="Nombre de acceso"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Contraseña" styleClass="field-label"/>
+                            <PasswordField fx:id="password" promptText="Mínimo 8 caracteres"/>
+                            <Label text="Al editar, deja vacío para conservarla." styleClass="footnote" wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Rol *" styleClass="field-label"/>
+                            <ComboBox fx:id="rol" promptText="Selecciona un rol" maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Bombero asociado" styleClass="field-label"/>
+                            <ComboBox fx:id="bombero" promptText="Selecciona un bombero" maxWidth="1.7976931348623157E308"/>
+                            <Button text="Quitar vínculo" onAction="#quitarBombero" styleClass="text-button"/>
+                        </VBox>
+                        <CheckBox fx:id="activo" text="Cuenta activa"/>
+                    </VBox>
+                </content>
+            </ScrollPane>
+            <VBox styleClass="form-actions" spacing="10">
+                <Button text="Guardar cambios" onAction="#guardar" styleClass="primary" maxWidth="1.7976931348623157E308"/>
+            </VBox>
+        </VBox>
+    </HBox>
+    <Label fx:id="mensaje" styleClass="feedback" wrapText="true"/>
+</VBox>

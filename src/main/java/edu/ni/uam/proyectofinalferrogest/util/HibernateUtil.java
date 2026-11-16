@@ -10,6 +10,7 @@ import org.hibernate.cfg.Configuration;
 
 import edu.ni.uam.proyectofinalferrogest.model.*;
 
+/** SessionFactory compartida por todos los módulos integrados. */
 public final class HibernateUtil {
 
     private static SessionFactory factory;
@@ -63,6 +64,9 @@ public final class HibernateUtil {
             cfg.addAnnotatedClass(Equipo.class);
             cfg.addAnnotatedClass(MantenimientoEquipo.class);
             cfg.addAnnotatedClass(Unidad.class);
+            cfg.addAnnotatedClass(Emergencia.class);
+            cfg.addAnnotatedClass(TipoEmergencia.class);
+            cfg.addAnnotatedClass(Asignacion.class);
 
             factory = cfg.buildSessionFactory();
         }
@@ -81,7 +85,7 @@ public final class HibernateUtil {
 
         if (valor == null || valor.isBlank()) {
             throw new IllegalStateException(
-                    "Falta configurar " + clave + ". Consulta LEEME.md."
+                    "Falta configurar " + clave + ". Consulta README_BASE_DATOS.md."
             );
         }
 

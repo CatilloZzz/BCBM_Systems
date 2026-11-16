@@ -13,30 +13,46 @@ public class Emergencia {
     @Version
     private long version;
 
-    @Column(nullable = false, length = 250)
+    @Column(nullable = false, length = 200)
     private String direccion;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "text")
     private String descripcion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tipo_emergencia_id", nullable = false)
+    @JoinColumn(name = "tipo_id", nullable = false)
     private TipoEmergencia tipo;
 
-    @Column(name = "usuario_id", nullable = false, updatable = false)
+    @Column(name = "registrado_por", nullable = false, updatable = false)
     private Integer usuarioId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 10)
     private PrioridadEmergencia prioridad;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EstadoEmergenciaConverter.class)
     @Column(nullable = false, length = 20)
     private EstadoEmergencia estado = EstadoEmergencia.PENDIENTE;
 
-    @Column(name = "fecha_registro", nullable = false, updatable = false)
+    @Column(name = "fecha_hora", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
+    @Column(name = "fecha_cierre")
+    private LocalDateTime fechaCierre;
+
+    public LocalDateTime getFechaCierre() { return fechaCierre; }
+
+    private Double latitud;
+    private Double longitud;
+    public Double getLatitud() { return latitud; }
+    public Double getLongitud() { return longitud; }
+    public void ubicar(Double latitud, Double longitud) {
+        if ((latitud == null) != (longitud == null) || (latitud != null &&
+                (!Double.isFinite(latitud) || Math.abs(latitud)>90 || !Double.isFinite(longitud) || Math.abs(longitud)>180)))
+            throw new IllegalArgumentException("Coordenadas inválidas.");
+        this.latitud = latitud;
+        this.longitud = longitud;
+    }
     protected Emergencia() {
     }
 
@@ -54,8 +70,8 @@ public class Emergencia {
         if (estado == EstadoEmergencia.CERRADA) {
             throw new IllegalStateException("Una emergencia cerrada no se puede editar.");
         }
-        if (direccion == null || direccion.isBlank() || direccion.strip().length() > 250) {
-            throw new IllegalArgumentException("Ingrese una dirección de hasta 250 caracteres.");
+        if (direccion == null || direccion.isBlank() || direccion.strip().length() > 200) {
+            throw new IllegalArgumentException("Ingrese una dirección de hasta 200 caracteres.");
         }
         if (descripcion != null && descripcion.strip().length() > 1000) {
             throw new IllegalArgumentException("La descripción admite hasta 1000 caracteres.");
@@ -78,6 +94,7 @@ public class Emergencia {
             throw new IllegalStateException("El cambio de estado solicitado no está permitido.");
         }
         estado = destino;
+        if (destino == EstadoEmergencia.CERRADA) fechaCierre = LocalDateTime.now();
     }
 
     public Integer getId() {

@@ -1,3 +1,5 @@
+# Referencia heredada: el HibernateUtil actual lee config.properties en la raíz.
+# Usar /config.properties.example como plantilla para la configuración local.
 db.url=jdbc:postgresql://localhost:5432/bomberos_db
 db.user=Tu_USUARIO
 db.password=TU_CONTRASENA

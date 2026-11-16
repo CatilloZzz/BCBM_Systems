@@ -23,6 +23,11 @@ public class Unidad {
     public Unidad() {
     }
 
+    public Unidad(String codigo, String tipo) {
+        this.codigo = codigo;
+        this.tipo = tipo;
+    }
+
     public Integer getId() {
         return id;
     }
