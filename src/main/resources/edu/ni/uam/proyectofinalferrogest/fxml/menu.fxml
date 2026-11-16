@@ -26,6 +26,8 @@
                 </graphic>
             </Button>
             <Button fx:id="emergenciasButton" text="Emergencias" onAction="#emergencias" styleClass="nav-button" maxWidth="1.7976931348623157E308"/>
+            <Button fx:id="despachoButton" text="Despacho y movimientos" onAction="#despacho" styleClass="nav-button" maxWidth="1.7976931348623157E308"/>
+            <Button fx:id="serviciosButton" text="Otros servicios" onAction="#servicios" styleClass="nav-button" maxWidth="1.7976931348623157E308"/>
             <Button fx:id="personalButton" text="Personal" onAction="#personal" styleClass="nav-button" maxWidth="1.7976931348623157E308">
                 <graphic>
                     <SVGPath content="M12 2 A5 5 0 1 1 11.99 2 Z M3 22 L3 19 C3 10 21 10 21 19 L21 22 Z" styleClass="nav-icon" scaleX="0.74" scaleY="0.74"/>

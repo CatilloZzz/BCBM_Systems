@@ -249,7 +249,7 @@ public class EmergenciasController {
     private void cerrar() {
         Registro seleccion = tabla.getSelectionModel().getSelectedItem();
         if (servicioCierre == null || seleccion == null
-                || !confirmar("Cerrar la emergencia y liberar sus recursos")) return;
+                || !confirmar("Cerrar la emergencia. Todas las unidades deben haber retornado.")) return;
         Integer id = seleccion.emergencia().getId();
         boolean confirmado = intentar(() -> {
             if (!emergencias.buscar(id).emergencia().getEstado().permiteTransicionA(EstadoEmergencia.CERRADA)) {

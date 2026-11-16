@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.DespachoController" spacing="16" styleClass="page" stylesheets="@../css/bcbm.css">
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="5">
+            <Label text="PUESTO DE MANDO" styleClass="eyebrow"/>
+            <Label fx:id="titulo" styleClass="page-title"/>
+            <Label fx:id="subtitulo" styleClass="subtitle" wrapText="true"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+        <Button text="Nueva salida" onAction="#nueva" styleClass="primary"/>
+    </HBox>
+    <FlowPane hgap="12" vgap="8">
+        <Label text="Mes"/><ComboBox fx:id="mes" prefWidth="85"/>
+        <Label text="Año"/><Spinner fx:id="anio" prefWidth="100"/>
+        <CheckBox fx:id="activas" text="Unidades fuera (todos los meses)"/>
+        <Button text="Consultar / Actualizar" onAction="#actualizar" styleClass="secondary"/>
+        <Label fx:id="contador" styleClass="count-label"/>
+    </FlowPane>
+    <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="44">
+        <placeholder><Label text="No hay salidas para esta consulta."/></placeholder>
+        <columns>
+            <TableColumn fx:id="colActividad" text="Actividad" prefWidth="130"/>
+            <TableColumn fx:id="colEscuadra" text="Escuadra / Departamento" prefWidth="160"/>
+            <TableColumn fx:id="colUnidad" text="Unidad" prefWidth="90"/>
+            <TableColumn fx:id="colOperador" text="Operador" prefWidth="150"/>
+            <TableColumn fx:id="colJefe" text="Jefe de unidad" prefWidth="150"/>
+            <TableColumn fx:id="colPersonal" text="Participantes" prefWidth="220"/>
+            <TableColumn fx:id="colSalida" text="Sale" prefWidth="145"/>
+            <TableColumn fx:id="colLlegada" text="Llega" prefWidth="145"/>
+            <TableColumn fx:id="colRetorno" text="Retorna" prefWidth="145"/>
+            <TableColumn fx:id="colTipo" text="Tipo de gestión" prefWidth="180"/>
+            <TableColumn fx:id="colDetalle" text="Detalle / Dirección" prefWidth="260"/>
+        </columns>
+    </TableView>
+    <FlowPane hgap="12" vgap="8">
+        <Button fx:id="llegada" text="Registrar llegada" onAction="#marcarLlegada" styleClass="secondary"/>
+        <Button fx:id="retorno" text="Registrar retorno" onAction="#registrarRetorno" styleClass="primary"/>
+    </FlowPane>
+    <Label fx:id="mensaje" styleClass="feedback" wrapText="true"/>
+</VBox>
