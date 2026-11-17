@@ -7,6 +7,7 @@ import edu.ni.uam.proyectofinalferrogest.model.Rol;
 import edu.ni.uam.proyectofinalferrogest.model.Usuario;
 import edu.ni.uam.proyectofinalferrogest.service.Acceso;
 import edu.ni.uam.proyectofinalferrogest.service.SesionUsuario;
+import edu.ni.uam.proyectofinalferrogest.service.DespachoService;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Locale;
@@ -63,12 +64,21 @@ public class EmergenciaDao {
     }
 
     public Integer guardarActa(SesionUsuario sesion, Integer id, long version, Emergencia.DatosActa datos) {
+        return guardarActa(sesion,id,version,datos,null);
+    }
+    public Integer guardarActa(SesionUsuario sesion, Integer id, long version, Emergencia.DatosActa datos,
+                               DespachoService.Tripulacion salida) {
         return factory.fromTransaction(session -> {
             Usuario usuario = autorizar(session, sesion);
             TipoEmergencia tipo = datos.tipoId() == null ? null : buscarTipo(session, datos.tipoId());
             if (id == null) {
                 Emergencia emergencia = Emergencia.abrir(datos, tipo, usuario.getId());
                 session.persist(emergencia);
+                if (salida != null) {
+                    if (salida.salida()==null || salida.salida().withNano(0).isBefore(datos.reporte().withNano(0)))
+                        throw new IllegalArgumentException("La unidad debe salir a partir de la hora del reporte.");
+                    DespachoService.asignarUnidad(session,usuario,emergencia.getId(),salida);
+                }
                 return emergencia.getId();
             }
             buscarVigente(session, id, version).completar(datos, tipo);

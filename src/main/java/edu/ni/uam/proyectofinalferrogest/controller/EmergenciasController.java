@@ -107,13 +107,14 @@ public class EmergenciasController {
         anio.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1900, 9998, LocalDate.now().getYear()));
         agregarColumna("N.º de acta", 115, r -> numero(r.emergencia()), 0);
         agregarColumna("Escuadra", 125, r -> r.emergencia().getEscuadra(), 2);
+        agregarColumna("Sale", 200, r -> resumen(r, x -> fecha(x.salida())), 3);
         agregarColumna("Solicitante", 145, r -> r.emergencia().getSolicitante(), 4);
         agregarColumna("Teléfono", 120, r -> r.emergencia().getTelefono(), 5);
         agregarColumna("Descripción", 210, r -> r.emergencia().getDescripcion(), 7);
         agregarColumna("Unidad", 130, r -> resumen(r, Salida::unidad));
         agregarColumna("Operador", 180, r -> resumen(r, x -> x.operador().nombre()));
         agregarColumna("Jefe de unidad", 180, r -> resumen(r, x -> texto(x.jefe())));
-        agregarColumna("Sale", 230, r -> resumen(r, x -> fecha(x.salida())));
+
         agregarColumna("Llega", 230, r -> resumen(r, x -> fecha(x.llegada())));
         agregarColumna("Retorna", 230, r -> resumen(r, x -> fecha(x.retorno())));
         columna(colFecha, r -> FECHA.format(r.emergencia().getFechaRegistro()));
@@ -238,7 +239,11 @@ public class EmergenciasController {
         campos.addRow(6, etiqueta("Tipo", categoria), opcional(categoria));
         campos.addRow(7, etiqueta("Prioridad", prioridad), opcional(prioridad));
         campos.addRow(8, etiqueta("Descripción", descripcion), descripcion);
-        campos.add(ubicacion, 0, 9, 2, 1);
+        TripulacionActa tripulacion = emergencia == null ? new TripulacionActa(despacho.catalogos(sesion)) : null;
+        if (tripulacion != null) campos.add(tripulacion,0,9,2,1);
+        var referencia = new TitledPane("Buscar referencia pública", ubicacion);
+        referencia.setExpanded(false);
+        campos.add(referencia, 0, 10, 2, 1);
         var formulario = new ScrollPane(campos);
         formulario.setFitToWidth(true);
         formulario.setPrefViewportHeight(420);
@@ -250,7 +255,7 @@ public class EmergenciasController {
                     categoria.getValue() == null ? null : categoria.getValue().getId(), prioridad.getValue(),
                     ubicacion.latitud(), ubicacion.longitud());
             idGuardado.set(emergencias.guardarActa(sesion, emergencia == null ? null : emergencia.getId(),
-                    emergencia == null ? 0 : emergencia.getVersion(), datos));
+                    emergencia == null ? 0 : emergencia.getVersion(), datos, tripulacion==null ? null : tripulacion.valor()));
             if (emergencia == null) {
                 estado.getSelectionModel().selectFirst();
                 tipo.getSelectionModel().selectFirst();

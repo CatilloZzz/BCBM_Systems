@@ -8,6 +8,18 @@ import java.time.LocalDate;
 public class Bombero {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
+    @Column(length=80)
+    private String compania;
+    @Column(length=1)
+    private String escuadra;
+    public String getCompania() { return compania; }
+    public String getEscuadra() { return escuadra; }
+    public void organizar(String compania, String escuadra) {
+        if (escuadra != null && (!java.util.Set.of("A","B").contains(escuadra) || compania == null))
+            throw new IllegalArgumentException("Indica la compañía de esta escuadra.");
+        this.compania = compania;
+        this.escuadra = escuadra;
+    }
     public Bombero() {}
     public Integer getId() { return id; }
     @Column(nullable=false, length=100)

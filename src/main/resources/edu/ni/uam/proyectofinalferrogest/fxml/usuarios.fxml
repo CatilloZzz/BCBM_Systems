@@ -34,7 +34,7 @@
             </TableView>
             <Label text="Selecciona una fila para consultar sus datos." styleClass="footnote"/>
         </VBox>
-        <VBox fx:id="formulario" styleClass="form-panel" minWidth="300" prefWidth="300" maxWidth="300">
+        <VBox fx:id="formulario" styleClass="form-panel" minWidth="290" prefWidth="400" maxWidth="540" HBox.hgrow="ALWAYS">
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll" minHeight="0" prefHeight="0" VBox.vgrow="ALWAYS">
                 <content>
                     <VBox styleClass="form-card" spacing="14">

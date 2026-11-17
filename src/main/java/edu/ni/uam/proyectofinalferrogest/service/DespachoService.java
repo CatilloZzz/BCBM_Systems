@@ -19,7 +19,7 @@ public class DespachoService {
     public record Salida(Integer id,Integer emergenciaId,Integer servicioId,Integer unidadId,String unidad,
                          Persona operador,Persona jefe,List<Persona> participantes,Integer registradoPor,
                          LocalDateTime salida,LocalDateTime llegada,LocalDateTime retorno,
-                         String escuadraDepartamento,TipoServicio tipoServicio,String detalle) {}
+                         String escuadraDepartamento,TipoServicio tipoServicio,String detalle,String numeroActa) {}
     public record Tripulacion(Integer unidadId,Integer operadorId,Integer jefeId,List<Integer> participantes,LocalDateTime salida) {
         public Tripulacion { participantes=participantes==null ? List.of() : List.copyOf(participantes); }
     }
@@ -36,9 +36,9 @@ public class DespachoService {
         return transaccion(s -> {
             autorizar(s,sesion);
             var unidades=s.createSelectionQuery("from Unidad order by codigo",Unidad.class).getResultList().stream()
-                .map(u -> new Vehiculo(u.getId(),u.getCodigo(),u.getEstado()==EstadoUnidad.EN_EMERGENCIA ? "Ocupada" : u.getEstado().toString())).toList();
-            var personal=s.createSelectionQuery("from Bombero where estado <> :baja order by nombre, apellido",Bombero.class)
-                .setParameter("baja",EstadoBombero.DE_BAJA).getResultList().stream().map(this::persona).toList();
+                .map(u -> new Vehiculo(u.getId(),u.getCodigo(),u.getEstado().toString())).toList();
+            var personal=s.createSelectionQuery("from Bombero where estado = :disponible order by nombre, apellido",Bombero.class)
+                .setParameter("disponible",EstadoBombero.DISPONIBLE).getResultList().stream().map(this::persona).toList();
             var actas=s.createSelectionQuery("from Emergencia where estado <> :cerrada order by fechaRegistro desc",Emergencia.class)
                 .setParameter("cerrada",EstadoEmergencia.CERRADA).getResultList().stream()
                 .map(e -> new Acta(e.getId(),(e.getNumeroActa() == null ? "" : e.getNumeroActa() + " · ")
@@ -49,6 +49,11 @@ public class DespachoService {
     public Integer asignarUnidad(SesionUsuario sesion,Integer emergenciaId,Tripulacion datos) {
         return transaccion(s -> {
             Usuario usuario=autorizar(s,sesion);
+            return asignarUnidad(s,usuario,emergenciaId,datos);
+        });
+    }
+    public static Integer asignarUnidad(Session s, Usuario usuario, Integer emergenciaId, Tripulacion datos) {
+            if (!usuario.getActivo() || usuario.getRol()==Rol.BOMBERO) throw new SecurityException("Se requiere acceso de despacho.");
             Unidad unidad=reservarUnidad(s,datos);
             Emergencia emergencia=s.find(Emergencia.class,exigirId(emergenciaId),LockModeType.PESSIMISTIC_WRITE);
             if (emergencia==null || emergencia.getEstado()==EstadoEmergencia.CERRADA)
@@ -56,7 +61,6 @@ public class DespachoService {
             SalidaUnidad salida=crear(s,emergencia,null,unidad,usuario.getId(),datos);
             if (emergencia.getEstado()==EstadoEmergencia.PENDIENTE) emergencia.cambiarEstado(EstadoEmergencia.EN_PROCESO);
             s.persist(salida); return salida.getId();
-        });
     }
     public Integer registrarServicio(SesionUsuario sesion,String escuadraDepartamento,TipoServicio tipo,String detalle,Tripulacion datos) {
         return transaccion(s -> {
@@ -67,7 +71,7 @@ public class DespachoService {
             s.persist(salida); return salida.getId();
         });
     }
-    private Unidad reservarUnidad(Session s,Tripulacion datos) {
+    private static Unidad reservarUnidad(Session s,Tripulacion datos) {
         if (datos==null) throw new IllegalArgumentException("Ingrese los datos de la salida.");
         Unidad unidad=s.find(Unidad.class,exigirId(datos.unidadId()),LockModeType.PESSIMISTIC_WRITE);
         if (unidad==null || unidad.getEstado()!=EstadoUnidad.DISPONIBLE || !s.createSelectionQuery(
@@ -81,17 +85,21 @@ public class DespachoService {
         // Bloqueo + índice único parcial: ambas actividades comparten la misma disponibilidad.
         return unidad;
     }
-    private SalidaUnidad crear(Session s,Emergencia e,OtroServicio servicio,Unidad unidad,Integer usuario,Tripulacion datos) {
+    private static SalidaUnidad crear(Session s,Emergencia e,OtroServicio servicio,Unidad unidad,Integer usuario,Tripulacion datos) {
         Set<Integer> ids=new TreeSet<>(datos.participantes()); ids.add(exigirId(datos.operadorId()));
         if (datos.jefeId()!=null) ids.add(exigirId(datos.jefeId()));
         Map<Integer,Bombero> personal=new LinkedHashMap<>();
         for (Integer id:ids) {
-            Bombero b=s.find(Bombero.class,exigirId(id));
-            if (b==null || b.getEstado()==EstadoBombero.DE_BAJA) throw new IllegalArgumentException("Un integrante no existe o está de baja.");
+            Bombero b=s.find(Bombero.class,exigirId(id),LockModeType.PESSIMISTIC_WRITE);
+            if (b==null || b.getEstado()!=EstadoBombero.DISPONIBLE) throw new IllegalArgumentException("Un integrante ya no está disponible. Actualice la tripulación.");
+            if (!s.createSelectionQuery("select x.id from SalidaUnidad x join x.participantes p where p.id=:id and x.retorno>:salida",Integer.class)
+                    .setParameter("id",id).setParameter("salida",datos.salida()).setMaxResults(1).getResultList().isEmpty())
+                throw new IllegalArgumentException("La salida es anterior al último retorno de un integrante.");
+            b.setEstado(e==null ? EstadoBombero.EN_SERVICIO : EstadoBombero.EN_EMERGENCIA);
             personal.put(id,b);
         }
         SalidaUnidad salida=new SalidaUnidad(e,servicio,unidad,personal.get(datos.operadorId()),personal.get(datos.jefeId()),personal.values(),usuario,datos.salida());
-        unidad.setEstado(EstadoUnidad.EN_EMERGENCIA); return salida;
+        unidad.setEstado(e==null ? EstadoUnidad.EN_SERVICIO : EstadoUnidad.EN_EMERGENCIA); return salida;
     }
     public void marcarLlegada(SesionUsuario sesion,Integer salidaId,LocalDateTime fecha) {
         transaccion(s -> { autorizar(s,sesion); bloquearSalida(s,salidaId).marcarLlegada(fecha); return null; });
@@ -99,7 +107,16 @@ public class DespachoService {
     public void registrarRetorno(SesionUsuario sesion,Integer salidaId,LocalDateTime fecha) {
         transaccion(s -> {
             autorizar(s,sesion); SalidaUnidad salida=bloquearSalida(s,salidaId);
-            salida.registrarRetorno(fecha); salida.getUnidad().setEstado(EstadoUnidad.DISPONIBLE); return null;
+            salida.registrarRetorno(fecha);
+            salida.getUnidad().setEstado(EstadoUnidad.DISPONIBLE);
+            s.flush();
+            for (Integer id : salida.getParticipantes().stream().map(Bombero::getId).sorted().toList()) {
+                Bombero b=s.find(Bombero.class,id,LockModeType.PESSIMISTIC_WRITE);
+                boolean libre=s.createSelectionQuery("select x.id from SalidaUnidad x join x.participantes p where p.id=:id and x.retorno is null",Integer.class)
+                        .setParameter("id",id).setMaxResults(1).getResultList().isEmpty();
+                if (libre && b.getEstado()!=EstadoBombero.DE_BAJA) b.setEstado(EstadoBombero.DISPONIBLE);
+            }
+            return null;
         });
     }
     private SalidaUnidad bloquearSalida(Session s,Integer id) {
@@ -168,11 +185,11 @@ public class DespachoService {
         return new Salida(x.getId(),x.getEmergencia()==null ? null : x.getEmergencia().getId(),o==null ? null : o.getId(),
             x.getUnidad().getId(),x.getUnidad().getCodigo(),persona(x.getOperador()),x.getJefe()==null ? null : persona(x.getJefe()),
             x.getParticipantes().stream().map(this::persona).sorted(Comparator.comparing(Persona::id)).toList(),
-            x.getRegistradoPor(),x.getSalida(),x.getLlegada(),x.getRetorno(),o==null ? "" : o.getEscuadraDepartamento(),
-            o==null ? null : o.getTipo(),o==null ? x.getEmergencia().getDireccion() : o.getDetalle());
+            x.getRegistradoPor(),x.getSalida(),x.getLlegada(),x.getRetorno(),o==null ? Objects.toString(x.getEmergencia().getEscuadra(),"") : o.getEscuadraDepartamento(),
+            o==null ? null : o.getTipo(),o==null ? x.getEmergencia().getDireccion() : o.getDetalle(),o==null ? x.getEmergencia().getNumeroActa() : null);
     }
     private Persona persona(Bombero b) { return new Persona(b.getId(),b.getNombre()+" "+b.getApellido()); }
-    private Integer exigirId(Integer id) {
+    private static Integer exigirId(Integer id) {
         if (id==null || id<=0) throw new IllegalArgumentException("Seleccione un registro válido."); return id;
     }
 }

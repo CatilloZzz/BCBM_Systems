@@ -40,7 +40,7 @@
             </TableView>
             <Label fx:id="detalle" text="Selecciona una fila para leer la descripción completa." styleClass="detail-note" wrapText="true" maxWidth="1.7976931348623157E308"/>
         </VBox>
-        <VBox fx:id="formulario" styleClass="form-panel" minWidth="300" prefWidth="300" maxWidth="300">
+        <VBox fx:id="formulario" styleClass="form-panel" minWidth="290" prefWidth="400" maxWidth="540" HBox.hgrow="ALWAYS">
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll" minHeight="0" prefHeight="0" VBox.vgrow="ALWAYS">
                 <content>
                     <VBox styleClass="form-card" spacing="14">

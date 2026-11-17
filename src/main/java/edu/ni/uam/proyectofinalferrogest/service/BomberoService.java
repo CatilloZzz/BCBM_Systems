@@ -16,6 +16,14 @@ public class BomberoService {
     }
     public void guardar(SesionUsuario sesion, Integer id, String nombre, String apellido, String cedula,
                         String rango, String telefono, LocalDate ingreso) {
+        guardar(sesion,id,nombre,apellido,cedula,rango,telefono,ingreso,null,null,false);
+    }
+    public void guardar(SesionUsuario sesion, Integer id, String nombre, String apellido, String cedula,
+                        String rango, String telefono, LocalDate ingreso, String compania, String escuadra) {
+        guardar(sesion,id,nombre,apellido,cedula,rango,telefono,ingreso,compania,escuadra,true);
+    }
+    private void guardar(SesionUsuario sesion, Integer id, String nombre, String apellido, String cedula,
+                         String rango, String telefono, LocalDate ingreso, String compania, String escuadra, boolean organizar) {
         String n = Validaciones.texto(nombre,"Nombre",100), a = Validaciones.texto(apellido,"Apellido",100);
         String c = Validaciones.texto(cedula,"Cédula",20), r = Validaciones.texto(rango,"Rango",40);
         String t = Validaciones.opcional(telefono,"Teléfono",20);
@@ -26,6 +34,7 @@ public class BomberoService {
                     .setParameter("c",c).setParameter("id",id).getSingleResult();
             if (repetidos > 0) throw new IllegalArgumentException("La cédula ya está registrada.");
             Bombero b = id == null ? new Bombero() : dao.bloquear(s,id);
+            if (organizar) b.organizar(Validaciones.opcional(compania,"Compañía",80),escuadra);
             b.setNombre(n); b.setApellido(a); b.setCedula(c); b.setRango(r); b.setTelefono(t); b.setFechaIngreso(ingreso);
             if (id == null) dao.crear(s,b); return null;
         });
@@ -36,8 +45,8 @@ public class BomberoService {
             new UsuarioDao().bloquearTodos(s);
             Usuario actor = Acceso.admin(s,sesion);
             Bombero b = dao.bloquear(s,id);
-            if (b.getEstado() == EstadoBombero.EN_EMERGENCIA)
-                throw new IllegalArgumentException("No se puede dar de baja a un bombero que atiende una emergencia.");
+            if (b.getEstado() == EstadoBombero.EN_EMERGENCIA || b.getEstado() == EstadoBombero.EN_SERVICIO)
+                throw new IllegalArgumentException("No se puede dar de baja a un bombero que tiene una salida activa.");
             if (baja && actor.getBombero() != null && actor.getBombero().getId().equals(id))
                 throw new IllegalArgumentException("No puedes dar de baja al bombero asociado a tu propia cuenta.");
             b.setEstado(baja ? EstadoBombero.DE_BAJA : EstadoBombero.DISPONIBLE);

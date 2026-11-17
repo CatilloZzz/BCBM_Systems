@@ -26,8 +26,10 @@ public class DespachoController {
     @FXML private Spinner<Integer> anio;
     @FXML private CheckBox activas;
     @FXML private TableView<Salida> tabla;
+    @FXML private TextField buscar;
+    private final javafx.collections.ObservableList<Salida> registros=javafx.collections.FXCollections.observableArrayList();
     @FXML private TableColumn<Salida,String> colActividad,colEscuadra,colUnidad,colOperador,colJefe,colPersonal,colSalida,colLlegada,colRetorno,colTipo,colDetalle;
-    @FXML private Button llegada,retorno;
+    @FXML private Button llegada,retorno,crearSalida;
     @FXML private ProgressIndicator cargando;
 
     public DespachoController(SesionUsuario sesion,boolean otros) {
@@ -42,18 +44,22 @@ public class DespachoController {
         return vista();
     }
     @FXML private void initialize() {
+        crearSalida.setText(otros ? "Nuevo servicio" : "Despachar unidad");
         titulo.setText(otros ? "Otros servicios del mes" : "Despacho y movimientos");
         subtitulo.setText(otros ? "Registra coberturas, gestiones, taller y capacitaciones." : "Consulta las salidas, tripulaciones y retornos de cada unidad.");
         for (int n=1;n<=12;n++) mes.getItems().add(n);
         mes.setValue(LocalDate.now().getMonthValue());
         anio.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2000,2100,LocalDate.now().getYear()));
-        Ui.columna(colActividad,x -> otros ? "Servicio #"+x.servicioId() : "Emergencia #"+x.emergenciaId());
+        Ui.columna(colActividad,this::actividad);
+        Ui.buscar(tabla,buscar,registros,x -> String.join(" ",actividad(x),x.unidad(),
+            nombres(x.participantes()),x.escuadraDepartamento(),Objects.toString(x.tipoServicio(),""),
+            Objects.toString(x.detalle(),"")),contador);
         Ui.columna(colEscuadra,Salida::escuadraDepartamento); Ui.columna(colUnidad,Salida::unidad);
         Ui.columna(colOperador,x -> x.operador().nombre()); Ui.columna(colJefe,x -> x.jefe()==null ? "—" : x.jefe().nombre());
         Ui.columna(colPersonal,x -> nombres(x.participantes()));
         Ui.columna(colSalida,x -> fecha(x.salida())); Ui.columna(colLlegada,x -> fecha(x.llegada()));
         Ui.columna(colRetorno,x -> fecha(x.retorno())); Ui.columna(colTipo,Salida::tipoServicio); Ui.columna(colDetalle,Salida::detalle);
-        colEscuadra.setVisible(otros); colTipo.setVisible(otros); colLlegada.setVisible(!otros);
+        colEscuadra.setVisible(true); colTipo.setVisible(otros); colLlegada.setVisible(!otros);
         colRetorno.setText(otros ? "Entrada" : "Retorna"); Ui.visible(llegada,!otros);
         retorno.setText(otros ? "Registrar entrada" : "Registrar retorno");
         if (actaFija != null) {
@@ -62,9 +68,16 @@ public class DespachoController {
             anio.setDisable(true);
             activas.setDisable(true);
         }
+        // La cronología se consulta junto a la unidad sin desplazar las columnas de personal.
+        tabla.getColumns().removeAll(List.of(colSalida,colLlegada,colRetorno));
+        tabla.getColumns().addAll(3,List.of(colSalida,colLlegada,colRetorno));
         tabla.getSelectionModel().selectedItemProperty().addListener((o,a,b) -> botones());
         activas.selectedProperty().addListener((o,a,b) -> { mes.setDisable(b); anio.setDisable(b); actualizar(); });
         Ui.carga(root,cargando); botones(); actualizar();
+    }
+    private String actividad(Salida salida) {
+        if (otros) return "Servicio #"+salida.servicioId();
+        return salida.numeroActa()==null ? "Emergencia #"+salida.emergenciaId() : "Acta "+salida.numeroActa();
     }
     private static String nombres(List<Persona> personas) { return personas.stream().map(Persona::nombre).collect(Collectors.joining(", ")); }
     private static String fecha(LocalDateTime valor) { return valor==null ? "Pendiente" : FECHA.format(valor); }
@@ -77,7 +90,7 @@ public class DespachoController {
         YearMonth periodo=YearMonth.of(anio.getValue(),mes.getValue()); boolean soloActivas=activas.isSelected();
         Ui.ejecutar(root,() -> actaFija != null ? servicio.consultarSalidas(sesion,actaFija)
                 : soloActivas ? servicio.listarActivas(sesion,otros) : servicio.listarMes(sesion,periodo,otros),rows -> {
-            tabla.getItems().setAll(rows); contador.setText(rows.size()+" salidas"); botones();
+            registros.setAll(rows); botones();
         });
     }
     @FXML private void nueva() {
@@ -101,7 +114,8 @@ public class DespachoController {
         Button quitarJefe=new Button("Sin jefe"); quitarJefe.setOnAction(e -> jefe.setValue(null));
         ListView<Persona> personal=new ListView<>(); personal.getItems().setAll(datos.personal()); personal.setPrefHeight(140);
         personal.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        TextField escuadra=new TextField(); ComboBox<TipoServicio> tipo=new ComboBox<>(); tipo.getItems().setAll(TipoServicio.values());
+        ComboBox<String> escuadra=new ComboBox<>(); escuadra.setEditable(true); escuadra.setMaxWidth(Double.MAX_VALUE);
+        escuadra.getItems().setAll("Escuadra A","Escuadra B","Administración","DPC","Operaciones","Taller"); ComboBox<TipoServicio> tipo=new ComboBox<>(); tipo.getItems().setAll(TipoServicio.values());
         TextArea detalle=new TextArea(); detalle.setPrefRowCount(3); detalle.setWrapText(true);
         FechaHora fecha=new FechaHora();
         VBox campos=new VBox(8);
@@ -111,7 +125,8 @@ public class DespachoController {
             new Label("Jefe de unidad (opcional)"),new HBox(8,jefe,quitarJefe),
             new Label("Otros participantes (Ctrl para seleccionar varios)"),personal,
             new Label("Operador y jefe se incluyen automáticamente en la tripulación."),new Label("Fecha y hora de salida *"),fecha.contenido);
-        ScrollPane scroll=new ScrollPane(campos); scroll.setFitToWidth(true); scroll.setPrefViewportWidth(530); scroll.setPrefViewportHeight(570);
+        ScrollPane scroll=new ScrollPane(campos); scroll.setFitToWidth(true); scroll.setPrefViewportWidth(640); scroll.setPrefViewportHeight(480);
+        for (var selector : List.of(unidad,operador,jefe,acta,tipo)) selector.setMaxWidth(Double.MAX_VALUE);
         dialog.getDialogPane().setContent(scroll); dialog.setResizable(true);
         dialog.getDialogPane().lookupButton(guardar).addEventFilter(javafx.event.ActionEvent.ACTION,e -> {
             e.consume(); Ui.seguro(root,() -> {
@@ -119,7 +134,7 @@ public class DespachoController {
                     throw new IllegalArgumentException("Seleccione unidad, operador y emergencia cuando corresponda.");
                 var tripulacion=new Tripulacion(unidad.getValue().id(),operador.getValue().id(),jefe.getValue()==null ? null : jefe.getValue().id(),
                     personal.getSelectionModel().getSelectedItems().stream().map(Persona::id).toList(),fecha.valor());
-                String departamento=escuadra.getText(),texto=detalle.getText(); TipoServicio gestion=tipo.getValue();
+                String departamento=escuadra.getEditor().getText(),texto=detalle.getText(); TipoServicio gestion=tipo.getValue();
                 Integer actaId=acta.getValue()==null ? null : acta.getValue().id();
                 dialog.getDialogPane().setDisable(true);
                 Ui.ejecutar(root,() -> otros ? servicio.registrarServicio(sesion,departamento,gestion,texto,tripulacion)

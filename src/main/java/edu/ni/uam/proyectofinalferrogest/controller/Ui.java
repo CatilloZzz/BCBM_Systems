@@ -29,7 +29,7 @@ public final class Ui {
         if (value == null) return "";
         return switch (value.toString()) {
             case "ADMIN" -> "Administrador"; case "DESPACHADOR" -> "Despachador"; case "BOMBERO" -> "Bombero";
-            case "DISPONIBLE" -> "Disponible"; case "EN_EMERGENCIA" -> "En emergencia"; case "DE_BAJA", "BAJA" -> "De baja";
+            case "DISPONIBLE" -> "Disponible"; case "EN_SERVICIO" -> "En servicio"; case "EN_EMERGENCIA" -> "En emergencia"; case "DE_BAJA", "BAJA" -> "De baja";
             case "OPERATIVO" -> "Operativo"; case "EN_REPARACION" -> "En reparación"; case "MANTENIMIENTO" -> "Mantenimiento";
             default -> value.toString();
         };
@@ -67,7 +67,7 @@ public final class Ui {
                 label.setText(text); label.getStyleClass().setAll("status-badge");
                 label.getStyleClass().add(switch (text) {
                     case "Disponible", "Operativo", "Activa" -> "status-ok";
-                    case "En emergencia", "De baja", "Inactiva" -> "status-danger";
+                    case "En emergencia", "En servicio", "De baja", "Inactiva" -> "status-danger";
                     case "En reparación", "Mantenimiento" -> "status-warning";
                     default -> "status-neutral";
                 });

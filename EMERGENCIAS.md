@@ -9,7 +9,7 @@ En la ficha, **Cerrar acta** solicita la descripción final y el resultado, que 
 ## Base de datos y ejecución
 
 - Base nueva. Ejecuta `database/schema.sql` y, para una demostración local, `database/datos_prueba.sql`.
-- Base existente. Aplica las migraciones pendientes de `database/migrations/` en orden. La última es `004_actas_emergencia.sql`, que agrega campos opcionales y un índice único para el número de acta. Conserva registros y asignaciones.
+- Base existente. Aplica las migraciones pendientes de `database/migrations/` en orden. La migración `004_actas_emergencia.sql` agrega campos opcionales y un índice único para el número de acta. Conserva registros y asignaciones.
 - En IntelliJ, usa JDK 21, el `config.properties` local junto a `pom.xml` y **Run MainApp**. También puedes ejecutar `mvnw.cmd javafx:run`.
 - Para las pruebas, ejecuta `mvnw.cmd test`. Para incluir PostgreSQL usa `mvnw.cmd -Dbcbm.pgtest=true test` con la configuración local y permisos para crear un esquema temporal. La verificación del menú JavaFX y el login de demostración se ejecuta con `mvnw.cmd -Dtest=DespachoPostgresTest -Dbcbm.pgtest=true -Dbcbm.fxtest=true test`.
 
