@@ -19,6 +19,7 @@ public class DespachoController {
     private final SesionUsuario sesion;
     private final boolean otros;
     private final DespachoService servicio;
+    private Integer actaFija;
     @FXML private VBox root;
     @FXML private Label titulo,subtitulo,contador,mensaje;
     @FXML private ComboBox<Integer> mes;
@@ -36,6 +37,10 @@ public class DespachoController {
         this.sesion=sesion; this.otros=otros; this.servicio=servicio;
     }
     public Parent vista() { return Vistas.cargar("despacho.fxml",this); }
+    public Parent vistaActa(Integer id) {
+        actaFija = id;
+        return vista();
+    }
     @FXML private void initialize() {
         titulo.setText(otros ? "Otros servicios del mes" : "Despacho y movimientos");
         subtitulo.setText(otros ? "Registra coberturas, gestiones, taller y capacitaciones." : "Consulta las salidas, tripulaciones y retornos de cada unidad.");
@@ -51,6 +56,12 @@ public class DespachoController {
         colEscuadra.setVisible(otros); colTipo.setVisible(otros); colLlegada.setVisible(!otros);
         colRetorno.setText(otros ? "Entrada" : "Retorna"); Ui.visible(llegada,!otros);
         retorno.setText(otros ? "Registrar entrada" : "Registrar retorno");
+        if (actaFija != null) {
+            titulo.setText("Salidas del acta");
+            mes.setDisable(true);
+            anio.setDisable(true);
+            activas.setDisable(true);
+        }
         tabla.getSelectionModel().selectedItemProperty().addListener((o,a,b) -> botones());
         activas.selectedProperty().addListener((o,a,b) -> { mes.setDisable(b); anio.setDisable(b); actualizar(); });
         Ui.carga(root,cargando); botones(); actualizar();
@@ -64,7 +75,8 @@ public class DespachoController {
     }
     @FXML private void actualizar() {
         YearMonth periodo=YearMonth.of(anio.getValue(),mes.getValue()); boolean soloActivas=activas.isSelected();
-        Ui.ejecutar(root,() -> soloActivas ? servicio.listarActivas(sesion,otros) : servicio.listarMes(sesion,periodo,otros),rows -> {
+        Ui.ejecutar(root,() -> actaFija != null ? servicio.consultarSalidas(sesion,actaFija)
+                : soloActivas ? servicio.listarActivas(sesion,otros) : servicio.listarMes(sesion,periodo,otros),rows -> {
             tabla.getItems().setAll(rows); contador.setText(rows.size()+" salidas"); botones();
         });
     }
@@ -76,7 +88,14 @@ public class DespachoController {
         ButtonType guardar=new ButtonType("Confirmar salida",ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(guardar,ButtonType.CANCEL);
         ComboBox<Acta> acta=new ComboBox<>(); acta.getItems().setAll(datos.emergencias());
-        ComboBox<Vehiculo> unidad=new ComboBox<>(); unidad.getItems().setAll(datos.unidades());
+        ComboBox<Vehiculo> unidad=new ComboBox<>();
+        unidad.getItems().setAll(actaFija == null ? datos.unidades()
+                : datos.unidades().stream().filter(u -> u.estado().equals(
+                        edu.ni.uam.proyectofinalferrogest.model.EstadoUnidad.DISPONIBLE.toString())).toList());
+        if (actaFija != null) {
+            acta.getItems().stream().filter(a -> a.id().equals(actaFija)).findFirst().ifPresent(acta::setValue);
+            acta.setDisable(true);
+        }
         ComboBox<Persona> operador=new ComboBox<>(); operador.getItems().setAll(datos.personal());
         ComboBox<Persona> jefe=new ComboBox<>(); jefe.getItems().setAll(datos.personal());
         Button quitarJefe=new Button("Sin jefe"); quitarJefe.setOnAction(e -> jefe.setValue(null));
@@ -137,15 +156,24 @@ public class DespachoController {
         Alert aviso=new Alert(Alert.AlertType.ERROR,Ui.mensaje(error),ButtonType.OK); Ui.dialogo(aviso,root); aviso.showAndWait();
     }
     /** Fechas completas para conservar movimientos que cruzan medianoche. */
-    private static class FechaHora {
+    static class FechaHora {
         final DatePicker dia=new DatePicker(LocalDate.now());
         final Spinner<Integer> hora=new Spinner<>(0,23,LocalTime.now().getHour());
         final Spinner<Integer> minuto=new Spinner<>(0,59,LocalTime.now().getMinute());
         final HBox contenido=new HBox(8,dia,new Label("Hora"),hora,new Label(":"),minuto);
         FechaHora() { Ui.fecha(dia); hora.setPrefWidth(78); minuto.setPrefWidth(78); }
+        private LocalDateTime inicial;
+        FechaHora(LocalDateTime valor) {
+            this();
+            inicial = valor;
+            dia.setValue(valor.toLocalDate());
+            hora.getValueFactory().setValue(valor.getHour());
+            minuto.getValueFactory().setValue(valor.getMinute());
+        }
         LocalDateTime valor() {
             if (dia.getValue()==null) throw new IllegalArgumentException("Seleccione la fecha.");
-            return dia.getValue().atTime(hora.getValue(),minuto.getValue());
+            LocalDateTime valor = dia.getValue().atTime(hora.getValue(),minuto.getValue());
+            return inicial != null && inicial.withSecond(0).withNano(0).equals(valor) ? inicial : valor;
         }
     }
 }

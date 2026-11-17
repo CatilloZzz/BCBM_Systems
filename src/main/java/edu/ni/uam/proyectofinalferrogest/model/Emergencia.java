@@ -13,32 +13,115 @@ public class Emergencia {
     @Version
     private long version;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200)
     private String direccion;
 
     @Column(columnDefinition = "text")
     private String descripcion;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tipo_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_id")
     private TipoEmergencia tipo;
 
     @Column(name = "registrado_por", nullable = false, updatable = false)
     private Integer usuarioId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(length = 10)
     private PrioridadEmergencia prioridad;
 
     @Convert(converter = EstadoEmergenciaConverter.class)
     @Column(nullable = false, length = 20)
     private EstadoEmergencia estado = EstadoEmergencia.PENDIENTE;
 
-    @Column(name = "fecha_hora", nullable = false, updatable = false)
+    @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
     @Column(name = "fecha_cierre")
     private LocalDateTime fechaCierre;
+
+    @Column(name = "numero_acta", length = 30)
+    private String numeroActa;
+    @Column(length = 100)
+    private String escuadra;
+    @Column(length = 120)
+    private String solicitante;
+    @Column(length = 30)
+    private String telefono;
+    @Column(name = "descripcion_final", columnDefinition = "text")
+    private String descripcionFinal;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 24)
+    private ResultadoEmergencia resultado;
+
+    public record DatosActa(String numero, LocalDateTime reporte, String escuadra,
+                           String solicitante, String telefono, String direccion, String descripcion,
+                           Integer tipoId, PrioridadEmergencia prioridad, Double latitud, Double longitud) {}
+
+    public static Emergencia abrir(DatosActa datos, TipoEmergencia tipo, Integer usuarioId) {
+        var emergencia = new Emergencia();
+        emergencia.usuarioId = usuarioId;
+        emergencia.completar(datos, tipo);
+        return emergencia;
+    }
+
+    public void completar(DatosActa datos, TipoEmergencia tipo) {
+        exigirAbierta();
+        String numero = texto(datos.numero(), 30, "Número de acta");
+        if ((numero == null && (id == null || numeroActa != null))
+                || (numero != null && !numero.matches("[\\p{L}\\p{N}][\\p{L}\\p{N}/._-]*"))) {
+            throw new IllegalArgumentException("Ingrese un número de acta válido.");
+        }
+        if (datos.reporte() == null || datos.reporte().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Ingrese una fecha de reporte que no esté en el futuro.");
+        }
+        String contacto = texto(datos.telefono(), 30, "Teléfono");
+        if (contacto != null && (!contacto.matches("[+0-9 ()-]+") || !contacto.matches(".*[0-9].*"))) {
+            throw new IllegalArgumentException("Ingrese un teléfono válido.");
+        }
+        this.numeroActa = numero;
+        this.fechaRegistro = datos.reporte();
+        this.escuadra = texto(datos.escuadra(), 100, "Escuadra");
+        this.solicitante = texto(datos.solicitante(), 120, "Solicitante");
+        this.telefono = contacto;
+        this.direccion = texto(datos.direccion(), 200, "Dirección");
+        this.descripcion = texto(datos.descripcion(), 1000, "Descripción");
+        this.tipo = tipo;
+        this.prioridad = datos.prioridad();
+        ubicar(datos.latitud(), datos.longitud());
+    }
+
+    public void prepararCierre(String descripcion, ResultadoEmergencia resultado) {
+        exigirAbierta();
+        String descripcionFinal = texto(descripcion, 1000, "Descripción final");
+        if (resultado == null || descripcionFinal == null) {
+            throw new IllegalArgumentException("Ingrese la descripción final y el resultado.");
+        }
+        this.descripcionFinal = descripcionFinal;
+        this.resultado = resultado;
+    }
+
+    private void exigirAbierta() {
+        if (estado == EstadoEmergencia.CERRADA) {
+            throw new IllegalStateException("Una emergencia cerrada no se puede editar.");
+        }
+    }
+
+    private static String texto(String valor, int limite, String campo) {
+        if (valor == null || valor.isBlank()) return null;
+        String limpio = valor.strip();
+        if (limpio.length() > limite) {
+            throw new IllegalArgumentException(campo + " admite hasta " + limite + " caracteres.");
+        }
+        return limpio;
+    }
+
+    public String getNumeroActa() { return numeroActa; }
+    public String getEscuadra() { return escuadra; }
+    public String getSolicitante() { return solicitante; }
+    public String getTelefono() { return telefono; }
+    public String getDescripcionFinal() { return descripcionFinal; }
+    public ResultadoEmergencia getResultado() { return resultado; }
 
     public LocalDateTime getFechaCierre() { return fechaCierre; }
 

@@ -44,9 +44,8 @@ public class MenuController {
     @FXML private void inicio() { mostrar(inicioButton,"Inicio",() -> new InicioController(sesion,this::personal,this::equipos,this::mantenimiento).vista()); }
     @FXML private void emergencias() {
         if (sesion.rol()==Rol.BOMBERO) return;
-        mostrar(emergenciasButton,"Emergencias",() -> {
-            try { return EmergenciasController.cargar(HibernateUtil.getSessionFactory(),sesion::id,
-                id -> new DespachoService(HibernateUtil.getSessionFactory()).cerrarEmergencia(sesion,id)); }
+        mostrar(emergenciasButton,"Emergencias del mes",() -> {
+            try { return EmergenciasController.cargar(HibernateUtil.getSessionFactory(),sesion); }
             catch (IOException e) { throw new IllegalStateException("No se pudo abrir Emergencias",e); }
         });
     }

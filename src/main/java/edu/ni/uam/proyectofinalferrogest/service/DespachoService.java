@@ -41,7 +41,8 @@ public class DespachoService {
                 .setParameter("baja",EstadoBombero.DE_BAJA).getResultList().stream().map(this::persona).toList();
             var actas=s.createSelectionQuery("from Emergencia where estado <> :cerrada order by fechaRegistro desc",Emergencia.class)
                 .setParameter("cerrada",EstadoEmergencia.CERRADA).getResultList().stream()
-                .map(e -> new Acta(e.getId(),e.getDireccion())).toList();
+                .map(e -> new Acta(e.getId(),(e.getNumeroActa() == null ? "" : e.getNumeroActa() + " · ")
+                        + Objects.toString(e.getDireccion(), "Sin dirección"))).toList();
             return new Catalogos(unidades,personal,actas);
         });
     }
@@ -109,6 +110,11 @@ public class DespachoService {
         return s.find(SalidaUnidad.class,id,LockModeType.PESSIMISTIC_WRITE);
     }
     public void cerrarEmergencia(SesionUsuario sesion,Integer emergenciaId) {
+        cerrarEmergencia(sesion, emergenciaId, null, null, null);
+    }
+
+    public void cerrarEmergencia(SesionUsuario sesion, Integer emergenciaId, Long version,
+                                  String descripcion, ResultadoEmergencia resultado) {
         transaccion(s -> {
             autorizar(s,sesion);
             Emergencia e=s.find(Emergencia.class,exigirId(emergenciaId),LockModeType.PESSIMISTIC_WRITE);
@@ -120,11 +126,23 @@ public class DespachoService {
             if (!s.createSelectionQuery("select id from Asignacion where emergencia.id=:id",Integer.class)
                     .setParameter("id",emergenciaId).setMaxResults(1).getResultList().isEmpty())
                 throw new IllegalArgumentException("Esta emergencia tiene asignaciones antiguas; revise sus retornos antes de migrarla al nuevo despacho.");
+            if (version != null) {
+                if (e.getVersion() != version) {
+                    throw new IllegalStateException("El acta cambió. Vuelva a abrirla antes de cerrar.");
+                }
+                e.prepararCierre(descripcion, resultado);
+            } else if (e.getNumeroActa() != null) {
+                throw new IllegalArgumentException("Cierre el acta desde su ficha para guardar el resultado y la descripción final.");
+            }
             e.cambiarEstado(EstadoEmergencia.CERRADA); return null;
         });
     }
     public List<Salida> consultarSalidas(SesionUsuario sesion,Integer emergenciaId) {
-        return consultar(sesion," where x.emergencia.id=:acta",null,exigirId(emergenciaId));
+        return consultarSalidas(sesion, List.of(exigirId(emergenciaId)));
+    }
+    public List<Salida> consultarSalidas(SesionUsuario sesion, Collection<Integer> emergencias) {
+        if (emergencias.isEmpty()) return List.of();
+        return consultar(sesion, " where x.emergencia.id in :actas", null, emergencias);
     }
     public List<Salida> listarMes(SesionUsuario sesion,YearMonth mes,boolean otrosServicios) {
         Objects.requireNonNull(mes,"Seleccione el mes.");
@@ -134,14 +152,14 @@ public class DespachoService {
     public List<Salida> listarActivas(SesionUsuario sesion,boolean otrosServicios) {
         return consultar(sesion," where x.retorno is null and x."+(otrosServicios ? "otroServicio" : "emergencia")+" is not null",null,null);
     }
-    private List<Salida> consultar(SesionUsuario sesion,String filtro,YearMonth mes,Integer acta) {
+    private List<Salida> consultar(SesionUsuario sesion,String filtro,YearMonth mes,Collection<Integer> actas) {
         return transaccion(s -> {
             autorizar(s,sesion);
             var q=s.createSelectionQuery("select distinct x from SalidaUnidad x join fetch x.unidad join fetch x.operador "+
                 "left join fetch x.jefe left join fetch x.emergencia left join fetch x.otroServicio left join fetch x.participantes"+
                 filtro+" order by x.salida desc, x.id desc",SalidaUnidad.class);
             if (mes!=null) { q.setParameter("desde",mes.atDay(1).atStartOfDay()); q.setParameter("hasta",mes.plusMonths(1).atDay(1).atStartOfDay()); }
-            if (acta!=null) q.setParameter("acta",acta);
+            if (actas!=null) q.setParameterList("actas",actas);
             return q.getResultList().stream().map(this::registro).toList();
         });
     }

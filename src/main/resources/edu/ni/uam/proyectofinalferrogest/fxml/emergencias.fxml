@@ -8,7 +8,7 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.ni.uam.proyectofinalferrogest.controller.EmergenciasController">
     <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-    <Label text="Emergencias" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+    <Label text="Emergencias del mes" styleClass="page-title"/>
     <Label fx:id="aviso" text="Conecte la persistencia compartida y la sesión para usar el módulo."
            wrapText="true"/>
     <VBox fx:id="contenido" spacing="10" disable="true" VBox.vgrow="ALWAYS">
@@ -22,21 +22,28 @@
                 <ComboBox fx:id="tipo" promptText="Todos" prefWidth="160"/>
             </VBox>
             <VBox spacing="4">
-                <Label text="Desde"/>
-                <DatePicker fx:id="desde" editable="false" prefWidth="130"/>
+                <Label text="Mes"/>
+                <ComboBox fx:id="mes" prefWidth="125"/>
             </VBox>
             <VBox spacing="4">
-                <Label text="Hasta"/>
-                <DatePicker fx:id="hasta" editable="false" prefWidth="130"/>
+                <Label text="Año"/>
+                <Spinner fx:id="anio" prefWidth="90"/>
             </VBox>
-            <Button text="Filtrar" onAction="#filtrar"/>
+            <VBox spacing="4">
+                <Label text="N.º de acta"/>
+                <TextField fx:id="numeroFiltro" onAction="#filtrar" prefWidth="110"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="Escuadra"/>
+                <ComboBox fx:id="escuadraFiltro" promptText="Todas" prefWidth="140"/>
+            </VBox>
+            <Button fx:id="aplicarFiltros" text="Filtrar" onAction="#filtrar"/>
             <Button text="Limpiar" onAction="#limpiarFiltros"/>
         </FlowPane>
         <TableView fx:id="tabla" VBox.vgrow="ALWAYS">
-            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
             <placeholder><Label text="No hay emergencias para mostrar."/></placeholder>
             <columns>
-                <TableColumn fx:id="colFecha" text="Fecha de registro" prefWidth="150"/>
+                <TableColumn fx:id="colFecha" text="Fecha del reporte" prefWidth="150"/>
                 <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="220"/>
                 <TableColumn fx:id="colTipo" text="Tipo" prefWidth="130"/>
                 <TableColumn fx:id="colPrioridad" text="Prioridad" prefWidth="90"/>
@@ -45,7 +52,7 @@
             </columns>
         </TableView>
         <FlowPane hgap="8" vgap="8">
-            <Button fx:id="nueva" text="Nueva emergencia" onAction="#registrar"/>
+            <Button fx:id="nueva" text="Abrir acta" onAction="#registrar"/>
             <Button fx:id="detalle" text="Ver detalle" onAction="#verDetalle"/>
             <Button fx:id="editar" text="Editar" onAction="#editar"/>
             <Button fx:id="eliminar" text="Eliminar" onAction="#eliminar"/>

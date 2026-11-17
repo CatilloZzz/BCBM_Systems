@@ -14,11 +14,14 @@ CREATE TABLE usuario (
 );
 CREATE TABLE tipo_emergencia (id SERIAL PRIMARY KEY, version BIGINT NOT NULL DEFAULT 0, nombre VARCHAR(60) NOT NULL UNIQUE);
 CREATE TABLE emergencia (
- id SERIAL PRIMARY KEY, version BIGINT NOT NULL DEFAULT 0, tipo_id INT NOT NULL REFERENCES tipo_emergencia(id), direccion VARCHAR(200) NOT NULL,
- descripcion TEXT, prioridad VARCHAR(10) NOT NULL CHECK (prioridad IN ('BAJA','MEDIA','ALTA','CRITICA')),
+ id SERIAL PRIMARY KEY, version BIGINT NOT NULL DEFAULT 0, tipo_id INT REFERENCES tipo_emergencia(id), direccion VARCHAR(200),
+ descripcion TEXT, prioridad VARCHAR(10) CHECK (prioridad IN ('BAJA','MEDIA','ALTA','CRITICA')),
  estado VARCHAR(20) NOT NULL DEFAULT 'REPORTADA' CHECK (estado IN ('REPORTADA','EN_CURSO','CERRADA')),
- fecha_hora TIMESTAMP NOT NULL DEFAULT NOW(), fecha_cierre TIMESTAMP, registrado_por INT REFERENCES usuario(id)
+ fecha_hora TIMESTAMP NOT NULL DEFAULT NOW(), fecha_cierre TIMESTAMP, registrado_por INT REFERENCES usuario(id),
+ numero_acta VARCHAR(30), escuadra VARCHAR(100), solicitante VARCHAR(120), telefono VARCHAR(30),
+ descripcion_final TEXT, resultado VARCHAR(24)
 );
+CREATE UNIQUE INDEX emergencia_numero_acta_idx ON emergencia (lower(numero_acta));
 CREATE TABLE unidad (
  id SERIAL PRIMARY KEY, codigo VARCHAR(20) NOT NULL UNIQUE, tipo VARCHAR(30) NOT NULL,
  estado VARCHAR(20) NOT NULL DEFAULT 'DISPONIBLE' CHECK (estado IN ('DISPONIBLE','EN_EMERGENCIA','MANTENIMIENTO'))
