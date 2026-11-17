@@ -72,10 +72,10 @@ La integración de las entidades y pantallas de emergencias y asignaciones corre
 
 ## Integración de develops con Rafael y Julián
 
-Para una base ya creada con el esquema de Rafael, ejecutar en Query Tool de `bomberos_db` el archivo `database/migrations/001_integracion_emergencias.sql` antes de iniciar la aplicación. Agrega las columnas `version` usadas por Julián para evitar sobrescribir cambios simultáneos y conserva los registros existentes. No ejecutar de nuevo `schema.sql` sobre esa base.
+Para una base existente, ejecutar en Query Tool de `bomberos_db` las migraciones pendientes de `database/migrations/` en orden. La migración 004 añade los campos del acta y el resultado de cierre. Los scripts conservan los registros existentes. No ejecutar de nuevo `schema.sql` sobre esa base.
 
 Para una instalación nueva, `database/schema.sql` ya incluye esas columnas. La configuración local sigue en `config.properties`, tomando como guía `config.properties.example`.
 
 El proyecto conserva Java 21 y el arranque modular con `module-info.java`. El menú incluye Emergencias para administrador y despachador, además de personal, inventario, usuarios y mantenimiento. Se unificaron los mapeos con las columnas `tipo_id`, `registrado_por` y `fecha_hora` del esquema compartido. Los estados Java PENDIENTE y EN_PROCESO corresponden a REPORTADA y EN_CURSO en PostgreSQL.
 
-El mapeo de Asignacion permite consultar los recursos existentes mediante HQL e impide eliminar emergencias con asignaciones. El despacho y el servicio transaccional de cierre todavía requieren implementación; el botón de cierre permanece deshabilitado mientras no se proporcione ese servicio.
+La ficha consulta las asignaciones antiguas y usa el servicio de despacho compartido para las nuevas salidas. El cierre guarda la descripción final y el resultado después de comprobar que todas las unidades hayan retornado. Consulta [Emergencias del mes](EMERGENCIAS.md) para ver el recorrido de prueba.

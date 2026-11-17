@@ -1,6 +1,7 @@
 package edu.ni.uam.proyectofinalferrogest.dao;
 
 import edu.ni.uam.proyectofinalferrogest.model.TipoEmergencia;
+import edu.ni.uam.proyectofinalferrogest.service.SesionUsuario;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -18,8 +19,9 @@ public class TipoEmergenciaDao {
                 .getResultList());
     }
 
-    public void guardar(Integer id, long version, String nombre) {
+    public void guardar(SesionUsuario sesion, Integer id, long version, String nombre) {
         factory.inTransaction(session -> {
+            EmergenciaDao.autorizar(session, sesion);
             if (id == null) {
                 session.persist(new TipoEmergencia(nombre));
             } else {
@@ -28,8 +30,9 @@ public class TipoEmergenciaDao {
         });
     }
 
-    public void eliminar(Integer id, long version) {
+    public void eliminar(SesionUsuario sesion, Integer id, long version) {
         factory.inTransaction(session -> {
+            EmergenciaDao.autorizar(session, sesion);
             TipoEmergencia tipo = buscarVigente(session, id, version);
             boolean enUso = !session.createSelectionQuery(
                     "select e.id from Emergencia e where e.tipo.id = :id", Integer.class)
