@@ -3,6 +3,7 @@ package edu.ni.uam.proyectofinalferrogest.service;
 import edu.ni.uam.proyectofinalferrogest.model.Rol;
 import org.hibernate.SessionFactory;
 import java.time.YearMonth;
+import java.time.LocalDate;
 import java.util.List;
 
 public class ReporteCabinaService {
@@ -36,10 +37,15 @@ public class ReporteCabinaService {
         """;
 
     public List<Fila> consultar(SesionUsuario sesion,YearMonth mes) {
+        return consultar(sesion,mes.atDay(1),mes.atEndOfMonth());
+    }
+
+    public List<Fila> consultar(SesionUsuario sesion,LocalDate desde,LocalDate hasta) {
+        if (desde==null || hasta==null || desde.isAfter(hasta)) throw new IllegalArgumentException("La fecha inicial debe ser anterior o igual a la fecha final.");
         return factory.fromTransaction(s -> {
             if (Acceso.usuario(s,sesion).getRol()==Rol.BOMBERO) throw new SecurityException("Se requiere acceso de cabina.");
             return s.createNativeQuery(CONSULTA,Object[].class)
-                .setParameter("desde",mes.atDay(1).atStartOfDay()).setParameter("hasta",mes.plusMonths(1).atDay(1).atStartOfDay())
+                .setParameter("desde",desde.atStartOfDay()).setParameter("hasta",hasta.plusDays(1).atStartOfDay())
                 .getResultList().stream().map(r -> new Fila((String)r[0],(String)r[1],(String)r[2],
                     ((Number)r[3]).longValue(),((Number)r[4]).longValue())).toList();
         });
