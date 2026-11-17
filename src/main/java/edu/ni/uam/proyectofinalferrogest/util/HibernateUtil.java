@@ -59,6 +59,7 @@ public final class HibernateUtil {
             cfg.setProperty("hibernate.show_sql", java.util.Objects.requireNonNullElse(cfg.getProperty("hibernate.show_sql"), "false"));
             cfg.setProperty("hibernate.connection.pool_size", "5");
 
+            cfg.addAnnotatedClass(OpcionCatalogo.class);
             cfg.addAnnotatedClass(Bombero.class);
             cfg.addAnnotatedClass(Usuario.class);
             cfg.addAnnotatedClass(Equipo.class);

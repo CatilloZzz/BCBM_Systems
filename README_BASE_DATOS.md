@@ -72,7 +72,7 @@ La integración de las entidades y pantallas de emergencias y asignaciones corre
 
 ## Integración de develops con Rafael y Julián
 
-Para una base existente, ejecutar en Query Tool de `bomberos_db` las migraciones pendientes de `database/migrations/` en orden. La 004 añade los campos del acta y el resultado de cierre. La 005 incorpora la compañía y la escuadra del personal. La 006 amplía los tipos de servicio y distingue las unidades en servicio de las que atienden emergencias. Los scripts conservan los registros existentes. No ejecutar de nuevo `schema.sql` sobre esa base.
+Para una base existente, ejecutar en Query Tool de `bomberos_db` las migraciones pendientes de `database/migrations/` en orden. La 004 añade los campos del acta y el resultado de cierre. La 005 incorpora la compañía y la escuadra del personal. La 006 amplía los tipos de servicio y distingue las unidades en servicio de las que atienden emergencias. La 007 crea los catálogos configurables y las autorizaciones de operadores. Recupera las opciones existentes y autoriza inicialmente a cada operador únicamente las unidades presentes en sus salidas históricas. Los scripts conservan los registros existentes. No ejecutar de nuevo `schema.sql` sobre esa base.
 
 Para una instalación nueva, `database/schema.sql` ya incluye esas columnas. La configuración local sigue en `config.properties`, tomando como guía `config.properties.example`.
 

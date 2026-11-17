@@ -51,6 +51,7 @@
                     <SVGPath content="M12 1 L22 5 L21 14 Q19 20 12 23 Q5 20 3 14 L2 5 Z M10 14 L8 12 L6 14 L10 18 L18 10 L16 8 Z" styleClass="nav-icon" scaleX="0.74" scaleY="0.74"/>
                 </graphic>
             </Button>
+            <Button fx:id="configuracionButton" text="Configuración" onAction="#configuracion" styleClass="nav-button" maxWidth="Infinity"/>
             <Region VBox.vgrow="ALWAYS"/>
             <VBox styleClass="session-block" spacing="5">
                 <Label text="SESIÓN ACTIVA" styleClass="nav-section"/>

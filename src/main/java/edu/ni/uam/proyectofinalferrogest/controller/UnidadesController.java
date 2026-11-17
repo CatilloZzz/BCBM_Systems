@@ -14,6 +14,7 @@ public class UnidadesController {
     private final SesionUsuario sesion;
     private final FlotaService servicio = new FlotaService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory());
     private final ObservableList<Unidad> registros = FXCollections.observableArrayList();
+    private record Datos(FlotaService.Inventario inventario,List<String> tipos) {}
     private List<Equipo> equipos = List.of();
     @FXML private VBox root;
     @FXML private VBox formulario;
@@ -22,7 +23,8 @@ public class UnidadesController {
     @FXML private TableView<Equipo> dotacion;
     @FXML private TableColumn<Unidad,String> codigoCol,tipoCol,estadoCol;
     @FXML private TableColumn<Equipo,String> nombreCol,categoriaCol,cantidadCol,condicionCol;
-    @FXML private TextField codigo,tipo,buscar;
+    @FXML private TextField codigo,buscar;
+    @FXML private ComboBox<String> tipo;
     @FXML private ComboBox<EstadoUnidad> estado;
     @FXML private ComboBox<Equipo> disponibles;
     @FXML private Label aviso,tituloForm,contador;
@@ -50,7 +52,8 @@ public class UnidadesController {
         return unidad==null ? null : unidad.getId();
     }
     private void recargar(Integer id) {
-        Ui.ejecutar(root,()->servicio.consultar(sesion),datos->{
+        Ui.ejecutar(root,()->new Datos(servicio.consultar(sesion),new ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.TIPO_UNIDAD)),resultado->{
+            var datos=resultado.inventario(); tipo.getItems().setAll(resultado.tipos());
             equipos=datos.equipos(); registros.setAll(datos.unidades());
             disponibles.getItems().setAll(equipos.stream().filter(e->e.getUnidad()==null && e.getCantidad()>0 && e.getEstado()==EstadoEquipo.OPERATIVO).toList());
             tabla.getSelectionModel().select(datos.unidades().stream().filter(u->u.getId().equals(id)).findFirst().orElse(null));
@@ -58,9 +61,9 @@ public class UnidadesController {
         });
     }
     private void mostrar(Unidad u) {
-        codigo.setText(u==null ? "" : u.getCodigo()); tipo.setText(u==null ? "" : u.getTipo());
+        codigo.setText(u==null ? "" : u.getCodigo()); Ui.seleccionActual(tipo,u==null ? null : u.getTipo());
         boolean editable=sesion.rol()==Rol.ADMIN && (u==null || !u.getEstado().enSalida());
-        codigo.setEditable(editable); tipo.setEditable(editable); estado.setDisable(!editable); guardarUnidad.setDisable(!editable);
+        codigo.setEditable(editable); tipo.setDisable(!editable); estado.setDisable(!editable); guardarUnidad.setDisable(!editable);
         estado.getItems().setAll(EstadoUnidad.DISPONIBLE,EstadoUnidad.MANTENIMIENTO);
         if (u!=null && u.getEstado().enSalida()) estado.getItems().add(u.getEstado());
         estado.getSelectionModel().select(u==null ? EstadoUnidad.DISPONIBLE : u.getEstado());
@@ -71,7 +74,7 @@ public class UnidadesController {
     }
     @FXML private void nueva() { tabla.getSelectionModel().clearSelection(); mostrar(null); codigo.requestFocus(); }
     @FXML private void guardar() {
-        Integer id=idUnidad(); String c=codigo.getText(),t=tipo.getText(); EstadoUnidad valor=estado.getValue();
+        Integer id=idUnidad(); String c=codigo.getText(),t=tipo.getValue(); EstadoUnidad valor=estado.getValue();
         Ui.ejecutar(root,()->servicio.guardar(sesion,id,c,t,valor),this::recargar);
     }
     @FXML private void asignar() { mover(disponibles.getValue(),true); }

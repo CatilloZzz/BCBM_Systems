@@ -30,6 +30,7 @@ public class EquipoService {
                 if (unidadId!=null && (cantidad==0 || estado!=EstadoEquipo.OPERATIVO))
                     throw new IllegalArgumentException("Selecciona un recurso operativo con existencias.");
             }
+            ConfiguracionService.validar(s,GrupoCatalogo.CATEGORIA_EQUIPO,c,e.getCategoria());
             e.setNombre(n); e.setCategoria(c); e.setCantidad(cantidad); e.setEstado(estado);
             e.setUnidad(unidadId == null ? null : new UnidadDao().buscar(s,unidadId));
             // ultimoMantenimiento solo cambia al registrar un mantenimiento.

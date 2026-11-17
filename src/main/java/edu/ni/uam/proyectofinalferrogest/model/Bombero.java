@@ -20,6 +20,20 @@ public class Bombero {
         this.compania = compania;
         this.escuadra = escuadra;
     }
+    @Column(name="operador_todas",nullable=false)
+    private boolean operadorTodas;
+    @ElementCollection
+    @CollectionTable(name="operador_unidad",joinColumns=@JoinColumn(name="bombero_id"))
+    @Column(name="unidad_id",nullable=false)
+    private java.util.Set<Integer> unidadesOperador=new java.util.HashSet<>();
+    public boolean isOperadorTodas() { return operadorTodas; }
+    public java.util.Set<Integer> getUnidadesOperador() { return java.util.Set.copyOf(unidadesOperador); }
+    public boolean puedeOperar(Integer unidad) { return operadorTodas || unidadesOperador.contains(unidad); }
+    public void autorizarOperador(boolean todas,java.util.Set<Integer> unidades) {
+        operadorTodas=todas;
+        unidadesOperador.clear();
+        if (!todas) unidadesOperador.addAll(unidades);
+    }
     public Bombero() {}
     public Integer getId() { return id; }
     @Column(nullable=false, length=100)

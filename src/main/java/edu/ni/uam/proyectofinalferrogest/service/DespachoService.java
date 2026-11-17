@@ -15,11 +15,16 @@ public class DespachoService {
     public record Persona(Integer id,String nombre) { @Override public String toString() { return nombre; } }
     public record Vehiculo(Integer id,String codigo,String estado) { @Override public String toString() { return codigo+" · "+estado; } }
     public record Acta(Integer id,String detalle) { @Override public String toString() { return "#"+id+" · "+detalle; } }
-    public record Catalogos(List<Vehiculo> unidades,List<Persona> personal,List<Acta> emergencias) {}
+    public record Catalogos(List<Vehiculo> unidades,List<Persona> personal,List<Acta> emergencias,Map<Integer,Set<Integer>> permisos,Set<Integer> todas,Map<GrupoCatalogo,List<String>> opciones) {
+        public List<Persona> operadores(Integer unidad) {
+            if (unidad==null) return List.of();
+            return personal.stream().filter(p->todas.contains(p.id()) || permisos.getOrDefault(p.id(),Set.of()).contains(unidad)).toList();
+        }
+    }
     public record Salida(Integer id,Integer emergenciaId,Integer servicioId,Integer unidadId,String unidad,
                          Persona operador,Persona jefe,List<Persona> participantes,Integer registradoPor,
                          LocalDateTime salida,LocalDateTime llegada,LocalDateTime retorno,
-                         String escuadraDepartamento,TipoServicio tipoServicio,String detalle,String numeroActa) {}
+                         String escuadraDepartamento,String tipoServicio,String detalle,String numeroActa) {}
     public record Tripulacion(Integer unidadId,Integer operadorId,Integer jefeId,List<Integer> participantes,LocalDateTime salida) {
         public Tripulacion { participantes=participantes==null ? List.of() : List.copyOf(participantes); }
     }
@@ -43,7 +48,17 @@ public class DespachoService {
                 .setParameter("cerrada",EstadoEmergencia.CERRADA).getResultList().stream()
                 .map(e -> new Acta(e.getId(),(e.getNumeroActa() == null ? "" : e.getNumeroActa() + " · ")
                         + Objects.toString(e.getDireccion(), "Sin dirección"))).toList();
-            return new Catalogos(unidades,personal,actas);
+            Map<Integer,Set<Integer>> permisos=new HashMap<>();
+            Set<Integer> todas=new HashSet<>();
+            for (Bombero b:s.createSelectionQuery("from Bombero",Bombero.class).getResultList()) {
+                permisos.put(b.getId(),b.getUnidadesOperador());
+                if (b.isOperadorTodas()) todas.add(b.getId());
+            }
+            Map<GrupoCatalogo,List<String>> opciones=new EnumMap<>(GrupoCatalogo.class);
+            for (GrupoCatalogo g:GrupoCatalogo.values()) opciones.put(g,new ArrayList<>());
+            for (OpcionCatalogo o:s.createSelectionQuery("from OpcionCatalogo where activo=true order by lower(nombre)",OpcionCatalogo.class).getResultList())
+                opciones.get(o.getGrupo()).add(o.getNombre());
+            return new Catalogos(unidades,personal,actas,permisos,todas,opciones);
         });
     }
     public Integer asignarUnidad(SesionUsuario sesion,Integer emergenciaId,Tripulacion datos) {
@@ -63,9 +78,14 @@ public class DespachoService {
             s.persist(salida); return salida.getId();
     }
     public Integer registrarServicio(SesionUsuario sesion,String escuadraDepartamento,TipoServicio tipo,String detalle,Tripulacion datos) {
+        return registrarServicio(sesion,escuadraDepartamento,tipo==null ? null : tipo.name(),detalle,datos);
+    }
+    public Integer registrarServicio(SesionUsuario sesion,String escuadraDepartamento,String tipo,String detalle,Tripulacion datos) {
         return transaccion(s -> {
             Usuario usuario=autorizar(s,sesion);
             Unidad unidad=reservarUnidad(s,datos);
+            ConfiguracionService.validar(s,GrupoCatalogo.TIPO_SERVICIO,tipo,null);
+            ConfiguracionService.validar(s,GrupoCatalogo.DEPARTAMENTO,escuadraDepartamento,null);
             OtroServicio servicio=new OtroServicio(escuadraDepartamento,tipo,detalle); s.persist(servicio);
             SalidaUnidad salida=crear(s,null,servicio,unidad,usuario.getId(),datos);
             s.persist(salida); return salida.getId();
@@ -98,6 +118,8 @@ public class DespachoService {
             b.setEstado(e==null ? EstadoBombero.EN_SERVICIO : EstadoBombero.EN_EMERGENCIA);
             personal.put(id,b);
         }
+        if (!personal.get(datos.operadorId()).puedeOperar(unidad.getId()))
+            throw new IllegalArgumentException("El operador no está autorizado para esta unidad. Revisa Configuración.");
         SalidaUnidad salida=new SalidaUnidad(e,servicio,unidad,personal.get(datos.operadorId()),personal.get(datos.jefeId()),personal.values(),usuario,datos.salida());
         unidad.setEstado(e==null ? EstadoUnidad.EN_SERVICIO : EstadoUnidad.EN_EMERGENCIA); return salida;
     }
@@ -186,7 +208,7 @@ public class DespachoService {
             x.getUnidad().getId(),x.getUnidad().getCodigo(),persona(x.getOperador()),x.getJefe()==null ? null : persona(x.getJefe()),
             x.getParticipantes().stream().map(this::persona).sorted(Comparator.comparing(Persona::id)).toList(),
             x.getRegistradoPor(),x.getSalida(),x.getLlegada(),x.getRetorno(),o==null ? Objects.toString(x.getEmergencia().getEscuadra(),"") : o.getEscuadraDepartamento(),
-            o==null ? null : o.getTipo(),o==null ? x.getEmergencia().getDireccion() : o.getDetalle(),o==null ? x.getEmergencia().getNumeroActa() : null);
+            o==null ? null : o.getTipoNombre(),o==null ? x.getEmergencia().getDireccion() : o.getDetalle(),o==null ? x.getEmergencia().getNumeroActa() : null);
     }
     private Persona persona(Bombero b) { return new Persona(b.getId(),b.getNombre()+" "+b.getApellido()); }
     private static Integer exigirId(Integer id) {

@@ -148,3 +148,11 @@
 .flow-pane { -fx-min-width: 0; }
 .form-panel .combo-box:disabled { -fx-opacity: 1; -fx-background-color: #f5f7f9; }
 .form-panel .combo-box:disabled .list-cell { -fx-opacity: 1; -fx-text-fill: #546470; }
+
+.settings-tabs > .tab-header-area > .tab-header-background { -fx-background-color: #e8edf1; }
+.settings-tabs > .tab-header-area .tab { -fx-background-color: transparent; -fx-padding: 10 18; -fx-background-insets: 0; -fx-border-width: 0 0 3; -fx-border-color: transparent; }
+.settings-tabs > .tab-header-area .tab:selected { -fx-background-color: white; -fx-border-color: transparent transparent #b8242c; }
+.settings-tabs > .tab-header-area .tab .tab-label { -fx-text-fill: #465560; -fx-font-weight: bold; }
+.settings-tabs > .tab-header-area .tab:selected .tab-label { -fx-text-fill: #9d1b23; }
+.settings-tabs > .tab-header-area { -fx-padding: 0; }
+.settings-tabs .tab-content-area { -fx-background-color: white; }

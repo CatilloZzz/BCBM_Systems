@@ -34,6 +34,9 @@ public class BomberoService {
                     .setParameter("c",c).setParameter("id",id).getSingleResult();
             if (repetidos > 0) throw new IllegalArgumentException("La cédula ya está registrada.");
             Bombero b = id == null ? new Bombero() : dao.bloquear(s,id);
+            ConfiguracionService.validar(s,GrupoCatalogo.RANGO,r,b.getRango());
+            if (organizar && compania!=null && !compania.isBlank())
+                ConfiguracionService.validar(s,GrupoCatalogo.COMPANIA,compania.strip(),b.getCompania());
             if (organizar) b.organizar(Validaciones.opcional(compania,"Compañía",80),escuadra);
             b.setNombre(n); b.setApellido(a); b.setCedula(c); b.setRango(r); b.setTelefono(t); b.setFechaIngreso(ingreso);
             if (id == null) dao.crear(s,b); return null;

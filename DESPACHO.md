@@ -62,3 +62,13 @@ Una salida pertenece a una única emergencia o servicio. El bloqueo de la fila d
 `mvn -Dbcbm.pgtest=true -Dbcbm.fxtest=true -Dtest=DespachoPostgresTest test`: agrega la carga y consulta de ambas pantallas JavaFX. Ejecutar por separado porque JavaFX no permite reiniciar su plataforma dentro del mismo proceso de pruebas.
 
 Prueba conjunta: abrir un accidente con dos unidades y cuatro bomberos distintos; retornar ambas; registrar una cobertura con una unidad y uno de esos bomberos. En el mismo mes: una emergencia, un otro servicio, tres salidas; ese bombero tiene una participación en cada actividad.
+
+## Configuración general
+
+Administración puede abrir Configuración para crear y activar o desactivar rangos, compañías, categorías de equipo, tipos de unidad, departamentos y tipos de servicio. Los formularios consultan esas opciones al abrirse o actualizarse. Las opciones desactivadas conservan el historial. Un nombre ya utilizado se reemplaza creando otra opción y desactivando la anterior.
+
+La pestaña Emergencias administra el catálogo compartido de tipos. Unidades permite crear camiones y gestionar su dotación mediante la misma pantalla de la flota.
+
+En Operadores se selecciona una persona y se autorizan todas las unidades (incluidas las futuras) o unidades concretas mediante selección múltiple. Sin autorizaciones, el personal participa como tripulante. El despacho filtra operadores disponibles y autorizados, y vuelve a comprobar el permiso dentro de la transacción. Los permisos nuevos afectan a las siguientes salidas y conservan los movimientos ya registrados.
+
+La migración 007 incorpora únicamente opciones existentes y autorizaciones demostradas por salidas históricas. En una base vacía, los catálogos se completan desde Configuración antes de registrar personal, equipos, unidades y servicios.

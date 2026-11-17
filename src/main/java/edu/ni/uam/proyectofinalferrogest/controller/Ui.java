@@ -34,6 +34,10 @@ public final class Ui {
             default -> value.toString();
         };
     }
+    public static <T> void seleccionActual(ComboBox<T> combo,T valor) {
+        combo.getSelectionModel().clearSelection();
+        combo.setValue(valor);
+    }
     public static <T> void opciones(ComboBox<T> combo) {
         combo.setConverter(new StringConverter<>() {
             @Override public String toString(T value) { return nombre(value); }

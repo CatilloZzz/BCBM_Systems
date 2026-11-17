@@ -17,7 +17,12 @@ final class TripulacionActa extends VBox {
         super(8);
         unidad.getItems().setAll(catalogos.unidades().stream()
                 .filter(u -> u.estado().equals(EstadoUnidad.DISPONIBLE.name())).toList());
-        operador.getItems().setAll(catalogos.personal());
+        operador.setPromptText("Selecciona primero la unidad");
+        unidad.valueProperty().addListener((obs,antes,actual)->{
+            operador.setValue(null);
+            operador.getItems().setAll(catalogos.operadores(actual==null ? null : actual.id()));
+            operador.setPromptText(operador.getItems().isEmpty() ? "Sin operadores autorizados disponibles" : "Seleccionar operador");
+        });
         jefe.getItems().setAll(catalogos.personal());
         adicionales.getItems().setAll(catalogos.personal());
         adicionales.setPrefHeight(110);

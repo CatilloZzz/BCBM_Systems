@@ -53,7 +53,7 @@
                         </VBox>
                         <VBox spacing="6">
                             <Label text="Categoría *" styleClass="field-label"/>
-                            <TextField fx:id="categoria" promptText="Ej. Protección"/>
+                            <ComboBox maxWidth="Infinity" fx:id="categoria" promptText="Ej. Protección"/>
                         </VBox>
                         <VBox spacing="6">
                             <Label text="Cantidad *" styleClass="field-label"/>

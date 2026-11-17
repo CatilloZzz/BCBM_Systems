@@ -44,6 +44,10 @@ class DespachoPostgresTest {
             s.execute("create schema "+esquema); s.execute("set search_path to "+esquema);
             s.execute(Files.readString(Path.of("database/schema.sql")));
             s.execute("insert into bombero(nombre,apellido,cedula,rango) values ('Uno','Prueba','t1','Bombero'),('Dos','Prueba','t2','Bombero'),('Tres','Prueba','t3','Bombero'),('Cuatro','Prueba','t4','Bombero')");
+            s.execute("update bombero set operador_todas=true");
+            s.execute("insert into opcion_catalogo(grupo,nombre) values ('DEPARTAMENTO','DPC'),('DEPARTAMENTO','A'),('DEPARTAMENTO','Escuadra A'),('TIPO_UNIDAD','Rescate')");
+            for (TipoServicio tipo:TipoServicio.values())
+                s.execute("insert into opcion_catalogo(grupo,nombre) values ('TIPO_SERVICIO','"+tipo.name()+"')");
             s.execute("insert into usuario(username,password_hash,rol) values ('prueba','no-utilizable','DESPACHADOR'),('bombero','no-utilizable','BOMBERO')");
             s.execute("insert into unidad(codigo,tipo) values ('U1','Rescate'),('U2','Rescate')");
             s.execute("insert into tipo_emergencia(nombre) values ('Accidente')");
@@ -54,7 +58,7 @@ class DespachoPostgresTest {
         cfg.setProperty("hibernate.connection.username",usuarioPg); cfg.setProperty("hibernate.connection.password",clavePg);
         cfg.setProperty("hibernate.hbm2ddl.auto","validate"); cfg.setProperty("hibernate.connection.pool_size","5");
         cfg.setProperty("hibernate.show_sql","false");
-        for (Class<?> tipo:List.of(Bombero.class,Usuario.class,Unidad.class,Emergencia.class,TipoEmergencia.class,
+        for (Class<?> tipo:List.of(OpcionCatalogo.class,Bombero.class,Usuario.class,Unidad.class,Emergencia.class,TipoEmergencia.class,
             Asignacion.class,Equipo.class,MantenimientoEquipo.class,OtroServicio.class,SalidaUnidad.class)) cfg.addAnnotatedClass(tipo);
         factory=cfg.buildSessionFactory(); servicio=new DespachoService(factory);
     }
@@ -115,6 +119,35 @@ class DespachoPostgresTest {
         servicio.registrarServicio(sesion,"A",TipoServicio.RECORRIDO,"Prueba",tripulacion(1,1,null));
         assertThrows(IllegalArgumentException.class,()->flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.MANTENIMIENTO));
         assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,1,1,true));
+    }
+    @Test void configuracionValidaPermisosOperadoresYCatalogos() {
+        var config=new ConfiguracionService(factory);
+        assertThrows(SecurityException.class,()->config.guardarOperador(sesion,1,true,Set.of()));
+        factory.inTransaction(s->s.createNativeMutationQuery("update usuario set rol='ADMIN' where id=1").executeUpdate());
+        config.guardarOperador(sesion,1,false,Set.of(1));
+        var catalogos=servicio.catalogos(sesion);
+        assertTrue(catalogos.operadores(1).stream().anyMatch(p->p.id()==1));
+        assertTrue(catalogos.operadores(2).stream().noneMatch(p->p.id()==1));
+        assertThrows(IllegalArgumentException.class,()->servicio.asignarUnidad(sesion,1,tripulacion(2,1,null)));
+        assertEquals(EstadoUnidad.DISPONIBLE,estado(2));
+        config.guardarOperador(sesion,1,true,Set.of());
+        int salida=servicio.asignarUnidad(sesion,1,tripulacion(2,1,null));
+        assertNotNull(salida);
+        config.guardarOperador(sesion,1,false,Set.of());
+        servicio.marcarLlegada(sesion,salida,fecha.plusMinutes(1));
+        servicio.registrarRetorno(sesion,salida,fecha.plusMinutes(2));
+        assertThrows(IllegalArgumentException.class,()->servicio.asignarUnidad(sesion,1,new Tripulacion(2,1,null,List.of(),fecha.plusMinutes(3))));
+        config.guardar(sesion,null,0,GrupoCatalogo.RANGO,"Capitán",true);
+        var rango=config.listar(sesion,GrupoCatalogo.RANGO).getFirst();
+        config.guardar(sesion,rango.getId(),rango.getVersion(),GrupoCatalogo.RANGO,"Capitán",false);
+        assertTrue(config.opciones(sesion).get(GrupoCatalogo.RANGO).isEmpty());
+        assertThrows(IllegalArgumentException.class,()->config.guardar(sesion,rango.getId(),rango.getVersion(),GrupoCatalogo.RANGO,"Mayor",true));
+        assertThrows(IllegalArgumentException.class,()->config.guardar(sesion,null,0,GrupoCatalogo.RANGO,"capitán",true));
+        config.guardar(sesion,null,0,GrupoCatalogo.TIPO_SERVICIO,"Apoyo comunitario",true);
+        servicio.registrarServicio(sesion,"DPC","Apoyo comunitario","Prueba",tripulacion(1,2,null));
+        assertEquals("Apoyo comunitario",servicio.listarMes(sesion,YearMonth.from(fecha),true).getFirst().tipoServicio());
+        var usado=config.listar(sesion,GrupoCatalogo.TIPO_SERVICIO).stream().filter(o->o.getNombre().equals("Apoyo comunitario")).findFirst().orElseThrow();
+        assertThrows(IllegalArgumentException.class,()->config.guardar(sesion,usado.getId(),usado.getVersion(),usado.getGrupo(),"Otro nombre",true));
     }
     @Test void actaParcialFiltrosYDespachoDesdeLaFicha() {
         var dao = new EmergenciaDao(factory);
@@ -222,6 +255,9 @@ class DespachoPostgresTest {
                 Parent vista = new MenuController().vista(admin, () -> {});
                 new Scene(vista, 1320, 860);
                 vista.applyCss();
+                ((Button)vista.lookup("#configuracionButton")).fire();
+                vista.applyCss(); vista.layout();
+                assertNotNull(vista.lookup("#catalogo"));
                 var emergencias = (Button) vista.lookup("#emergenciasButton");
                 assertNotNull(emergencias);
                 ((Button)vista.lookup("#unidadesButton")).fire();
@@ -236,6 +272,8 @@ class DespachoPostgresTest {
                 assertNotNull(tabla);
                 assertTrue(tabla.getColumns().stream().anyMatch(c -> c.getText().equals("N.º de acta")));
                 assertTrue(tabla.getColumns().stream().anyMatch(c -> c.getText().equals("Retorna")));
+                vista=edu.ni.uam.proyectofinalferrogest.controller.EmergenciasController.cargar(factory,sesion);
+                new Scene(vista,1320,860); vista.applyCss(); vista.layout();
                 var estado = (javafx.scene.control.ComboBox<?>) vista.lookup("#estado");
                 var tipo = (javafx.scene.control.ComboBox<?>) vista.lookup("#tipo");
                 var filtrar = (Button) vista.lookup("#aplicarFiltros");

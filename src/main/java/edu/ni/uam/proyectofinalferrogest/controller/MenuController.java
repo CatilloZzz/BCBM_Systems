@@ -22,7 +22,7 @@ public class MenuController {
     @FXML private Button menuButton;
     @FXML private StackPane contenido;
     @FXML private Label usuario,rol,fecha,seccion;
-    @FXML private Button emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton;
+    @FXML private Button emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton,configuracionButton;
     private SesionUsuario sesion;
     private Runnable salir;
     public BorderPane vista(SesionUsuario sesion,Runnable salir) { this.sesion=sesion; this.salir=salir; return Vistas.cargar("menu.fxml",this); }
@@ -34,6 +34,7 @@ public class MenuController {
         });
         fecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("es-NI"))));
         Ui.visible(usuariosButton,sesion.rol()==Rol.ADMIN);
+        Ui.visible(configuracionButton,sesion.rol()==Rol.ADMIN);
         Ui.visible(emergenciasButton,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(despachoButton,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(reportesButton,sesion.rol()!=Rol.BOMBERO);
@@ -49,7 +50,7 @@ public class MenuController {
             scroll.getStyleClass().add("page-scroll");
             contenido.getChildren().setAll(scroll); seccion.setText(titulo);
             if (root.getWidth()>0 && root.getWidth()<1100) mostrarMenu(false);
-            for (Button b:List.of(emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton)) b.getStyleClass().remove("nav-active");
+            for (Button b:List.of(emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton,configuracionButton)) b.getStyleClass().remove("nav-active");
             activo.getStyleClass().add("nav-active");
         });
     }
@@ -73,6 +74,9 @@ public class MenuController {
     @FXML private void servicios() {
         if (sesion.rol()==Rol.BOMBERO) return;
         mostrar(serviciosButton,"Otros servicios del mes",() -> new DespachoController(sesion,true).vista());
+    }
+    @FXML private void configuracion() {
+        if(sesion.rol()==Rol.ADMIN) mostrar(configuracionButton,"Configuración general",()->new ConfiguracionController(sesion).vista());
     }
     @FXML private void unidades() { mostrar(unidadesButton,"Unidades y dotación",() -> new UnidadesController(sesion).vista()); }
     @FXML private void reportes() {

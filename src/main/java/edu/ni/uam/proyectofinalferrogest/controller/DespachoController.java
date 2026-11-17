@@ -203,13 +203,19 @@ public class DespachoController {
             acta.getItems().stream().filter(a -> a.id().equals(actaFija)).findFirst().ifPresent(acta::setValue);
             acta.setDisable(true);
         }
-        ComboBox<Persona> operador=new ComboBox<>(); operador.getItems().setAll(datos.personal());
+        ComboBox<Persona> operador=new ComboBox<>(); operador.setPromptText("Selecciona primero la unidad");
+        unidad.valueProperty().addListener((obs,antes,actual)->{
+            operador.setValue(null);
+            operador.getItems().setAll(datos.operadores(actual==null ? null : actual.id()));
+            operador.setPromptText(operador.getItems().isEmpty() ? "Sin operadores autorizados disponibles" : "Seleccionar operador");
+        });
         ComboBox<Persona> jefe=new ComboBox<>(); jefe.getItems().setAll(datos.personal());
         Button quitarJefe=new Button("Sin jefe"); quitarJefe.setOnAction(e -> jefe.setValue(null));
         ListView<Persona> personal=new ListView<>(); personal.getItems().setAll(datos.personal()); personal.setPrefHeight(140);
         personal.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        ComboBox<String> escuadra=new ComboBox<>(); escuadra.setEditable(true); escuadra.setMaxWidth(Double.MAX_VALUE);
-        escuadra.getItems().setAll("Escuadra A","Escuadra B","Administración","DPC","Operaciones","Taller"); ComboBox<TipoServicio> tipo=new ComboBox<>(); tipo.getItems().setAll(TipoServicio.values());
+        ComboBox<String> escuadra=new ComboBox<>(); escuadra.setEditable(false); escuadra.setMaxWidth(Double.MAX_VALUE);
+        escuadra.getItems().setAll(datos.opciones().get(edu.ni.uam.proyectofinalferrogest.model.GrupoCatalogo.DEPARTAMENTO));
+        ComboBox<String> tipo=new ComboBox<>(); tipo.getItems().setAll(datos.opciones().get(edu.ni.uam.proyectofinalferrogest.model.GrupoCatalogo.TIPO_SERVICIO));
         TextArea detalleText=new TextArea(); detalleText.setPrefRowCount(3); detalleText.setWrapText(true);
         FechaHora fecha=new FechaHora();
         VBox campos=new VBox(8);
@@ -228,7 +234,7 @@ public class DespachoController {
                     throw new IllegalArgumentException("Seleccione unidad, operador y emergencia cuando corresponda.");
                 var tripulacion=new Tripulacion(unidad.getValue().id(),operador.getValue().id(),jefe.getValue()==null ? null : jefe.getValue().id(),
                     personal.getSelectionModel().getSelectedItems().stream().map(Persona::id).toList(),fecha.valor());
-                String departamento=escuadra.getEditor().getText(),texto=detalleText.getText(); TipoServicio gestion=tipo.getValue();
+                String departamento=escuadra.getValue(),texto=detalleText.getText(),gestion=tipo.getValue();
                 Integer actaId=acta.getValue()==null ? null : acta.getValue().id();
                 dialog.getDialogPane().setDisable(true);
                 Ui.ejecutar(root,() -> otros ? servicio.registrarServicio(sesion,departamento,gestion,texto,tripulacion)

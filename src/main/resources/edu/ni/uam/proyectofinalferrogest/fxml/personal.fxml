@@ -71,7 +71,7 @@
                         </VBox>
                         <VBox spacing="6">
                             <Label text="Compañía" styleClass="field-label"/>
-                            <ComboBox fx:id="compania" editable="true" maxWidth="Infinity" promptText="Seleccionar o escribir compañía"/>
+                            <ComboBox fx:id="compania" editable="false" maxWidth="Infinity" promptText="Seleccionar compañía"/>
                         </VBox>
                         <VBox spacing="6">
                             <Label text="Escuadra" styleClass="field-label"/>
