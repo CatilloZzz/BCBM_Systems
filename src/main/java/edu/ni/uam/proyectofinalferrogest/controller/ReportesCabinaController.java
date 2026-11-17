@@ -21,6 +21,7 @@ public class ReportesCabinaController {
     private List<Fila> filas=List.of();
     private YearMonth mes=YearMonth.now();
     @FXML private VBox root;
+    @FXML private ProgressIndicator cargando;
     @FXML private ComboBox<String> seccion;
     @FXML private Label periodo,resumen;
     @FXML private TableView<Fila> tabla;
@@ -28,6 +29,8 @@ public class ReportesCabinaController {
     public ReportesCabinaController(SesionUsuario sesion) { this.sesion=sesion; }
     public Parent vista() { return Vistas.cargar("reportes-cabina.fxml",this); }
     @FXML private void initialize() {
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        Ui.carga(root,cargando);
         Ui.columna(grupo,Fila::grupo); Ui.columna(tipo,Fila::tipo); Ui.columna(cantidad,Fila::cantidad); Ui.columna(total,Fila::total);
         seccion.getItems().setAll("Unidades","Emergencias","Personal"); seccion.setValue("Unidades");
         seccion.valueProperty().addListener((o,a,b)->mostrar()); cargar();

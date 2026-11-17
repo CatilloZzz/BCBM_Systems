@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import edu.ni.uam.proyectofinalferrogest.controller.PanelAdaptable?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.Insets?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.EquipoController" stylesheets="@../css/bcbm.css">
-    <HBox alignment="CENTER_LEFT" spacing="12">
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
-            <Label text="GESTIÓN INSTITUCIONAL" styleClass="eyebrow"/>
-            <Label text="Inventario de equipos" styleClass="page-title"/>
+                        <Label text="Inventario de equipos" styleClass="page-title"/>
             <Label text="Controla las existencias, su estado y la unidad asignada." styleClass="subtitle"/>
         </VBox>
-        <Region HBox.hgrow="ALWAYS"/>
+
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
         <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
-    </HBox>
-    <HBox spacing="18" VBox.vgrow="ALWAYS">
-        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+    </FlowPane>
+    <PanelAdaptable spacing="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="0">
             <HBox alignment="CENTER_LEFT" spacing="12">
                 <TextField fx:id="buscar" promptText="Buscar equipo, categoría o unidad…" HBox.hgrow="ALWAYS" styleClass="search-field"/>
                 <Label fx:id="contador" styleClass="count-label"/>
@@ -76,6 +76,6 @@
                 <Label text="Para dar de baja un equipo, selecciona el estado De baja y guarda." styleClass="footnote" wrapText="true"/>
             </VBox>
         </VBox>
-    </HBox>
+    </PanelAdaptable>
     <Label fx:id="mensaje" styleClass="feedback" wrapText="true"/>
 </VBox>

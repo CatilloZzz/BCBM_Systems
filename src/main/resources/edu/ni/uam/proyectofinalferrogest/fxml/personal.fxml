@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import edu.ni.uam.proyectofinalferrogest.controller.PanelAdaptable?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.Insets?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.BomberoController" stylesheets="@../css/bcbm.css">
-    <HBox alignment="CENTER_LEFT" spacing="12">
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
-            <Label text="GESTIÓN INSTITUCIONAL" styleClass="eyebrow"/>
-            <Label text="Personal" styleClass="page-title"/>
+                        <Label text="Personal" styleClass="page-title"/>
             <Label text="Fichas del personal, rangos y disponibilidad." styleClass="subtitle"/>
         </VBox>
-        <Region HBox.hgrow="ALWAYS"/>
+
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
         <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
-    </HBox>
-    <HBox spacing="18" VBox.vgrow="ALWAYS">
-        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+    </FlowPane>
+    <PanelAdaptable spacing="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="0">
             <HBox alignment="CENTER_LEFT" spacing="12">
                 <TextField fx:id="buscar" promptText="Buscar por nombre, rango, compañía o escuadra…" HBox.hgrow="ALWAYS" styleClass="search-field"/>
                 <Label fx:id="contador" styleClass="count-label"/>
@@ -43,8 +43,9 @@
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll" minHeight="0" prefHeight="0" VBox.vgrow="ALWAYS">
                 <content>
                     <VBox styleClass="form-card" spacing="14">
-                        <HBox alignment="CENTER_LEFT">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label fx:id="tituloForm" text="Nuevo bombero" styleClass="card-title"/>
+                            <Label fx:id="estadoForm" styleClass="status-badge"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Button text="Nuevo" onAction="#limpiar" styleClass="text-button"/>
                         </HBox>
@@ -62,12 +63,22 @@
                             <Label text="Cédula *" styleClass="field-label"/>
                             <TextField fx:id="cedula" promptText="000-000000-0000A"/>
                         </VBox>
+                        <Separator/>
+                        <Label text="Datos organizacionales" styleClass="field-label"/>
                         <VBox spacing="6">
                             <Label text="Rango *" styleClass="field-label"/>
                             <ComboBox fx:id="rango" maxWidth="Infinity" promptText="Seleccionar rango"/>
-                            <Label text="Compañía"/><ComboBox fx:id="compania" editable="true" maxWidth="Infinity" promptText="Seleccionar o escribir compañía"/>
-                            <Label text="Escuadra"/><ComboBox fx:id="escuadra" maxWidth="Infinity" promptText="Seleccionar A o B"/>
                         </VBox>
+                        <VBox spacing="6">
+                            <Label text="Compañía" styleClass="field-label"/>
+                            <ComboBox fx:id="compania" editable="true" maxWidth="Infinity" promptText="Seleccionar o escribir compañía"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Escuadra" styleClass="field-label"/>
+                            <ComboBox fx:id="escuadra" maxWidth="Infinity" promptText="Seleccionar A o B"/>
+                        </VBox>
+                        <Separator/>
+                        <Label text="Contacto e ingreso" styleClass="field-label"/>
                         <VBox spacing="6">
                             <Label text="Teléfono" styleClass="field-label"/>
                             <TextField fx:id="telefono" promptText="Opcional"/>
@@ -89,6 +100,6 @@
                 <Label text="Las bajas conservan el historial del bombero." styleClass="footnote" wrapText="true"/>
             </VBox>
         </VBox>
-    </HBox>
+    </PanelAdaptable>
     <Label fx:id="mensaje" styleClass="feedback" wrapText="true"/>
 </VBox>

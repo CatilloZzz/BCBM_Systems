@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import edu.ni.uam.proyectofinalferrogest.controller.PanelAdaptable?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.Insets?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.MantenimientoController" stylesheets="@../css/bcbm.css">
-    <HBox alignment="CENTER_LEFT" spacing="12">
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
             <Label text="CUIDADO DE LOS RECURSOS" styleClass="eyebrow"/>
             <Label text="Mantenimiento" styleClass="page-title"/>
             <Label text="Consulta el historial y registra los trabajos realizados." styleClass="subtitle"/>
         </VBox>
-        <Region HBox.hgrow="ALWAYS"/>
+
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
         <Button text="Actualizar equipos" onAction="#cargarEquipos" styleClass="secondary"/>
-    </HBox>
+    </FlowPane>
     <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="14">
         <Label text="Equipo" styleClass="field-label"/>
         <ComboBox fx:id="equipo" promptText="Selecciona un equipo" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
         <Button text="Consultar historial" onAction="#historial" styleClass="primary"/>
     </HBox>
-    <HBox spacing="18" VBox.vgrow="ALWAYS">
-        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+    <PanelAdaptable spacing="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="0">
             <HBox alignment="CENTER_LEFT">
                 <Label text="Historial de trabajos" styleClass="card-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
@@ -68,6 +69,6 @@
                 <Label text="El historial conserva el autor y la fecha de cada trabajo." styleClass="footnote" wrapText="true"/>
             </VBox>
         </VBox>
-    </HBox>
+    </PanelAdaptable>
     <Label fx:id="mensaje" styleClass="feedback" wrapText="true"/>
 </VBox>

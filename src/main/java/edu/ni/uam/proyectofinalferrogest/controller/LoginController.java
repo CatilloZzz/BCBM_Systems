@@ -10,6 +10,7 @@ import edu.ni.uam.proyectofinalferrogest.util.Vistas;
 
 public class LoginController {
     @FXML private HBox root;
+    @FXML private javafx.scene.layout.VBox marca;
     @FXML private TextField usuario;
     @FXML private PasswordField clave;
     @FXML private Label error;
@@ -19,6 +20,7 @@ public class LoginController {
     public Parent vista(Consumer<SesionUsuario> entrar) { this.entrar=entrar; return Vistas.cargar("login.fxml",this); }
     @FXML private void initialize() {
         Ui.visible(error,false); Ui.carga(root,cargando);
+        root.widthProperty().addListener((o,a,b) -> Ui.visible(marca,b.doubleValue()>=1050));
         usuario.textProperty().addListener((o,a,b) -> Ui.visible(error,false));
         clave.textProperty().addListener((o,a,b) -> Ui.visible(error,false));
     }

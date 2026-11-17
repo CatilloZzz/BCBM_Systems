@@ -225,10 +225,13 @@ class DespachoPostgresTest {
                 var emergencias = (Button) vista.lookup("#emergenciasButton");
                 assertNotNull(emergencias);
                 ((Button)vista.lookup("#unidadesButton")).fire();
+                vista.applyCss(); vista.layout();
                 assertNotNull(vista.lookup("#dotacion"));
                 ((Button)vista.lookup("#reportesButton")).fire();
+                vista.applyCss(); vista.layout();
                 assertNotNull(vista.lookup("#resumen"));
                 emergencias.fire();
+                vista.applyCss(); vista.layout();
                 var tabla = (TableView<?>) vista.lookup("#tabla");
                 assertNotNull(tabla);
                 assertTrue(tabla.getColumns().stream().anyMatch(c -> c.getText().equals("N.º de acta")));

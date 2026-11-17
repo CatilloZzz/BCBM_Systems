@@ -18,6 +18,8 @@ import edu.ni.uam.proyectofinalferrogest.util.Vistas;
 
 public class MenuController {
     @FXML private BorderPane root;
+    @FXML private ScrollPane navegacion;
+    @FXML private Button menuButton;
     @FXML private StackPane contenido;
     @FXML private Label usuario,rol,fecha,seccion;
     @FXML private Button emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton;
@@ -26,6 +28,10 @@ public class MenuController {
     public BorderPane vista(SesionUsuario sesion,Runnable salir) { this.sesion=sesion; this.salir=salir; return Vistas.cargar("menu.fxml",this); }
     @FXML private void initialize() {
         usuario.setText(sesion.username()); rol.setText(Ui.nombre(sesion.rol()));
+        root.widthProperty().addListener((o,a,b) -> {
+            if ((a.doubleValue()<1100)!=(b.doubleValue()<1100)) mostrarMenu(b.doubleValue()>=1100);
+            Ui.visible(fecha,b.doubleValue()>=1000);
+        });
         fecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("es-NI"))));
         Ui.visible(usuariosButton,sesion.rol()==Rol.ADMIN);
         Ui.visible(emergenciasButton,sesion.rol()!=Rol.BOMBERO);
@@ -37,10 +43,20 @@ public class MenuController {
     }
     private void mostrar(Button activo,String titulo,Supplier<Parent> pantalla) {
         Ui.seguro(root,() -> {
-            Parent vista=pantalla.get(); contenido.getChildren().setAll(vista); seccion.setText(titulo);
+            Parent vista=pantalla.get();
+            ScrollPane scroll=new ScrollPane(vista);
+            scroll.setFitToWidth(true); scroll.setFitToHeight(true);
+            scroll.getStyleClass().add("page-scroll");
+            contenido.getChildren().setAll(scroll); seccion.setText(titulo);
+            if (root.getWidth()>0 && root.getWidth()<1100) mostrarMenu(false);
             for (Button b:List.of(emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton)) b.getStyleClass().remove("nav-active");
             activo.getStyleClass().add("nav-active");
         });
+    }
+    @FXML private void alternarMenu() { mostrarMenu(!navegacion.isVisible()); }
+    private void mostrarMenu(boolean visible) {
+        Ui.visible(navegacion,visible);
+        menuButton.setText(visible ? "Ocultar menú" : "Menú");
     }
     @FXML private void inicio() { mostrar(inicioButton,"Inicio",() -> new InicioController(sesion,this::personal,this::equipos,this::mantenimiento).vista()); }
     @FXML private void emergencias() {

@@ -17,7 +17,7 @@ public class UnidadesController {
     private List<Equipo> equipos = List.of();
     @FXML private VBox root;
     @FXML private VBox formulario;
-    @FXML private HBox asignacion;
+    @FXML private FlowPane asignacion;
     @FXML private TableView<Unidad> tabla;
     @FXML private TableView<Equipo> dotacion;
     @FXML private TableColumn<Unidad,String> codigoCol,tipoCol,estadoCol;
@@ -27,15 +27,19 @@ public class UnidadesController {
     @FXML private ComboBox<Equipo> disponibles;
     @FXML private Label aviso,tituloForm,contador;
     @FXML private ProgressIndicator cargando;
+    @FXML private Button guardarUnidad,nuevaUnidad;
     public UnidadesController(SesionUsuario sesion) { this.sesion=sesion; }
     public Parent vista() { return Vistas.cargar("unidades.fxml",this); }
     @FXML private void initialize() {
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         Ui.carga(root,cargando);
         Ui.columna(codigoCol,Unidad::getCodigo); Ui.columna(tipoCol,Unidad::getTipo); Ui.estado(estadoCol,Unidad::getEstado);
         Ui.columna(nombreCol,Equipo::getNombre); Ui.columna(categoriaCol,Equipo::getCategoria);
         Ui.columna(cantidadCol,Equipo::getCantidad); Ui.estado(condicionCol,Equipo::getEstado);
         estado.getItems().setAll(EstadoUnidad.DISPONIBLE,EstadoUnidad.MANTENIMIENTO); Ui.opciones(estado);
-        Ui.visible(formulario,sesion.rol()==Rol.ADMIN);
+        Ui.visible(guardarUnidad,sesion.rol()==Rol.ADMIN);
+        Ui.visible(nuevaUnidad,sesion.rol()==Rol.ADMIN);
+        Ui.visible(asignacion,sesion.rol()==Rol.ADMIN);
         Ui.buscar(tabla,buscar,registros,u -> u.getCodigo()+" "+u.getTipo()+" "+Ui.nombre(u.getEstado()),contador);
         tabla.getSelectionModel().selectedItemProperty().addListener((obs,a,b)->mostrar(b));
         cargar();
@@ -55,7 +59,11 @@ public class UnidadesController {
     }
     private void mostrar(Unidad u) {
         codigo.setText(u==null ? "" : u.getCodigo()); tipo.setText(u==null ? "" : u.getTipo());
-        estado.setValue(u==null ? EstadoUnidad.DISPONIBLE : u.getEstado());
+        boolean editable=sesion.rol()==Rol.ADMIN && (u==null || !u.getEstado().enSalida());
+        codigo.setEditable(editable); tipo.setEditable(editable); estado.setDisable(!editable); guardarUnidad.setDisable(!editable);
+        estado.getItems().setAll(EstadoUnidad.DISPONIBLE,EstadoUnidad.MANTENIMIENTO);
+        if (u!=null && u.getEstado().enSalida()) estado.getItems().add(u.getEstado());
+        estado.getSelectionModel().select(u==null ? EstadoUnidad.DISPONIBLE : u.getEstado());
         tituloForm.setText(u==null ? "Nueva unidad" : "Detalle de "+u.getCodigo());
         dotacion.getItems().setAll(equipos.stream().filter(e->u!=null && e.getUnidad()!=null && u.getId().equals(e.getUnidad().getId())).toList());
         asignacion.setDisable(u==null || u.getEstado().enSalida());

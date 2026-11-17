@@ -23,8 +23,8 @@ public class MainApp {
         public void start(Stage stage) {
             stage.setTitle("BCBM Systems · Benemérito Cuerpo de Bomberos de Managua");
             stage.getIcons().add(Vistas.logo());
-            stage.setMinWidth(1120);
-            stage.setMinHeight(760);
+            stage.setMinWidth(760);
+            stage.setMinHeight(560);
             scene = new Scene(new LoginController().vista(this::entrar), 1320, 860);
             scene.getStylesheets().add(Vistas.estilos());
             stage.setScene(scene);

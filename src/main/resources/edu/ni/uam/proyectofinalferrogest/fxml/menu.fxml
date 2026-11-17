@@ -6,7 +6,7 @@
 <?import javafx.geometry.Insets?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="app-shell" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.MenuController" stylesheets="@../css/bcbm.css">
     <left>
-        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" prefWidth="248" minWidth="215"><content>
+        <ScrollPane fx:id="navegacion" styleClass="nav-scroll" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" prefWidth="248" minWidth="215"><content>
         <VBox styleClass="sidebar" spacing="8">
             <VBox styleClass="sidebar-brand" alignment="CENTER" spacing="12">
                 <StackPane styleClass="logo-tile" minWidth="96" prefWidth="96" maxWidth="96" minHeight="96" maxHeight="96">
@@ -66,6 +66,7 @@
         <BorderPane>
             <top>
                 <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="10">
+                    <Button fx:id="menuButton" text="Ocultar menú" onAction="#alternarMenu" styleClass="secondary"/>
                     <Label text="BCBM" styleClass="topbar-brand"/>
                     <Label text="/" styleClass="muted"/>
                     <Label fx:id="seccion" styleClass="topbar-section"/>
@@ -74,7 +75,7 @@
                 </HBox>
             </top>
             <center>
-                <StackPane fx:id="contenido"/>
+                <StackPane fx:id="contenido" minWidth="0"/>
             </center>
         </BorderPane>
     </center>

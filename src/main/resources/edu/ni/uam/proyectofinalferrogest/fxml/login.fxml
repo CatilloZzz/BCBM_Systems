@@ -5,7 +5,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.Insets?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="login-root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.LoginController" stylesheets="@../css/bcbm.css">
-    <VBox styleClass="login-brand" prefWidth="490" minWidth="420" maxWidth="540" spacing="24" HBox.hgrow="ALWAYS">
+    <VBox fx:id="marca" styleClass="login-brand" prefWidth="490" minWidth="420" maxWidth="540" spacing="24" HBox.hgrow="ALWAYS">
         <Label text="BENEMÉRITO CUERPO DE BOMBEROS" styleClass="brand-eyebrow" wrapText="true"/>
         <Region VBox.vgrow="ALWAYS"/>
         <StackPane styleClass="logo-tile" maxWidth="184" minHeight="184" prefHeight="184">
@@ -26,7 +26,7 @@
             <Label text="MANAGUA, NICARAGUA" styleClass="brand-caption"/>
         </VBox>
     </VBox>
-    <StackPane styleClass="login-content" HBox.hgrow="ALWAYS" minWidth="500">
+    <StackPane styleClass="login-content" HBox.hgrow="ALWAYS" minWidth="0">
         <VBox maxWidth="410" spacing="18" alignment="CENTER_LEFT">
             <Label text="BCBM / ACCESO INSTITUCIONAL" styleClass="eyebrow"/>
             <VBox spacing="8">

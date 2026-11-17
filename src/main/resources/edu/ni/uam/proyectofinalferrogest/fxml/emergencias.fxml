@@ -3,49 +3,62 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
 
-<VBox fx:id="modulo" spacing="12" xmlns="http://javafx.com/javafx"
+<VBox fx:id="modulo" styleClass="page" spacing="18" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.ni.uam.proyectofinalferrogest.controller.EmergenciasController">
-    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-    <HBox alignment="CENTER_LEFT" spacing="12">
-        <Label text="Emergencias del mes" styleClass="page-title"/>
-        <Region HBox.hgrow="ALWAYS"/>
+
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
+        <VBox spacing="5">
+                        <Label text="Emergencias" styleClass="page-title"/>
+            <Label text="Consulta y gestiona las actas del mes." styleClass="subtitle"/>
+        </VBox>
+
         <Button fx:id="nueva" text="Nueva emergencia" onAction="#registrar" styleClass="primary"/>
-    </HBox>
-    <Label fx:id="aviso" text="Conecte la persistencia compartida y la sesión para usar el módulo."
-           wrapText="true"/>
-    <VBox fx:id="contenido" spacing="10" disable="true" VBox.vgrow="ALWAYS">
-        <FlowPane hgap="10" vgap="8" alignment="BOTTOM_LEFT">
-            <VBox spacing="4">
-                <Label text="Estado"/>
-                <ComboBox fx:id="estado" promptText="Todos" prefWidth="120"/>
-            </VBox>
-            <VBox spacing="4">
-                <Label text="Tipo"/>
-                <ComboBox fx:id="tipo" promptText="Todos" prefWidth="160"/>
-            </VBox>
-            <VBox spacing="4">
-                <Label text="Mes"/>
-                <ComboBox fx:id="mes" prefWidth="125"/>
-            </VBox>
-            <VBox spacing="4">
-                <Label text="Año"/>
-                <Spinner fx:id="anio" prefWidth="90"/>
-            </VBox>
-            <VBox spacing="4">
-                <Label text="N.º de acta"/>
-                <TextField fx:id="numeroFiltro" onAction="#filtrar" prefWidth="110"/>
-            </VBox>
-            <VBox spacing="4">
-                <Label text="Escuadra"/>
-                <ComboBox fx:id="escuadraFiltro" promptText="Todas" prefWidth="140"/>
-            </VBox>
-            <Button fx:id="aplicarFiltros" text="Filtrar" onAction="#filtrar"/>
-            <Button text="Limpiar" onAction="#limpiarFiltros"/>
-        </FlowPane>
+    </FlowPane>
+
+    <Label fx:id="aviso" text="Cargando emergencias…"
+           wrapText="true" styleClass="feedback"/>
+
+    <VBox fx:id="contenido" spacing="14" disable="true" VBox.vgrow="ALWAYS">
+
+        <VBox styleClass="list-card" spacing="12">
+            <Label text="Filtros" styleClass="field-label"/>
+            <FlowPane hgap="10" vgap="8" alignment="BOTTOM_LEFT">
+                <VBox spacing="4">
+                    <Label text="Estado" styleClass="muted"/>
+                    <ComboBox fx:id="estado" promptText="Todos" prefWidth="120"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Tipo" styleClass="muted"/>
+                    <ComboBox fx:id="tipo" promptText="Todos" prefWidth="160"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Mes" styleClass="muted"/>
+                    <ComboBox fx:id="mes" prefWidth="125"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Año" styleClass="muted"/>
+                    <Spinner fx:id="anio" prefWidth="90"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="N.º de acta" styleClass="muted"/>
+                    <TextField fx:id="numeroFiltro" onAction="#filtrar" prefWidth="110"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Escuadra" styleClass="muted"/>
+                    <ComboBox fx:id="escuadraFiltro" promptText="Todas" prefWidth="140"/>
+                </VBox>
+                <HBox spacing="8" alignment="BOTTOM_LEFT">
+                    <Button fx:id="aplicarFiltros" text="Filtrar" onAction="#filtrar" styleClass="primary"/>
+                    <Button text="Limpiar" onAction="#limpiarFiltros" styleClass="secondary"/>
+                </HBox>
+            </FlowPane>
+        </VBox>
+
         <TableView fx:id="tabla" VBox.vgrow="ALWAYS">
-            <placeholder><Label text="No hay emergencias para mostrar."/></placeholder>
+            <placeholder><Label text="No hay emergencias para mostrar." styleClass="muted"/></placeholder>
             <columns>
                 <TableColumn fx:id="colFecha" text="Fecha del reporte" prefWidth="150"/>
                 <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="220"/>
@@ -55,15 +68,22 @@
                 <TableColumn fx:id="colUsuario" text="Registrada por" prefWidth="135"/>
             </columns>
         </TableView>
-        <FlowPane hgap="8" vgap="8">
-            <Button fx:id="movimientos" text="Despachar / ver salidas" onAction="#verSalidas"/>
-            <Button fx:id="llegada" text="Registrar llegada" onAction="#registrarLlegada" styleClass="secondary"/>
-            <Button fx:id="retorno" text="Registrar retorno" onAction="#registrarRetorno"/>
-            <Button fx:id="detalle" text="Ver detalle" onAction="#verDetalle"/>
-            <Button fx:id="editar" text="Editar" onAction="#editar"/>
-            <Button fx:id="eliminar" text="Eliminar" onAction="#eliminar"/>
-            <Button fx:id="cerrar" text="Cerrar emergencia" onAction="#cerrar"/>
-            <Button text="Gestionar tipos" onAction="#gestionarTipos"/>
-        </FlowPane>
+
+        <VBox styleClass="form-actions" spacing="10">
+            <FlowPane hgap="8" vgap="8" alignment="CENTER_LEFT">
+                <Label text="Acciones" styleClass="field-label"/>
+
+                <Button fx:id="movimientos" text="Despachar / ver salidas" onAction="#verSalidas" styleClass="primary"/>
+                <Button fx:id="llegada" text="Registrar llegada" onAction="#registrarLlegada" styleClass="primary"/>
+                <Button fx:id="retorno" text="Registrar retorno" onAction="#registrarRetorno" styleClass="primary"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="detalle" text="Ver detalle" onAction="#verDetalle" styleClass="secondary"/>
+                <Button fx:id="editar" text="Editar" onAction="#editar" styleClass="secondary"/>
+                <Button fx:id="cerrar" text="Cerrar emergencia" onAction="#cerrar" styleClass="secondary"/>
+                <Button text="Gestionar tipos" onAction="#gestionarTipos" styleClass="secondary"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="eliminar" text="Eliminar" onAction="#eliminar" styleClass="danger-outline"/>
+            </FlowPane>
+        </VBox>
     </VBox>
 </VBox>

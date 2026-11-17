@@ -21,7 +21,7 @@
                 <Label text="Personal y recursos,&#10;en un mismo lugar." styleClass="welcome-title"/>
                 <Label text="Consulta la disponibilidad del personal y mantén al día el cuidado de los equipos." styleClass="brand-copy" wrapText="true"/>
             </VBox>
-            <HBox spacing="16">
+            <FlowPane hgap="16" vgap="16">
                 <VBox styleClass="metric-card" spacing="10" HBox.hgrow="ALWAYS" prefWidth="250">
                     <Label fx:id="alcancePersonal" text="Personal registrado" styleClass="metric-label"/>
                     <Label fx:id="totalPersonal" text="—" styleClass="metric-value"/>
@@ -37,7 +37,7 @@
                     <Label fx:id="equiposReparacion" text="—" styleClass="metric-value"/>
                     <Label text="Para seguimiento de mantenimiento" styleClass="muted" wrapText="true"/>
                 </VBox>
-            </HBox>
+            </FlowPane>
             <VBox styleClass="metric-card" spacing="8">
                 <Label text="Tiempo en Managua" styleClass="section-title"/>
                 <Label fx:id="clima" text="Fuente: Open-Meteo · Consulta pendiente" wrapText="true"/>
@@ -45,7 +45,7 @@
                 <Button fx:id="consultarClima" text="Actualizar clima · Open-Meteo" onAction="#actualizarClima"/>
             </VBox>
             <Label text="Accesos rápidos" styleClass="section-title"/>
-            <HBox spacing="16">
+            <FlowPane hgap="16" vgap="16">
                 <VBox styleClass="quick-card" spacing="12" HBox.hgrow="ALWAYS" prefWidth="250">
                     <Label text="Personal" styleClass="card-title"/>
                     <Label text="Consulta fichas, rangos y disponibilidad." styleClass="muted" wrapText="true"/>
@@ -61,7 +61,7 @@
                     <Label text="Consulta los trabajos y próximas fechas." styleClass="muted" wrapText="true"/>
                     <Button text="Ver historial  →" onAction="#verMantenimiento" styleClass="text-button"/>
                 </VBox>
-            </HBox>
+            </FlowPane>
             <Region VBox.vgrow="ALWAYS"/>
             <Label text="Los datos de personal y las acciones disponibles se ajustan a los permisos de tu cuenta." styleClass="footnote" wrapText="true"/>
         </VBox>

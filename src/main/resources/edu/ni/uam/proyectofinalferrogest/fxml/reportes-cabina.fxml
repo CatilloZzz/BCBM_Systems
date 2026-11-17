@@ -1,20 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReportesCabinaController" styleClass="page" spacing="12">
-    <Label text="Reportes mensuales de cabina" styleClass="page-title"/>
-    <FlowPane hgap="9" vgap="6" alignment="CENTER_LEFT">
-        <Button text="Mes anterior" onAction="#anterior"/><Label fx:id="periodo"/><Button text="Mes siguiente" onAction="#siguiente"/>
-        <ComboBox fx:id="seccion"/><Button text="Actualizar" onAction="#cargar"/>
-        <Button text="Exportar los tres reportes (CSV)" onAction="#exportar"/>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReportesCabinaController" styleClass="page" spacing="18" stylesheets="@../css/bcbm.css">
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
+        <VBox spacing="5">
+                        <Label text="Reportes de cabina" styleClass="page-title"/>
+            <Label text="Resumen mensual de actividad por unidades, emergencias y personal." styleClass="subtitle" wrapText="true"/>
+        </VBox>
+
+        <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+        <Button text="Exportar CSV (tres reportes)" onAction="#exportar" styleClass="secondary"/>
     </FlowPane>
-    <Label fx:id="resumen" wrapText="true" styleClass="card-title"/>
-    <TableView fx:id="tabla" VBox.vgrow="ALWAYS"><placeholder><Label text="Sin registros para este mes."/></placeholder>
-        <columns>
-            <TableColumn fx:id="grupo" text="Unidad, persona o emergencia" prefWidth="285"/>
-            <TableColumn fx:id="tipo" text="Tipo de actividad" prefWidth="250"/>
-            <TableColumn fx:id="cantidad" text="Cantidad por tipo" prefWidth="140"/>
-            <TableColumn fx:id="total" text="Total del grupo" prefWidth="140"/>
-        </columns>
-    </TableView>
+
+    <HBox styleClass="equipment-picker" alignment="CENTER" spacing="18">
+        <Button text="◀ Mes anterior" onAction="#anterior" styleClass="secondary"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="periodo" styleClass="card-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Mes siguiente ▶" onAction="#siguiente" styleClass="secondary"/>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <ComboBox fx:id="seccion" prefWidth="220"/>
+        <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
+    </HBox>
+
+    <VBox styleClass="metric-card" spacing="4">
+        <Label fx:id="resumen" wrapText="true" styleClass="card-title"/>
+    </VBox>
+
+    <VBox styleClass="list-card" spacing="10" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="46">
+            <placeholder>
+                <Label text="Sin registros para este mes." styleClass="muted"/>
+            </placeholder>
+            <columns>
+                <TableColumn fx:id="grupo" text="Unidad, persona o emergencia" prefWidth="285"/>
+                <TableColumn fx:id="tipo" text="Tipo de actividad" prefWidth="250"/>
+                <TableColumn fx:id="cantidad" text="Cantidad por tipo" prefWidth="140"/>
+                <TableColumn fx:id="total" text="Total del grupo" prefWidth="140"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <Label text="El CSV incluye los tres reportes (Unidades, Emergencias, Personal) del mes consultado." styleClass="footnote" wrapText="true"/>
 </VBox>

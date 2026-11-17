@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import edu.ni.uam.proyectofinalferrogest.controller.PanelAdaptable?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.UnidadesController" stylesheets="@../css/bcbm.css">
-    <HBox alignment="CENTER_LEFT" spacing="12">
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
-            <Label text="PUESTO DE MANDO" styleClass="eyebrow"/>
-            <Label text="Unidades y dotación" styleClass="page-title"/>
+                        <Label text="Unidades y dotación" styleClass="page-title"/>
             <Label text="Consulta la disponibilidad, equipamiento y dotación de cada unidad." styleClass="subtitle"/>
         </VBox>
-        <Region HBox.hgrow="ALWAYS"/>
+
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
         <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
-    </HBox>
-    <HBox spacing="18" VBox.vgrow="ALWAYS">
-        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+    </FlowPane>
+    <PanelAdaptable spacing="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="0">
             <HBox alignment="CENTER_LEFT" spacing="12">
                 <TextField fx:id="buscar" promptText="Buscar por código, tipo o estado…" HBox.hgrow="ALWAYS" styleClass="search-field"/>
                 <Label fx:id="contador" styleClass="count-label"/>
@@ -37,7 +37,7 @@
                         <HBox alignment="CENTER_LEFT">
                             <Label fx:id="tituloForm" text="Nueva unidad" styleClass="card-title"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Button text="Nueva unidad" onAction="#nueva" styleClass="text-button"/>
+                            <Button fx:id="nuevaUnidad" text="Nueva unidad" onAction="#nueva" styleClass="text-button"/>
                         </HBox>
                         <Label text="Cada registro representa una unidad o camión. Los campos con * son obligatorios." styleClass="muted" wrapText="true"/>
                         <Separator/>
@@ -66,18 +66,18 @@
                                 <TableColumn fx:id="condicionCol" text="Estado" prefWidth="120"/>
                             </columns>
                         </TableView>
-                        <HBox fx:id="asignacion" spacing="8" alignment="CENTER_LEFT" styleClass="equipment-picker">
+                        <FlowPane fx:id="asignacion" hgap="8" vgap="8" alignment="CENTER_LEFT">
                             <ComboBox fx:id="disponibles" prefWidth="260" promptText="Recursos disponibles" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
                             <Button text="Asignar" onAction="#asignar" styleClass="secondary"/>
                             <Button text="Retirar" onAction="#retirar" styleClass="danger-outline"/>
-                        </HBox>
+                        </FlowPane>
                     </VBox>
                 </content>
             </ScrollPane>
             <VBox styleClass="form-actions" spacing="10">
-                <Button text="Guardar unidad" onAction="#guardar" styleClass="primary" maxWidth="1.7976931348623157E308"/>
+                <Button fx:id="guardarUnidad" text="Guardar unidad" onAction="#guardar" styleClass="primary" maxWidth="1.7976931348623157E308"/>
                 <Label fx:id="aviso" styleClass="footnote" wrapText="true"/>
             </VBox>
         </VBox>
-    </HBox>
+    </PanelAdaptable>
 </VBox>

@@ -28,9 +28,12 @@ public class DespachoController {
     @FXML private TableView<Salida> tabla;
     @FXML private TextField buscar;
     private final javafx.collections.ObservableList<Salida> registros=javafx.collections.FXCollections.observableArrayList();
-    @FXML private TableColumn<Salida,String> colActividad,colEscuadra,colUnidad,colOperador,colJefe,colPersonal,colSalida,colLlegada,colRetorno,colTipo,colDetalle;
+    @FXML private TableColumn<Salida,String> colEstado,colActividad,colEscuadra,colUnidad,colOperador,colJefe,colPersonal,colSalida,colLlegada,colRetorno,colTipo,colDetalle;
     @FXML private Button llegada,retorno,crearSalida;
     @FXML private ProgressIndicator cargando;
+    // Detail panel
+    @FXML private FlowPane detalle;
+    @FXML private Label detalleUnidad,detalleEstado,detalleTripulacion,detalleSalida;
 
     public DespachoController(SesionUsuario sesion,boolean otros) {
         this(sesion,otros,new DespachoService(HibernateUtil.getSessionFactory()));
@@ -50,6 +53,19 @@ public class DespachoController {
         for (int n=1;n<=12;n++) mes.getItems().add(n);
         mes.setValue(LocalDate.now().getMonthValue());
         anio.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2000,2100,LocalDate.now().getYear()));
+
+        // Status column with colored badges
+        Ui.columna(colEstado, this::estadoTexto);
+        colEstado.setCellFactory(col -> new TableCell<>() {
+            private final Label etiqueta=new Label();
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item,empty); setText(null);
+                if (empty || item==null) { setGraphic(null); return; }
+                etiqueta.setText(item); etiqueta.getStyleClass().setAll("status-badge",estadoClase(item));
+                setGraphic(etiqueta);
+            }
+        });
+
         Ui.columna(colActividad,this::actividad);
         Ui.buscar(tabla,buscar,registros,x -> String.join(" ",actividad(x),x.unidad(),
             nombres(x.participantes()),x.escuadraDepartamento(),Objects.toString(x.tipoServicio(),""),
@@ -60,7 +76,7 @@ public class DespachoController {
         Ui.columna(colSalida,x -> fecha(x.salida())); Ui.columna(colLlegada,x -> fecha(x.llegada()));
         Ui.columna(colRetorno,x -> fecha(x.retorno())); Ui.columna(colTipo,Salida::tipoServicio); Ui.columna(colDetalle,Salida::detalle);
         colEscuadra.setVisible(true); colTipo.setVisible(otros); colLlegada.setVisible(!otros);
-        colRetorno.setText(otros ? "Entrada" : "Retorna"); Ui.visible(llegada,!otros);
+        colRetorno.setText(otros ? "Entrada" : "Retorna");
         retorno.setText(otros ? "Registrar entrada" : "Registrar retorno");
         if (actaFija != null) {
             titulo.setText("Salidas del acta");
@@ -70,22 +86,100 @@ public class DespachoController {
         }
         // La cronología se consulta junto a la unidad sin desplazar las columnas de personal.
         tabla.getColumns().removeAll(List.of(colSalida,colLlegada,colRetorno));
+        tabla.getColumns().remove(colUnidad);
+        tabla.getColumns().add(2,colUnidad);
         tabla.getColumns().addAll(3,List.of(colSalida,colLlegada,colRetorno));
+        tabla.setTableMenuButtonVisible(true);
         tabla.getSelectionModel().selectedItemProperty().addListener((o,a,b) -> botones());
         activas.selectedProperty().addListener((o,a,b) -> { mes.setDisable(b); anio.setDisable(b); actualizar(); });
         Ui.carga(root,cargando); botones(); actualizar();
     }
+
+    // ── Movement state helpers ────────────────────────────────────────────
+    private String estadoTexto(Salida s) {
+        if (s.retorno() != null) return "Retornó";
+        if (otros) return "En servicio";
+        if (s.llegada() != null) return "En lugar";
+        return "En camino";
+    }
+    private static String estadoClase(String estado) {
+        return switch (estado) {
+            case "En camino" -> "status-danger";
+            case "En lugar", "En servicio"  -> "status-warning";
+            case "Retornó"   -> "status-ok";
+            default          -> "status-neutral";
+        };
+    }
+
     private String actividad(Salida salida) {
         if (otros) return "Servicio #"+salida.servicioId();
         return salida.numeroActa()==null ? "Emergencia #"+salida.emergenciaId() : "Acta "+salida.numeroActa();
     }
     private static String nombres(List<Persona> personas) { return personas.stream().map(Persona::nombre).collect(Collectors.joining(", ")); }
     private static String fecha(LocalDateTime valor) { return valor==null ? "Pendiente" : FECHA.format(valor); }
+
+    // ── Detail panel + button state ───────────────────────────────────────
     private void botones() {
         Salida x=tabla.getSelectionModel().getSelectedItem();
-        llegada.setDisable(x==null || x.llegada()!=null || x.retorno()!=null);
-        retorno.setDisable(x==null || x.retorno()!=null || (!otros && x.llegada()==null));
+        boolean haySeleccion = x != null;
+
+        // Show / hide context panel
+        detalle.setVisible(haySeleccion);
+        detalle.setManaged(haySeleccion);
+
+        if (haySeleccion) {
+            // Unit name
+            detalleUnidad.setText(x.unidad());
+
+            // Status badge
+            String estado = estadoTexto(x);
+            detalleEstado.setText(estado);
+            detalleEstado.getStyleClass().removeAll("status-ok","status-danger","status-warning","status-neutral");
+            detalleEstado.getStyleClass().add(estadoClase(estado));
+
+            // Crew info
+            String tripulacion = "Operador: " + x.operador().nombre();
+            if (x.jefe() != null) tripulacion += "  •  Jefe: " + x.jefe().nombre();
+            if (!x.participantes().isEmpty()) tripulacion += "  •  " + nombres(x.participantes());
+            detalleTripulacion.setText(tripulacion);
+
+            // Last movement timestamp
+            if (x.retorno() != null) {
+                detalleSalida.setText("Retornó: " + FECHA.format(x.retorno()));
+            } else if (x.llegada() != null) {
+                detalleSalida.setText("Llegada: " + FECHA.format(x.llegada()));
+            } else {
+                detalleSalida.setText("Salida: " + FECHA.format(x.salida()));
+            }
+
+            // Contextual action buttons
+            boolean puedeMarcarLlegada = x.llegada() == null && x.retorno() == null;
+            boolean puedeRetornar = x.retorno() == null && (otros || x.llegada() != null);
+
+            llegada.setDisable(!puedeMarcarLlegada);
+            llegada.setVisible(!otros);
+            llegada.setManaged(!otros);
+            llegada.setText(puedeMarcarLlegada ? "Registrar llegada de " + x.unidad() : "Registrar llegada");
+
+            if (x.retorno() != null) {
+                retorno.setText("Completado");
+                retorno.setDisable(true);
+            } else {
+                String accion = otros ? "Registrar entrada de " : "Registrar retorno de ";
+                retorno.setText(puedeRetornar ? accion + x.unidad() : (otros ? "Registrar entrada" : "Registrar retorno"));
+                retorno.setDisable(!puedeRetornar);
+            }
+        } else {
+            // No selection — reset buttons
+            llegada.setDisable(true);
+            llegada.setVisible(!otros);
+            llegada.setManaged(!otros);
+            llegada.setText("Registrar llegada");
+            retorno.setDisable(true);
+            retorno.setText(otros ? "Registrar entrada" : "Registrar retorno");
+        }
     }
+
     @FXML private void actualizar() {
         YearMonth periodo=YearMonth.of(anio.getValue(),mes.getValue()); boolean soloActivas=activas.isSelected();
         Ui.ejecutar(root,() -> actaFija != null ? servicio.consultarSalidas(sesion,actaFija)
@@ -116,11 +210,11 @@ public class DespachoController {
         personal.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         ComboBox<String> escuadra=new ComboBox<>(); escuadra.setEditable(true); escuadra.setMaxWidth(Double.MAX_VALUE);
         escuadra.getItems().setAll("Escuadra A","Escuadra B","Administración","DPC","Operaciones","Taller"); ComboBox<TipoServicio> tipo=new ComboBox<>(); tipo.getItems().setAll(TipoServicio.values());
-        TextArea detalle=new TextArea(); detalle.setPrefRowCount(3); detalle.setWrapText(true);
+        TextArea detalleText=new TextArea(); detalleText.setPrefRowCount(3); detalleText.setWrapText(true);
         FechaHora fecha=new FechaHora();
         VBox campos=new VBox(8);
         if (!otros) campos.getChildren().addAll(new Label("Emergencia *"),acta);
-        else campos.getChildren().addAll(new Label("Escuadra o departamento *"),escuadra,new Label("Tipo de gestión *"),tipo,new Label("Detalle *"),detalle);
+        else campos.getChildren().addAll(new Label("Escuadra o departamento *"),escuadra,new Label("Tipo de gestión *"),tipo,new Label("Detalle *"),detalleText);
         campos.getChildren().addAll(new Label("Unidad disponible *"),unidad,new Label("Operador *"),operador,
             new Label("Jefe de unidad (opcional)"),new HBox(8,jefe,quitarJefe),
             new Label("Otros participantes (Ctrl para seleccionar varios)"),personal,
@@ -134,7 +228,7 @@ public class DespachoController {
                     throw new IllegalArgumentException("Seleccione unidad, operador y emergencia cuando corresponda.");
                 var tripulacion=new Tripulacion(unidad.getValue().id(),operador.getValue().id(),jefe.getValue()==null ? null : jefe.getValue().id(),
                     personal.getSelectionModel().getSelectedItems().stream().map(Persona::id).toList(),fecha.valor());
-                String departamento=escuadra.getEditor().getText(),texto=detalle.getText(); TipoServicio gestion=tipo.getValue();
+                String departamento=escuadra.getEditor().getText(),texto=detalleText.getText(); TipoServicio gestion=tipo.getValue();
                 Integer actaId=acta.getValue()==null ? null : acta.getValue().id();
                 dialog.getDialogPane().setDisable(true);
                 Ui.ejecutar(root,() -> otros ? servicio.registrarServicio(sesion,departamento,gestion,texto,tripulacion)

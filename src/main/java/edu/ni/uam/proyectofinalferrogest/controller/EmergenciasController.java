@@ -117,11 +117,19 @@ public class EmergenciasController {
 
         agregarColumna("Llega", 230, r -> resumen(r, x -> fecha(x.llegada())));
         agregarColumna("Retorna", 230, r -> resumen(r, x -> fecha(x.retorno())));
+        var orden=java.util.List.of("N.º de acta","Estado","Tipo","Unidad","Dirección","Sale","Llega","Retorna");
+        var columnas=new java.util.ArrayList<>(tabla.getColumns());
+        columnas.sort(java.util.Comparator.comparingInt(c -> {
+            int posicion=orden.indexOf(c.getText());
+            return posicion<0 ? orden.size() : posicion;
+        }));
+        tabla.getColumns().setAll(columnas);
+        tabla.setTableMenuButtonVisible(true);
         columna(colFecha, r -> FECHA.format(r.emergencia().getFechaRegistro()));
         columna(colDireccion, r -> r.emergencia().getDireccion());
         columna(colTipo, r -> texto(r.emergencia().getTipo()));
         columna(colPrioridad, r -> texto(r.emergencia().getPrioridad()));
-        columna(colEstado, r -> r.emergencia().getEstado().toString());
+        estadoBadge(colEstado, r -> r.emergencia().getEstado());
         columna(colUsuario, Registro::usuario);
         tabla.getSelectionModel().selectedItemProperty().addListener(
                 (observable, anterior, actual) -> actualizarBotones());
@@ -158,8 +166,12 @@ public class EmergenciasController {
             List<TipoEmergencia> catalogo = tipos.listar();
             tipo.getItems().setAll(new OpcionFiltro<>(null, "Todos"));
             catalogo.forEach(t -> tipo.getItems().add(new OpcionFiltro<>(t.getId(), t.getNombre())));
-            tipo.setValue(tipo.getItems().stream().filter(t -> java.util.Objects.equals(t.valor(), tipoId))
-                    .findFirst().orElse(tipo.getItems().getFirst()));
+            tipo.getSelectionModel().clearSelection();
+            int indice=0;
+            for (int i=0;i<tipo.getItems().size();i++) {
+                if (java.util.Objects.equals(tipo.getItems().get(i).valor(),tipoId)) { indice=i; break; }
+            }
+            tipo.getSelectionModel().select(indice);
             String escuadra = escuadraFiltro.getValue();
             escuadraFiltro.getItems().setAll(emergencias.escuadras(sesion));
             escuadraFiltro.setValue(escuadra);
@@ -170,7 +182,8 @@ public class EmergenciasController {
                     .stream().collect(Collectors.groupingBy(Salida::emergenciaId));
             tabla.getItems().setAll(registros);
             tabla.refresh();
-            aviso.setText(registros.size() + " actas");
+            aviso.setText(registros.size() == 1 ? "1 acta encontrada"
+                    : registros.size() + " actas encontradas");
         });
         actualizarBotones();
     }
@@ -502,6 +515,29 @@ public class EmergenciasController {
 
     private <T> void columna(TableColumn<T, String> columna, Function<T, String> texto) {
         columna.setCellValueFactory(celda -> new ReadOnlyStringWrapper(texto.apply(celda.getValue())));
+    }
+
+    private void estadoBadge(TableColumn<Registro, String> columna,
+                             Function<Registro, EstadoEmergencia> valor) {
+        columna.setCellValueFactory(celda -> new ReadOnlyStringWrapper(
+                valor.apply(celda.getValue()).toString()));
+        columna.setCellFactory(c -> new TableCell<>() {
+            private final Label badge = new Label();
+            @Override protected void updateItem(String text, boolean empty) {
+                super.updateItem(text, empty);
+                setText(null);
+                if (empty || text == null) { setGraphic(null); return; }
+                badge.setText(text);
+                badge.getStyleClass().setAll("status-badge");
+                badge.getStyleClass().add(switch (text) {
+                    case "Pendiente" -> "status-warning";
+                    case "En proceso" -> "status-ok";
+                    case "Cerrada" -> "status-neutral";
+                    default -> "status-neutral";
+                });
+                setGraphic(badge);
+            }
+        });
     }
 
     private boolean confirmar(String pregunta) {
