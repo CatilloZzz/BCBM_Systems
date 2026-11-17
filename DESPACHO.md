@@ -1,10 +1,10 @@
 # Despacho, unidades y Otros servicios — Josué
 
-Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL, sin dependencias nuevas.
+Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL. La exportación Excel usa Apache POI.
 
 ## Preparación y uso
 
-Para una base existente, aplicar las migraciones pendientes de `database/migrations/` en orden hasta la 006. La 003 crea las tablas de despacho, la 005 incorpora la disponibilidad del personal y la 006 distingue las salidas de servicio de las de emergencia. Para una base vacía, `database/schema.sql` ya incluye estas tablas: no ejecutar también la migración 003. Se conserva el historial de `asignacion`; no se inventan horarios para registros antiguos.
+Para una base existente, aplicar las migraciones pendientes de `database/migrations/` en orden hasta la 008. La 008 crea `dotacion_equipo`, copia allí las dotaciones anteriores y deja `equipo.cantidad` como existencias totales. Para una base vacía, `database/schema.sql` ya incluye las tablas y `datos_prueba.sql` carga la distribución ficticia. Mantener `hibernate.hbm2ddl.auto=validate`.
 
 Se mantiene `hibernate.hbm2ddl.auto=validate`. La conexión acepta las propiedades locales de `hibernate.properties`; las claves `db.*` de `config.properties` tienen prioridad y las variables `BCBM_DB_*` tienen prioridad sobre ambas. La contraseña vacía se admite si PostgreSQL local lo permite. No subir credenciales.
 
@@ -45,7 +45,7 @@ La ficha actual de Emergencias consulta también la tripulación de las nuevas s
 
 ## Reportes de cabina
 
-El menú Reportes de cabina permite consultar un mes y exportar sus tres resultados en CSV. Unidades y Personal cuentan salidas por tipo de actividad. Cada integrante cuenta una vez por salida, aunque también figure como jefe u operador. Emergencias cuenta actas por tipo y por mes de apertura, incluso cuando intervienen varias unidades. El resumen muestra también los empates. Las asignaciones antiguas que carecen de un movimiento de salida se conservan en la ficha de la emergencia.
+El menú Reportes de cabina permite filtrar desde/hasta (fechas inclusivas) y exportar un libro `.xlsx` con hojas UNIDADES, EMERGENCIAS y PERSONAL. El libro incluye el período, encabezados con estilo, filtros y encabezados congelados. Unidades y Personal cuentan salidas por tipo de actividad. Cada integrante cuenta una vez por salida, aunque también figure como jefe u operador. Emergencias cuenta actas por tipo y por período de apertura, incluso cuando intervienen varias unidades. El resumen muestra también los empates.
 
 ## Reglas que deben confirmar con el puesto de mando
 

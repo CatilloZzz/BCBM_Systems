@@ -9,7 +9,7 @@
     <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
                         <Label text="Inventario de equipos" styleClass="page-title"/>
-            <Label text="Controla las existencias, su estado y la unidad asignada." styleClass="subtitle"/>
+            <Label text="Controla las existencias totales y revisa en qué unidades está distribuido cada recurso." styleClass="subtitle"/>
         </VBox>
 
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
@@ -30,7 +30,7 @@
                     <TableColumn fx:id="colCategoria" text="Categoría" prefWidth="105"/>
                     <TableColumn fx:id="colCantidad" text="Cant." prefWidth="65"/>
                     <TableColumn fx:id="colEstado" text="Estado" prefWidth="125"/>
-                    <TableColumn fx:id="colUnidad" text="Unidad" prefWidth="85"/>
+                    <TableColumn fx:id="colUnidad" text="Unidades asignadas" prefWidth="150"/>
                     <TableColumn fx:id="colMantenimiento" text="Últ. mant." prefWidth="115"/>
                 </columns>
             </TableView>
@@ -45,7 +45,7 @@
                             <Region HBox.hgrow="ALWAYS"/>
                             <Button text="Nuevo" onAction="#limpiar" styleClass="text-button"/>
                         </HBox>
-                        <Label text="Cada registro representa un equipo o grupo de piezas. Los campos con * son obligatorios." styleClass="muted" wrapText="true"/>
+                        <Label text="Cada registro representa las existencias totales de un tipo de equipo. Distribuye cantidades por unidad desde Unidades y dotación." styleClass="muted" wrapText="true"/>
                         <Separator/>
                         <VBox spacing="6">
                             <Label text="Nombre del equipo *" styleClass="field-label"/>
@@ -62,11 +62,6 @@
                         <VBox spacing="6">
                             <Label text="Estado *" styleClass="field-label"/>
                             <ComboBox fx:id="estado" promptText="" maxWidth="1.7976931348623157E308"/>
-                        </VBox>
-                        <VBox spacing="6">
-                            <Label text="Unidad asignada" styleClass="field-label"/>
-                            <ComboBox fx:id="unidad" promptText="Sin unidad" maxWidth="1.7976931348623157E308"/>
-                            <Button text="Quitar unidad" onAction="#quitarUnidad" styleClass="text-button"/>
                         </VBox>
                     </VBox>
                 </content>
