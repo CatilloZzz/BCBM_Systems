@@ -73,6 +73,49 @@ class DespachoPostgresTest {
         return factory.fromSession(s -> s.find(Unidad.class,unidad).getEstado());
     }
 
+    @Test void despachoInicialReservaTripulacionYReporteCuentaActasUnaVez() {
+        var dao=new EmergenciaDao(factory);
+        var datos=new Emergencia.DatosActa("A-025",fecha,"Escuadra A",null,null,null,null,1,null,null,null);
+        int acta=dao.guardarActa(sesion,null,0,datos,tripulacion(1,1,2));
+        assertEquals(EstadoBombero.EN_EMERGENCIA,factory.fromSession(s->s.find(Bombero.class,2).getEstado()));
+        var duplicada=new Emergencia.DatosActa("A-026",fecha,null,null,null,null,null,null,null,null,null);
+        assertThrows(IllegalArgumentException.class,()->dao.guardarActa(sesion,null,0,duplicada,tripulacion(2,2,null)));
+        assertTrue(dao.listarMes(sesion,YearMonth.from(fecha),"A-026",null,null,null).isEmpty());
+        assertEquals(EstadoUnidad.DISPONIBLE,estado(2));
+        servicio.asignarUnidad(sesion,acta,tripulacion(2,3,null));
+        var salida=servicio.consultarSalidas(sesion,acta).stream().filter(x->x.unidadId()==1).findFirst().orElseThrow();
+        assertEquals(fecha,salida.salida());
+        servicio.marcarLlegada(sesion,salida.id(),fecha.plusMinutes(1));
+        servicio.registrarRetorno(sesion,salida.id(),fecha.plusMinutes(2));
+        assertEquals(EstadoBombero.DISPONIBLE,factory.fromSession(s->s.find(Bombero.class,2).getEstado()));
+        servicio.registrarServicio(sesion,"DPC",TipoServicio.SIMULACRO,"Prueba",new Tripulacion(1,1,null,List.of(),fecha.plusMinutes(3)));
+        assertEquals(EstadoBombero.EN_SERVICIO,factory.fromSession(s->s.find(Bombero.class,1).getEstado()));
+        var filas=new ReporteCabinaService(factory).consultar(sesion,YearMonth.from(fecha));
+        assertEquals(1,filas.stream().filter(f->f.seccion().equals("Emergencias")).mapToLong(ReporteCabinaService.Fila::cantidad).sum());
+        var unidad=filas.stream().filter(f->f.grupo().equals("U1")).toList();
+        assertEquals(2,unidad.size());
+        assertTrue(unidad.stream().allMatch(f->f.total()==2 && f.cantidad()==1));
+        assertTrue(filas.stream().anyMatch(f->f.seccion().equals("Personal") && f.grupo().contains("Uno Prueba") && f.total()==2));
+    }
+    @Test void flotaControlaDotacionMantenimientoYPermisos() {
+        var flota=new FlotaService(factory);
+        assertThrows(SecurityException.class,()->flota.guardar(sesion,null,"M3","Rescate",EstadoUnidad.DISPONIBLE));
+        factory.inTransaction(s->{
+            s.createNativeMutationQuery("update usuario set rol='ADMIN' where id=1").executeUpdate();
+            s.createNativeMutationQuery("insert into equipo(nombre,categoria,cantidad) values ('Manguera','Herramienta',3)").executeUpdate();
+        });
+        flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.MANTENIMIENTO);
+        assertThrows(IllegalArgumentException.class,()->servicio.asignarUnidad(sesion,1,tripulacion(1,1,null)));
+        flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.DISPONIBLE);
+        flota.moverEquipo(sesion,1,1,true);
+        assertEquals("U1",flota.consultar(sesion).equipos().getFirst().getUnidad().getCodigo());
+        assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,2,1,true));
+        flota.moverEquipo(sesion,1,1,false);
+        assertNull(flota.consultar(sesion).equipos().getFirst().getUnidad());
+        servicio.registrarServicio(sesion,"A",TipoServicio.RECORRIDO,"Prueba",tripulacion(1,1,null));
+        assertThrows(IllegalArgumentException.class,()->flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.MANTENIMIENTO));
+        assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,1,1,true));
+    }
     @Test void actaParcialFiltrosYDespachoDesdeLaFicha() {
         var dao = new EmergenciaDao(factory);
         var parcial = new Emergencia.DatosActa("A-023", fecha, null, null, null, null, null, null, null, null, null);
@@ -137,7 +180,7 @@ class DespachoPostgresTest {
         Integer evento=servicio.registrarServicio(sesion,"Escuadra A",TipoServicio.COBERTURA_EVENTOS,"Evento",
             new Tripulacion(1,1,null,List.of(1),fecha.plusMinutes(40)));
         assertThrows(IllegalArgumentException.class,() -> servicio.asignarUnidad(sesion,1,tripulacion(1,2,null)));
-        assertEquals(EstadoUnidad.EN_EMERGENCIA,estado(1));
+        assertEquals(EstadoUnidad.EN_SERVICIO,estado(1));
         servicio.registrarRetorno(sesion,evento,fecha.plusHours(3)); servicio.registrarRetorno(sesion,dos,fecha.plusHours(2));
         assertEquals(EstadoUnidad.DISPONIBLE,estado(1)); assertEquals(EstadoUnidad.DISPONIBLE,estado(2));
         var enero=YearMonth.of(2025,1);
@@ -166,7 +209,7 @@ class DespachoPostgresTest {
             Future<Boolean> a=executor.submit(emergencia),b=executor.submit(evento); inicio.countDown();
             assertNotEquals(a.get(20,TimeUnit.SECONDS),b.get(20,TimeUnit.SECONDS));
             assertEquals(1,servicio.listarActivas(sesion,false).size()+servicio.listarActivas(sesion,true).size());
-            assertEquals(EstadoUnidad.EN_EMERGENCIA,estado(1));
+            assertEquals(a.get() ? EstadoUnidad.EN_EMERGENCIA : EstadoUnidad.EN_SERVICIO,estado(1));
         } finally { executor.shutdownNow(); }
     }
     @Test @EnabledIfSystemProperty(named="bcbm.fxtest",matches="true")
@@ -181,6 +224,10 @@ class DespachoPostgresTest {
                 vista.applyCss();
                 var emergencias = (Button) vista.lookup("#emergenciasButton");
                 assertNotNull(emergencias);
+                ((Button)vista.lookup("#unidadesButton")).fire();
+                assertNotNull(vista.lookup("#dotacion"));
+                ((Button)vista.lookup("#reportesButton")).fire();
+                assertNotNull(vista.lookup("#resumen"));
                 emergencias.fire();
                 var tabla = (TableView<?>) vista.lookup("#tabla");
                 assertNotNull(tabla);
