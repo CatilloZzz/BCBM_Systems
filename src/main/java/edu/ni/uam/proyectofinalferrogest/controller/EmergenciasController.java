@@ -50,7 +50,7 @@ public class EmergenciasController {
     @FXML private TableColumn<Registro, String> colPrioridad;
     @FXML private TableColumn<Registro, String> colEstado;
     @FXML private TableColumn<Registro, String> colUsuario;
-    @FXML private Button nueva;
+    @FXML private Button nueva, movimientos;
     @FXML private Button editar;
     @FXML private Button eliminar;
     @FXML private Button detalle;
@@ -139,6 +139,7 @@ public class EmergenciasController {
         EstadoEmergencia actual = seleccion == null ? null : seleccion.emergencia().getEstado();
         nueva.setDisable(sesion == null);
         detalle.setDisable(seleccion == null);
+        movimientos.setDisable(seleccion == null || actual == EstadoEmergencia.CERRADA);
         editar.setDisable(seleccion == null || actual == EstadoEmergencia.CERRADA);
         eliminar.setDisable(actual != EstadoEmergencia.PENDIENTE);
         cerrar.setDisable(despacho == null || actual == null
@@ -234,7 +235,11 @@ public class EmergenciasController {
         campos.addRow(7, etiqueta("Prioridad", prioridad), opcional(prioridad));
         campos.addRow(8, etiqueta("Descripción", descripcion), descripcion);
         campos.add(ubicacion, 0, 9, 2, 1);
-        guardarEnDialogo(emergencia == null ? "Abrir acta" : "Editar acta", campos, () -> {
+        var formulario = new ScrollPane(campos);
+        formulario.setFitToWidth(true);
+        formulario.setPrefViewportHeight(420);
+        formulario.setPrefViewportWidth(610);
+        guardarEnDialogo(emergencia == null ? "Nueva emergencia" : "Editar acta", formulario, () -> {
             var datos = new Emergencia.DatosActa(acta.getText(), fechaReporte.valor(), escuadra.getEditor().getText(),
                     solicitante.getText(), telefono.getText(), direccion.getText(), descripcion.getText(),
                     categoria.getValue() == null ? null : categoria.getValue().getId(), prioridad.getValue(),
@@ -249,6 +254,21 @@ public class EmergenciasController {
         Registro seleccion = tabla.getSelectionModel().getSelectedItem();
         if (seleccion == null) return;
         intentar(() -> ficha(seleccion.emergencia().getId()));
+    }
+
+    @FXML private void verSalidas() {
+        Registro registro = tabla.getSelectionModel().getSelectedItem();
+        if (registro == null) return;
+        intentar(() -> {
+            Emergencia acta = registro.emergencia();
+            var vista = new DespachoController(sesion, false, despacho).vistaActa(acta.getId());
+            var dialogo = dialogo("Movimientos del acta " + numero(acta), vista);
+            dialogo.setResizable(true);
+            dialogo.getDialogPane().setPrefSize(980, 520);
+            dialogo.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialogo.showAndWait();
+            filtrar();
+        });
     }
 
     private void ficha(Integer id) {

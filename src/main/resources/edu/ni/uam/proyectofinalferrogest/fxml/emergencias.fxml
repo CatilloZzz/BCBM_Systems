@@ -8,7 +8,11 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.ni.uam.proyectofinalferrogest.controller.EmergenciasController">
     <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-    <Label text="Emergencias del mes" styleClass="page-title"/>
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="Emergencias del mes" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="nueva" text="Nueva emergencia" onAction="#registrar" styleClass="primary"/>
+    </HBox>
     <Label fx:id="aviso" text="Conecte la persistencia compartida y la sesión para usar el módulo."
            wrapText="true"/>
     <VBox fx:id="contenido" spacing="10" disable="true" VBox.vgrow="ALWAYS">
@@ -52,7 +56,7 @@
             </columns>
         </TableView>
         <FlowPane hgap="8" vgap="8">
-            <Button fx:id="nueva" text="Abrir acta" onAction="#registrar"/>
+            <Button fx:id="movimientos" text="Despachar / ver salidas" onAction="#verSalidas"/>
             <Button fx:id="detalle" text="Ver detalle" onAction="#verDetalle"/>
             <Button fx:id="editar" text="Editar" onAction="#editar"/>
             <Button fx:id="eliminar" text="Eliminar" onAction="#eliminar"/>
