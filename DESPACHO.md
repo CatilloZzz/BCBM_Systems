@@ -1,6 +1,6 @@
 # Despacho, unidades y Otros servicios — Josué
 
-Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL. La exportación Excel usa Apache POI.
+Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL. La exportación Excel usa Apache POI y los reportes PDF se generan con JasperReports.
 
 ## Preparación y uso
 
@@ -45,7 +45,7 @@ La ficha actual de Emergencias consulta también la tripulación de las nuevas s
 
 ## Reportes de cabina
 
-El menú Reportes de cabina permite filtrar desde/hasta (fechas inclusivas) y exportar un libro `.xlsx` con hojas UNIDADES, EMERGENCIAS y PERSONAL. El libro incluye el período, encabezados con estilo, filtros y encabezados congelados. Unidades y Personal cuentan salidas por tipo de actividad. Cada integrante cuenta una vez por salida, aunque también figure como jefe u operador. Emergencias cuenta actas por tipo y por período de apertura, incluso cuando intervienen varias unidades. El resumen muestra también los empates.
+El menú Reportes de cabina permite filtrar desde/hasta (fechas inclusivas), exportar un libro `.xlsx` con hojas UNIDADES, EMERGENCIAS y PERSONAL, y generar un PDF con JasperReports. El Excel incluye el período, encabezados con estilo, filtros y encabezados congelados. La plantilla del PDF está en `src/main/resources/edu/ni/uam/proyectofinalferrogest/reports/reporte-cabina.jrxml`; Maven la compila a `.jasper` durante `process-resources` para cargarla desde Java sin compilar expresiones al ejecutar la aplicación. Unidades y Personal cuentan salidas por tipo de actividad. Cada integrante cuenta una vez por salida, aunque también figure como jefe u operador. Emergencias cuenta actas por tipo y por período de apertura, incluso cuando intervienen varias unidades. El resumen muestra también los empates.
 
 ## Reglas que deben confirmar con el puesto de mando
 

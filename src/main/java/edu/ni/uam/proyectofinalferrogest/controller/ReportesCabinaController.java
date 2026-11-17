@@ -12,9 +12,11 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import net.sf.jasperreports.engine.JRException;
 
 public class ReportesCabinaController {
     private static final DateTimeFormatter FECHA=DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -83,5 +85,21 @@ public class ReportesCabinaController {
             try (OutputStream out=Files.newOutputStream(archivo.toPath())) { libro.write(out); }
             resumen.setText("Excel guardado: "+archivo.getName());
         } catch (IOException ex) { Ui.seguro(root,()->{ throw new IllegalStateException("No se pudo guardar el Excel. Revisa la carpeta de destino.",ex); }); }
+    }
+
+    @FXML private void exportarPdf() {
+        if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
+        LocalDate inicio=desde.getValue(),fin=hasta.getValue();
+        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte de cabina en PDF");
+        chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".pdf");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF (*.pdf)","*.pdf"));
+        File archivo=chooser.showSaveDialog(root.getScene().getWindow()); if (archivo==null) return;
+        if (!archivo.getName().toLowerCase(Locale.ROOT).endsWith(".pdf")) archivo=new File(archivo.getParentFile(),archivo.getName()+".pdf");
+        Path destino=archivo.toPath(); String nombre=archivo.getName(); List<Fila> datos=List.copyOf(filas);
+        Ui.ejecutar(root,()->{
+            try { new ReporteJasperService().exportarCabina(datos,inicio,fin,destino); }
+            catch (IOException|JRException ex) { throw new IllegalStateException("No se pudo generar el reporte PDF con JasperReports.",ex); }
+            return nombre;
+        },guardado->resumen.setText("PDF generado con JasperReports: "+guardado));
     }
 }

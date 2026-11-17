@@ -53,7 +53,7 @@ Los 15 registros de `equipo` representan grupos con su propia cantidad, no un to
 
 En este equipo los scripts ya fueron ejecutados. El script de datos rechaza cargar registros si las tablas ya tienen información; no incluye el TRUNCATE del archivo original y no reinicia los datos.
 
-Para actualizar una base existente, aplicar en orden todas las migraciones pendientes de `database/migrations` hasta la 008. La 008 traslada las asignaciones existentes a `dotacion_equipo` y permite distribuir parte del inventario a cada unidad. Aplicar cada script una sola vez y mantener `hibernate.hbm2ddl.auto=validate`. Los reportes aceptan fechas inclusivas y exportan un libro `.xlsx` con tres hojas.
+Para actualizar una base existente, aplicar en orden todas las migraciones pendientes de `database/migrations` hasta la 008. La 008 traslada las asignaciones existentes a `dotacion_equipo` y permite distribuir parte del inventario a cada unidad. Aplicar cada script una sola vez y mantener `hibernate.hbm2ddl.auto=validate`. Los reportes aceptan fechas inclusivas, exportan un libro `.xlsx` con tres hojas y pueden generar PDF con JasperReports.
 
 En pgAdmin, actualiza el nodo Databases para ver `bomberos_db`. Sus tablas están en Schemas → public → Tables. Puedes utilizar tu conexión habitual de administrador para inspeccionar la base.
 

@@ -5,11 +5,12 @@
     <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
                         <Label text="Reportes de cabina" styleClass="page-title"/>
-            <Label text="Resumen mensual de actividad por unidades, emergencias y personal." styleClass="subtitle" wrapText="true"/>
+            <Label text="Consulta actividad por período y genera reportes para compartir o imprimir." styleClass="subtitle" wrapText="true"/>
         </VBox>
 
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
         <Button text="Exportar a Excel" onAction="#exportar" styleClass="primary"/>
+        <Button text="Generar PDF · JasperReports" onAction="#exportarPdf" styleClass="secondary"/>
     </FlowPane>
 
     <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="12">
@@ -27,7 +28,7 @@
     <VBox styleClass="list-card" spacing="10" VBox.vgrow="ALWAYS">
         <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="46">
             <placeholder>
-                <Label text="Sin registros para este mes." styleClass="muted"/>
+                <Label text="Sin registros para este período." styleClass="muted"/>
             </placeholder>
             <columns>
                 <TableColumn fx:id="grupo" text="Unidad, persona o emergencia" prefWidth="285"/>
