@@ -20,7 +20,7 @@ public class MenuController {
     @FXML private BorderPane root;
     @FXML private StackPane contenido;
     @FXML private Label usuario,rol,fecha,seccion;
-    @FXML private Button emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton;
+    @FXML private Button emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton;
     private SesionUsuario sesion;
     private Runnable salir;
     public BorderPane vista(SesionUsuario sesion,Runnable salir) { this.sesion=sesion; this.salir=salir; return Vistas.cargar("menu.fxml",this); }
@@ -30,6 +30,7 @@ public class MenuController {
         Ui.visible(usuariosButton,sesion.rol()==Rol.ADMIN);
         Ui.visible(emergenciasButton,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(despachoButton,sesion.rol()!=Rol.BOMBERO);
+        Ui.visible(reportesButton,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(serviciosButton,sesion.rol()!=Rol.BOMBERO);
         if (sesion.rol()==Rol.BOMBERO) personalButton.setText("Mi ficha");
         inicio();
@@ -37,7 +38,7 @@ public class MenuController {
     private void mostrar(Button activo,String titulo,Supplier<Parent> pantalla) {
         Ui.seguro(root,() -> {
             Parent vista=pantalla.get(); contenido.getChildren().setAll(vista); seccion.setText(titulo);
-            for (Button b:List.of(emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton)) b.getStyleClass().remove("nav-active");
+            for (Button b:List.of(emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton)) b.getStyleClass().remove("nav-active");
             activo.getStyleClass().add("nav-active");
         });
     }
@@ -56,6 +57,10 @@ public class MenuController {
     @FXML private void servicios() {
         if (sesion.rol()==Rol.BOMBERO) return;
         mostrar(serviciosButton,"Otros servicios del mes",() -> new DespachoController(sesion,true).vista());
+    }
+    @FXML private void unidades() { mostrar(unidadesButton,"Unidades y dotación",() -> new UnidadesController(sesion).vista()); }
+    @FXML private void reportes() {
+        if (sesion.rol()!=Rol.BOMBERO) mostrar(reportesButton,"Reportes de cabina",() -> new ReportesCabinaController(sesion).vista());
     }
     @FXML private void personal() { mostrar(personalButton,"Personal",() -> new BomberoController(sesion).vista()); }
     @FXML private void equipos() { mostrar(equiposButton,"Equipos",() -> new EquipoController(sesion).vista()); }

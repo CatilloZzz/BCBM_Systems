@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.UnidadesController" styleClass="page" spacing="10">
+  <HBox spacing="12" alignment="CENTER_LEFT"><Label text="Unidades y camiones" styleClass="page-title"/><Region HBox.hgrow="ALWAYS"/><Button text="Actualizar" onAction="#cargar"/></HBox>
+  <TableView fx:id="tabla" VBox.vgrow="ALWAYS"><columns><TableColumn fx:id="codigoCol" text="Código" prefWidth="150"/><TableColumn fx:id="tipoCol" text="Tipo de unidad" prefWidth="260"/><TableColumn fx:id="estadoCol" text="Disponibilidad" prefWidth="175"/></columns></TableView>
+  <FlowPane fx:id="edicion" hgap="8" vgap="6"><TextField fx:id="codigo" promptText="Código"/><TextField fx:id="tipo" promptText="Tipo de unidad"/><ComboBox fx:id="estado"/><Button text="Guardar unidad" onAction="#guardar" styleClass="primary"/><Button text="Nueva unidad" onAction="#nueva"/></FlowPane>
+  <Label text="Herramientas y materiales de la unidad" styleClass="card-title"/>
+  <TableView fx:id="dotacion" VBox.vgrow="ALWAYS"><columns><TableColumn fx:id="nombreCol" text="Recurso" prefWidth="200"/><TableColumn fx:id="categoriaCol" text="Categoría" prefWidth="145"/><TableColumn fx:id="cantidadCol" text="Cantidad"/><TableColumn fx:id="condicionCol" text="Estado" prefWidth="160"/></columns></TableView>
+  <FlowPane fx:id="asignacion" hgap="8" vgap="6"><ComboBox fx:id="disponibles" prefWidth="260" promptText="Recursos disponibles"/><Button text="Asignar lote" onAction="#asignar"/><Button text="Retirar lote seleccionado" onAction="#retirar"/></FlowPane>
+  <Label fx:id="aviso" wrapText="true"/>
+</VBox>

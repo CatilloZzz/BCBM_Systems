@@ -4,7 +4,7 @@ Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL, sin dependencias n
 
 ## Preparación y uso
 
-Para una base existente, ejecutar una sola vez `database/migrations/003_despacho_servicios.sql`, después de las migraciones anteriores (001 de integración y 002 de ubicación). Para una base vacía, `database/schema.sql` ya incluye estas tablas: no ejecutar también la migración 003. Se conserva el historial de `asignacion`; no se inventan horarios para registros antiguos.
+Para una base existente, aplicar las migraciones pendientes de `database/migrations/` en orden hasta la 006. La 003 crea las tablas de despacho, la 005 incorpora la disponibilidad del personal y la 006 distingue las salidas de servicio de las de emergencia. Para una base vacía, `database/schema.sql` ya incluye estas tablas: no ejecutar también la migración 003. Se conserva el historial de `asignacion`; no se inventan horarios para registros antiguos.
 
 Se mantiene `hibernate.hbm2ddl.auto=validate`. La conexión acepta las propiedades locales de `hibernate.properties`; las claves `db.*` de `config.properties` tienen prioridad y las variables `BCBM_DB_*` tienen prioridad sobre ambas. La contraseña vacía se admite si PostgreSQL local lo permite. No subir credenciales.
 
@@ -16,7 +16,7 @@ El administrador y el despachador tienen acceso a **Despacho y movimientos** y *
 4. Seleccionar cada salida para registrar llegada y retorno. Solo la unidad que retornó vuelve a estar disponible.
 5. En Otros servicios, registrar escuadra/departamento, tipo, detalle, unidad, operador, jefe opcional, participantes y salida. Registrar entrada al terminar.
 
-La selección de participantes permite Ctrl/clic. Operador y jefe se incluyen automáticamente, una sola vez, en la tripulación. El usuario que digitó se conserva por separado. Las unidades ocupadas se identifican en el selector y el servicio rechaza su despacho. El estado compartido existente `EN_EMERGENCIA` significa unidad ocupada tanto por emergencias como por otros servicios; el selector muestra «Ocupada».
+La selección de participantes permite Ctrl/clic. Operador y jefe se incluyen automáticamente, una sola vez, en la tripulación. El usuario que digitó se conserva por separado. Los selectores ofrecen unidades y personal disponibles. Al confirmar, tanto la unidad como su tripulación pasan a `EN_EMERGENCIA` o `EN_SERVICIO` según la actividad. Al registrar el retorno quedan disponibles para la siguiente salida.
 
 El filtro mensual utiliza la fecha completa de salida. **Unidades fuera** consulta salidas abiertas de todos los meses, para encontrar retornos pendientes aunque la actividad empezara el mes anterior.
 
@@ -43,6 +43,10 @@ La ficha actual de Emergencias consulta también la tripulación de las nuevas s
 - No contar filas de tripulación como emergencias. Para actividades, contar IDs de acta/servicio distintos. Para movimientos, contar IDs de salida. Para participación por persona y actividad, deduplicar `(emergenciaId, bomberoId)` o `(servicioId, bomberoId)`, incluso si una persona figura en varios refuerzos.
 - Operador es un bombero de la tripulación; `registradoPor` es el usuario que digitó, no el operador de la unidad.
 
+## Reportes de cabina
+
+El menú Reportes de cabina permite consultar un mes y exportar sus tres resultados en CSV. Unidades y Personal cuentan salidas por tipo de actividad. Cada integrante cuenta una vez por salida, aunque también figure como jefe u operador. Emergencias cuenta actas por tipo y por mes de apertura, incluso cuando intervienen varias unidades. El resumen muestra también los empates. Las asignaciones antiguas que carecen de un movimiento de salida se conservan en la ficha de la emergencia.
+
 ## Reglas que deben confirmar con el puesto de mando
 
 Se usa provisionalmente el mes de la salida, aunque el retorno ocurra en el mes siguiente. Las consultas entregan las fechas completas para ajustar el criterio cuando lo confirmen. La regla de conteo por persona/actividad anterior es la propuesta del ejemplo compartido, no una política impuesta por este módulo. La numeración de actas y su reinicio se mantienen fuera de este cambio.
@@ -53,7 +57,7 @@ Una salida pertenece a una única emergencia o servicio. El bloqueo de la fila d
 
 `mvn test`: pruebas de secuencia, fechas y la integración existente.
 
-`mvn -Dbcbm.pgtest=true test`: agrega pruebas reales en PostgreSQL local (`bomberos_db`, usuario `postgres`, contraseña vacía), en esquemas temporales aleatorios, sin insertar datos de prueba en public. Verifica dos unidades, retornos independientes, disponibilidad compartida, reversión ante errores, permisos y despachos simultáneos.
+`mvn -Dbcbm.pgtest=true test`: agrega pruebas reales en PostgreSQL local (`bomberos_db`, credenciales de `config.properties`), en esquemas temporales aleatorios, sin insertar datos de prueba en public. Verifica dos unidades, retornos independientes, disponibilidad compartida, reversión ante errores, permisos y despachos simultáneos.
 
 `mvn -Dbcbm.pgtest=true -Dbcbm.fxtest=true -Dtest=DespachoPostgresTest test`: agrega la carga y consulta de ambas pantallas JavaFX. Ejecutar por separado porque JavaFX no permite reiniciar su plataforma dentro del mismo proceso de pruebas.
 
