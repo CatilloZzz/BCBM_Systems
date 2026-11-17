@@ -40,15 +40,15 @@ public final class HibernateUtil {
 
             cfg.setProperty(
                     "hibernate.connection.url",
-                    value(propiedades, "db.url", "BCBM_DB_URL")
+                    value(propiedades, "db.url", "BCBM_DB_URL", cfg.getProperty("hibernate.connection.url"), false)
             );
             cfg.setProperty(
                     "hibernate.connection.username",
-                    value(propiedades, "db.user", "BCBM_DB_USER")
+                    value(propiedades, "db.user", "BCBM_DB_USER", cfg.getProperty("hibernate.connection.username"), false)
             );
             cfg.setProperty(
                     "hibernate.connection.password",
-                    value(propiedades, "db.password", "BCBM_DB_PASSWORD")
+                    value(propiedades, "db.password", "BCBM_DB_PASSWORD", cfg.getProperty("hibernate.connection.password"), true)
             );
 
             cfg.setProperty(
@@ -56,7 +56,7 @@ public final class HibernateUtil {
                     "org.postgresql.Driver"
             );
             cfg.setProperty("hibernate.hbm2ddl.auto", "validate");
-            cfg.setProperty("hibernate.show_sql", "false");
+            cfg.setProperty("hibernate.show_sql", java.util.Objects.requireNonNullElse(cfg.getProperty("hibernate.show_sql"), "false"));
             cfg.setProperty("hibernate.connection.pool_size", "5");
 
             cfg.addAnnotatedClass(Bombero.class);
@@ -67,6 +67,8 @@ public final class HibernateUtil {
             cfg.addAnnotatedClass(Emergencia.class);
             cfg.addAnnotatedClass(TipoEmergencia.class);
             cfg.addAnnotatedClass(Asignacion.class);
+            cfg.addAnnotatedClass(OtroServicio.class);
+            cfg.addAnnotatedClass(SalidaUnidad.class);
 
             factory = cfg.buildSessionFactory();
         }
@@ -75,15 +77,17 @@ public final class HibernateUtil {
     }
 
     private static String value(
-            Properties propiedades, String clave, String variableEntorno
+            Properties propiedades, String clave, String variableEntorno, String predeterminado, boolean admiteVacio
     ) {
         String valor = System.getenv(variableEntorno);
 
         if (valor == null) {
             valor = propiedades.getProperty(clave);
         }
+        if (valor == null) valor = predeterminado;
+        if (valor == null && admiteVacio) valor = "";
 
-        if (valor == null || valor.isBlank()) {
+        if (valor == null || (!admiteVacio && valor.isBlank())) {
             throw new IllegalStateException(
                     "Falta configurar " + clave + ". Consulta README_BASE_DATOS.md."
             );

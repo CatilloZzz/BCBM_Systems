@@ -69,7 +69,8 @@ public class EmergenciaDao {
         if (!asignacionesDisponibles()) {
             throw new IllegalStateException("La consulta requiere el mapeo de Asignacion.");
         }
-        return factory.fromSession(session -> session.createSelectionQuery("""
+        return factory.fromSession(session -> {
+            var recursos = new java.util.ArrayList<>(session.createSelectionQuery("""
                 select u.codigo, b.nombre, b.apellido
                 from Asignacion a
                 left join a.unidad u
@@ -79,10 +80,21 @@ public class EmergenciaDao {
                 """, RecursoAsignado.class)
                 .setParameter("id", id)
                 .getResultList());
+            recursos.addAll(session.createSelectionQuery("""
+                select distinct x.unidad.codigo, b.nombre, b.apellido
+                from SalidaUnidad x join x.participantes b
+                where x.emergencia.id = :id
+                """, RecursoAsignado.class).setParameter("id", id).getResultList());
+            return recursos.stream().distinct().toList();
+        });
     }
 
     public void registrar(String direccion, String descripcion, Integer tipoId,
                           PrioridadEmergencia prioridad, Integer usuarioId) {
+        registrar(direccion, descripcion, tipoId, prioridad, usuarioId, null, null);
+    }
+    public void registrar(String direccion, String descripcion, Integer tipoId,
+                          PrioridadEmergencia prioridad, Integer usuarioId, Double latitud, Double longitud) {
         if (usuarioId == null || usuarioId <= 0) {
             throw new IllegalArgumentException("Inicie sesión para registrar una emergencia.");
         }
@@ -96,8 +108,9 @@ public class EmergenciaDao {
             if (!usuarioActivo) {
                 throw new IllegalStateException("El usuario de la sesión ya no está activo.");
             }
-            session.persist(new Emergencia(direccion, descripcion, buscarTipo(session, tipoId),
-                    prioridad, usuarioId));
+            var emergencia = new Emergencia(direccion, descripcion, buscarTipo(session, tipoId), prioridad, usuarioId);
+            emergencia.ubicar(latitud, longitud);
+            session.persist(emergencia);
         });
     }
 
@@ -107,6 +120,14 @@ public class EmergenciaDao {
                 .actualizarDatos(direccion, descripcion, buscarTipo(session, tipoId), prioridad));
     }
 
+    public void actualizar(Integer id, long version, String direccion, String descripcion, Integer tipoId,
+                           PrioridadEmergencia prioridad, Double latitud, Double longitud) {
+        factory.inTransaction(session -> {
+            var emergencia = buscarVigente(session, id, version);
+            emergencia.actualizarDatos(direccion, descripcion, buscarTipo(session, tipoId), prioridad);
+            emergencia.ubicar(latitud, longitud);
+        });
+    }
     public void eliminar(Integer id, long version) {
         factory.inTransaction(session -> {
             Emergencia emergencia = buscarVigente(session, id, version);
@@ -120,6 +141,10 @@ public class EmergenciaDao {
                     .setMaxResults(1)
                     .getResultList().isEmpty()) {
                 throw new IllegalStateException("La emergencia tiene asignaciones registradas.");
+            }
+            if (!session.createSelectionQuery("select id from SalidaUnidad where emergencia.id=:id",Integer.class)
+                    .setParameter("id",id).setMaxResults(1).getResultList().isEmpty()) {
+                throw new IllegalStateException("La emergencia tiene salidas registradas.");
             }
             session.remove(emergencia);
         });
