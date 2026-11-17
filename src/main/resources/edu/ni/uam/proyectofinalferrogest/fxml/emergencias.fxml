@@ -57,6 +57,8 @@
         </TableView>
         <FlowPane hgap="8" vgap="8">
             <Button fx:id="movimientos" text="Despachar / ver salidas" onAction="#verSalidas"/>
+            <Button fx:id="llegada" text="Registrar llegada" onAction="#registrarLlegada" styleClass="secondary"/>
+            <Button fx:id="retorno" text="Registrar retorno" onAction="#registrarRetorno"/>
             <Button fx:id="detalle" text="Ver detalle" onAction="#verDetalle"/>
             <Button fx:id="editar" text="Editar" onAction="#editar"/>
             <Button fx:id="eliminar" text="Eliminar" onAction="#eliminar"/>

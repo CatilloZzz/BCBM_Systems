@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /** Pantallas JavaFX de despacho y otros servicios; ambas usan el mismo servicio. */
 public class DespachoController {
-    private static final DateTimeFormatter FECHA=DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FECHA=DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private final SesionUsuario sesion;
     private final boolean otros;
     private final DespachoService servicio;
@@ -89,9 +89,9 @@ public class DespachoController {
         dialog.getDialogPane().getButtonTypes().addAll(guardar,ButtonType.CANCEL);
         ComboBox<Acta> acta=new ComboBox<>(); acta.getItems().setAll(datos.emergencias());
         ComboBox<Vehiculo> unidad=new ComboBox<>();
-        unidad.getItems().setAll(actaFija == null ? datos.unidades()
-                : datos.unidades().stream().filter(u -> u.estado().equals(
-                        edu.ni.uam.proyectofinalferrogest.model.EstadoUnidad.DISPONIBLE.toString())).toList());
+        unidad.getItems().setAll(datos.unidades().stream().filter(u -> u.estado().equals(
+                edu.ni.uam.proyectofinalferrogest.model.EstadoUnidad.DISPONIBLE.toString())).toList());
+        unidad.setPromptText(unidad.getItems().isEmpty() ? "Sin unidades disponibles" : "Seleccionar unidad");
         if (actaFija != null) {
             acta.getItems().stream().filter(a -> a.id().equals(actaFija)).findFirst().ifPresent(acta::setValue);
             acta.setDisable(true);
@@ -107,7 +107,7 @@ public class DespachoController {
         VBox campos=new VBox(8);
         if (!otros) campos.getChildren().addAll(new Label("Emergencia *"),acta);
         else campos.getChildren().addAll(new Label("Escuadra o departamento *"),escuadra,new Label("Tipo de gestión *"),tipo,new Label("Detalle *"),detalle);
-        campos.getChildren().addAll(new Label("Unidad * (las ocupadas no pueden salir)"),unidad,new Label("Operador *"),operador,
+        campos.getChildren().addAll(new Label("Unidad disponible *"),unidad,new Label("Operador *"),operador,
             new Label("Jefe de unidad (opcional)"),new HBox(8,jefe,quitarJefe),
             new Label("Otros participantes (Ctrl para seleccionar varios)"),personal,
             new Label("Operador y jefe se incluyen automáticamente en la tripulación."),new Label("Fecha y hora de salida *"),fecha.contenido);
@@ -134,19 +134,41 @@ public class DespachoController {
     @FXML private void registrarRetorno() { movimiento(false); }
     private void movimiento(boolean esLlegada) {
         Salida seleccion=tabla.getSelectionModel().getSelectedItem(); if (seleccion==null) return;
+        registrarMovimiento(root, sesion, servicio, List.of(seleccion), esLlegada, otros, () -> {
+            mensaje.setText(esLlegada ? "Llegada registrada." : "Retorno registrado. La unidad está disponible.");
+            actualizar();
+        });
+    }
+
+    static void registrarMovimiento(Parent root, SesionUsuario sesion, DespachoService servicio,
+                                    List<Salida> pendientes, boolean esLlegada, boolean otros, Runnable actualizar) {
         Dialog<ButtonType> dialog=new Dialog<>(); Ui.dialogo(dialog,root);
         dialog.setTitle(esLlegada ? "Registrar llegada" : otros ? "Registrar entrada" : "Registrar retorno");
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);
         FechaHora fecha=new FechaHora(); Label error=new Label(); error.setWrapText(true);
-        dialog.getDialogPane().setContent(new VBox(10,new Label("Unidad "+seleccion.unidad()+" · salida "+fecha(seleccion.salida())),fecha.contenido,error));
+        ComboBox<Salida> unidad = new ComboBox<>();
+        unidad.getItems().setAll(pendientes);
+        unidad.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(Salida s) {
+                return s == null ? "" : s.unidad() + " · salida " + fecha(s.salida());
+            }
+            @Override public Salida fromString(String valor) { throw new UnsupportedOperationException(); }
+        });
+        if (pendientes.size() == 1) unidad.getSelectionModel().selectFirst();
+        unidad.setPromptText("Seleccionar unidad");
+        dialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(unidad.valueProperty().isNull());
+        dialog.getDialogPane().setContent(new VBox(10, new Label("Unidad despachada"), unidad,
+                new Label(esLlegada ? "Fecha y hora de llegada al lugar" : "Fecha y hora de retorno"),
+                fecha.contenido, error));
         dialog.getDialogPane().lookupButton(ButtonType.OK).addEventFilter(javafx.event.ActionEvent.ACTION,e -> {
             e.consume();
             try {
+                Salida seleccion = unidad.getValue();
                 LocalDateTime valor=fecha.valor(); dialog.getDialogPane().setDisable(true);
                 Ui.ejecutar(root,() -> {
                     if (esLlegada) servicio.marcarLlegada(sesion,seleccion.id(),valor);
                     else servicio.registrarRetorno(sesion,seleccion.id(),valor); return true;
-                },ok -> { dialog.close(); mensaje.setText(esLlegada ? "Llegada registrada." : "Retorno registrado. La unidad está disponible."); actualizar(); },
+                },ok -> { dialog.close(); actualizar.run(); },
                 fallo -> { dialog.getDialogPane().setDisable(false); error.setText(Ui.mensaje(fallo)); });
             } catch (RuntimeException fallo) { error.setText(Ui.mensaje(fallo)); }
         });
@@ -160,11 +182,14 @@ public class DespachoController {
         final DatePicker dia=new DatePicker(LocalDate.now());
         final Spinner<Integer> hora=new Spinner<>(0,23,LocalTime.now().getHour());
         final Spinner<Integer> minuto=new Spinner<>(0,59,LocalTime.now().getMinute());
-        final HBox contenido=new HBox(8,dia,new Label("Hora"),hora,new Label(":"),minuto);
-        FechaHora() { Ui.fecha(dia); hora.setPrefWidth(78); minuto.setPrefWidth(78); }
+        final Spinner<Integer> segundo=new Spinner<>(0,59,LocalTime.now().getSecond());
+        final HBox contenido=new HBox(6,dia,new Label("Hora"),hora,new Label(":"),minuto,new Label(":"),segundo);
+        FechaHora() { this(LocalDateTime.now()); }
         private LocalDateTime inicial;
         FechaHora(LocalDateTime valor) {
-            this();
+            Ui.fecha(dia);
+            for (var reloj : List.of(hora, minuto, segundo)) reloj.setPrefWidth(64);
+            segundo.getValueFactory().setValue(valor.getSecond());
             inicial = valor;
             dia.setValue(valor.toLocalDate());
             hora.getValueFactory().setValue(valor.getHour());
@@ -172,8 +197,8 @@ public class DespachoController {
         }
         LocalDateTime valor() {
             if (dia.getValue()==null) throw new IllegalArgumentException("Seleccione la fecha.");
-            LocalDateTime valor = dia.getValue().atTime(hora.getValue(),minuto.getValue());
-            return inicial != null && inicial.withSecond(0).withNano(0).equals(valor) ? inicial : valor;
+            LocalDateTime valor = dia.getValue().atTime(hora.getValue(),minuto.getValue(),segundo.getValue());
+            return inicial.withNano(0).equals(valor) ? inicial : valor;
         }
     }
 }

@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 
 public class EmergenciasController {
     private static final Logger LOG = Logger.getLogger(EmergenciasController.class.getName());
-    private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     @FXML private VBox modulo;
     @FXML private VBox contenido;
@@ -50,7 +50,7 @@ public class EmergenciasController {
     @FXML private TableColumn<Registro, String> colPrioridad;
     @FXML private TableColumn<Registro, String> colEstado;
     @FXML private TableColumn<Registro, String> colUsuario;
-    @FXML private Button nueva, movimientos;
+    @FXML private Button nueva, movimientos, llegada, retorno;
     @FXML private Button editar;
     @FXML private Button eliminar;
     @FXML private Button detalle;
@@ -137,6 +137,10 @@ public class EmergenciasController {
     private void actualizarBotones() {
         Registro seleccion = tabla.getSelectionModel().getSelectedItem();
         EstadoEmergencia actual = seleccion == null ? null : seleccion.emergencia().getEstado();
+        List<Salida> delActa = seleccion == null ? List.of()
+                : salidas.getOrDefault(seleccion.emergencia().getId(), List.of());
+        llegada.setDisable(delActa.stream().noneMatch(s -> s.llegada() == null && s.retorno() == null));
+        retorno.setDisable(delActa.stream().noneMatch(s -> s.llegada() != null && s.retorno() == null));
         nueva.setDisable(sesion == null);
         detalle.setDisable(seleccion == null);
         movimientos.setDisable(seleccion == null || actual == EstadoEmergencia.CERRADA);
@@ -239,14 +243,28 @@ public class EmergenciasController {
         formulario.setFitToWidth(true);
         formulario.setPrefViewportHeight(420);
         formulario.setPrefViewportWidth(610);
-        guardarEnDialogo(emergencia == null ? "Nueva emergencia" : "Editar acta", formulario, () -> {
+        var idGuardado = new javafx.beans.property.SimpleObjectProperty<Integer>();
+        boolean guardado = guardarEnDialogo(emergencia == null ? "Nueva emergencia" : "Editar acta", formulario, () -> {
             var datos = new Emergencia.DatosActa(acta.getText(), fechaReporte.valor(), escuadra.getEditor().getText(),
                     solicitante.getText(), telefono.getText(), direccion.getText(), descripcion.getText(),
                     categoria.getValue() == null ? null : categoria.getValue().getId(), prioridad.getValue(),
                     ubicacion.latitud(), ubicacion.longitud());
-            emergencias.guardarActa(sesion, emergencia == null ? null : emergencia.getId(),
-                    emergencia == null ? 0 : emergencia.getVersion(), datos);
+            idGuardado.set(emergencias.guardarActa(sesion, emergencia == null ? null : emergencia.getId(),
+                    emergencia == null ? 0 : emergencia.getVersion(), datos));
+            if (emergencia == null) {
+                estado.getSelectionModel().selectFirst();
+                tipo.getSelectionModel().selectFirst();
+                escuadraFiltro.setValue(null);
+                numeroFiltro.clear();
+                mes.setValue(fechaReporte.valor().getMonth());
+                anio.getValueFactory().setValue(fechaReporte.valor().getYear());
+            }
         });
+        if (guardado) tabla.getItems().stream()
+                .filter(r -> r.emergencia().getId().equals(idGuardado.get())).findFirst().ifPresent(r -> {
+                    tabla.getSelectionModel().select(r);
+                    tabla.scrollTo(r);
+                });
     }
 
     @FXML
@@ -254,6 +272,31 @@ public class EmergenciasController {
         Registro seleccion = tabla.getSelectionModel().getSelectedItem();
         if (seleccion == null) return;
         intentar(() -> ficha(seleccion.emergencia().getId()));
+    }
+
+    @FXML private void registrarLlegada() { registrarMovimiento(true); }
+    @FXML private void registrarRetorno() { registrarMovimiento(false); }
+
+    private void registrarMovimiento(boolean esLlegada) {
+        Registro registro = tabla.getSelectionModel().getSelectedItem();
+        if (registro == null) return;
+        int id = registro.emergencia().getId();
+        intentar(() -> {
+            var pendientes = despacho.consultarSalidas(sesion, id).stream()
+                    .filter(s -> s.retorno() == null && (s.llegada() == null) == esLlegada)
+                    .toList();
+            if (pendientes.isEmpty()) {
+                filtrar();
+                aviso.setText("El acta ya no tiene unidades pendientes de este movimiento.");
+                return;
+            }
+            DespachoController.registrarMovimiento(modulo, sesion, despacho, pendientes, esLlegada,
+                    false, () -> {
+                        filtrar();
+                        tabla.getItems().stream().filter(r -> r.emergencia().getId().equals(id))
+                                .findFirst().ifPresent(tabla.getSelectionModel()::select);
+                    });
+        });
     }
 
     @FXML private void verSalidas() {

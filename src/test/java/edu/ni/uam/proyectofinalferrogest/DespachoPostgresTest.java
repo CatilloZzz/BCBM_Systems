@@ -208,6 +208,37 @@ class DespachoPostgresTest {
             });
             Platform.runLater(menu);
             menu.get(20, TimeUnit.SECONDS);
+            servicio.asignarUnidad(sesion, 1, tripulacion(1, 1, null));
+            var movimientos = new FutureTask<Void>(() -> {
+                var vista = edu.ni.uam.proyectofinalferrogest.controller.EmergenciasController.cargar(factory, sesion);
+                var ventana = new javafx.stage.Stage();
+                ventana.setScene(new Scene(vista, 900, 680));
+                ventana.show();
+                try {
+                    var crear = (Button) vista.lookup("#nueva");
+                    assertEquals("Nueva emergencia", crear.getText());
+                    assertFalse(crear.isDisabled());
+                    var tabla = (TableView<?>) vista.lookup("#tabla");
+                    tabla.getSelectionModel().selectFirst();
+                    for (String accion : List.of("#llegada", "#retorno")) {
+                        var boton = (Button) vista.lookup(accion);
+                        assertFalse(boton.isDisabled(), accion);
+                        Platform.runLater(() -> javafx.stage.Window.getWindows().stream()
+                                .filter(w -> w.getScene().getRoot() instanceof javafx.scene.control.DialogPane)
+                                .map(w -> (javafx.scene.control.DialogPane) w.getScene().getRoot())
+                                .findFirst().ifPresent(p -> ((Button)p.lookupButton(javafx.scene.control.ButtonType.OK)).fire()));
+                        boton.fire();
+                        assertTrue(boton.isDisabled(), accion);
+                    }
+                    return null;
+                } finally { ventana.close(); }
+            });
+            Platform.setImplicitExit(false);
+            Platform.runLater(movimientos);
+            movimientos.get(25, TimeUnit.SECONDS);
+            var salida = servicio.consultarSalidas(sesion, 1).getFirst();
+            assertNotNull(salida.llegada());
+            assertNotNull(salida.retorno());
             for (boolean otros:List.of(false,true)) {
                 CompletableFuture<Parent> lista=new CompletableFuture<>();
                 Platform.runLater(() -> {
