@@ -14,6 +14,11 @@ module edu.ni.uam.proyectofinalferrogest {
     requires jakarta.persistence;
     requires org.hibernate.orm.core;
     requires org.postgresql.jdbc;
+    requires org.apache.poi.ooxml;
+    requires net.sf.jasperreports.core;
+    requires net.sf.jasperreports.pdf.classic;
+    requires org.apache.commons.logging;
+    requires com.fasterxml.jackson.dataformat.xml;
 
     // Contraseñas BCrypt
     requires jbcrypt;

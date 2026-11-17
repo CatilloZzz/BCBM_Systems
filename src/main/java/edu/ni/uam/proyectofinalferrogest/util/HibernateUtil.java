@@ -63,6 +63,7 @@ public final class HibernateUtil {
             cfg.addAnnotatedClass(Bombero.class);
             cfg.addAnnotatedClass(Usuario.class);
             cfg.addAnnotatedClass(Equipo.class);
+            cfg.addAnnotatedClass(DotacionEquipo.class);
             cfg.addAnnotatedClass(MantenimientoEquipo.class);
             cfg.addAnnotatedClass(Unidad.class);
             cfg.addAnnotatedClass(Emergencia.class);

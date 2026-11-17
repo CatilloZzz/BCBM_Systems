@@ -5,24 +5,20 @@
     <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
         <VBox spacing="5">
                         <Label text="Reportes de cabina" styleClass="page-title"/>
-            <Label text="Resumen mensual de actividad por unidades, emergencias y personal." styleClass="subtitle" wrapText="true"/>
+            <Label text="Consulta actividad por período y genera reportes para compartir o imprimir." styleClass="subtitle" wrapText="true"/>
         </VBox>
 
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
-        <Button text="Exportar CSV (tres reportes)" onAction="#exportar" styleClass="secondary"/>
+        <Button text="Exportar a Excel" onAction="#exportar" styleClass="primary"/>
+        <Button text="Generar PDF · JasperReports" onAction="#exportarPdf" styleClass="secondary"/>
     </FlowPane>
 
-    <HBox styleClass="equipment-picker" alignment="CENTER" spacing="18">
-        <Button text="◀ Mes anterior" onAction="#anterior" styleClass="secondary"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Label fx:id="periodo" styleClass="card-title"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Mes siguiente ▶" onAction="#siguiente" styleClass="secondary"/>
-    </HBox>
-
-    <HBox alignment="CENTER_LEFT" spacing="12">
+    <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="12">
+        <Label text="Desde" styleClass="field-label"/><DatePicker fx:id="desde"/>
+        <Label text="Hasta" styleClass="field-label"/><DatePicker fx:id="hasta"/>
         <ComboBox fx:id="seccion" prefWidth="220"/>
-        <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
+        <Button text="Filtrar fechas" onAction="#cargar" styleClass="secondary"/>
+        <Label fx:id="periodo" styleClass="card-title"/>
     </HBox>
 
     <VBox styleClass="metric-card" spacing="4">
@@ -32,7 +28,7 @@
     <VBox styleClass="list-card" spacing="10" VBox.vgrow="ALWAYS">
         <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="46">
             <placeholder>
-                <Label text="Sin registros para este mes." styleClass="muted"/>
+                <Label text="Sin registros para este período." styleClass="muted"/>
             </placeholder>
             <columns>
                 <TableColumn fx:id="grupo" text="Unidad, persona o emergencia" prefWidth="285"/>
@@ -43,5 +39,5 @@
         </TableView>
     </VBox>
 
-    <Label text="El CSV incluye los tres reportes (Unidades, Emergencias, Personal) del mes consultado." styleClass="footnote" wrapText="true"/>
+    <Label text="El libro Excel incluye hojas separadas para Unidades, Emergencias y Personal." styleClass="footnote" wrapText="true"/>
 </VBox>
