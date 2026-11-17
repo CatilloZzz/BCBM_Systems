@@ -1,12 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.UnidadesController" styleClass="page" spacing="10">
-  <HBox spacing="12" alignment="CENTER_LEFT"><Label text="Unidades y camiones" styleClass="page-title"/><Region HBox.hgrow="ALWAYS"/><Button text="Actualizar" onAction="#cargar"/></HBox>
-  <TableView fx:id="tabla" VBox.vgrow="ALWAYS"><columns><TableColumn fx:id="codigoCol" text="Código" prefWidth="150"/><TableColumn fx:id="tipoCol" text="Tipo de unidad" prefWidth="260"/><TableColumn fx:id="estadoCol" text="Disponibilidad" prefWidth="175"/></columns></TableView>
-  <FlowPane fx:id="edicion" hgap="8" vgap="6"><TextField fx:id="codigo" promptText="Código"/><TextField fx:id="tipo" promptText="Tipo de unidad"/><ComboBox fx:id="estado"/><Button text="Guardar unidad" onAction="#guardar" styleClass="primary"/><Button text="Nueva unidad" onAction="#nueva"/></FlowPane>
-  <Label text="Herramientas y materiales de la unidad" styleClass="card-title"/>
-  <TableView fx:id="dotacion" VBox.vgrow="ALWAYS"><columns><TableColumn fx:id="nombreCol" text="Recurso" prefWidth="200"/><TableColumn fx:id="categoriaCol" text="Categoría" prefWidth="145"/><TableColumn fx:id="cantidadCol" text="Cantidad"/><TableColumn fx:id="condicionCol" text="Estado" prefWidth="160"/></columns></TableView>
-  <FlowPane fx:id="asignacion" hgap="8" vgap="6"><ComboBox fx:id="disponibles" prefWidth="260" promptText="Recursos disponibles"/><Button text="Asignar lote" onAction="#asignar"/><Button text="Retirar lote seleccionado" onAction="#retirar"/></FlowPane>
-  <Label fx:id="aviso" wrapText="true"/>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" styleClass="page" spacing="18" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.UnidadesController" stylesheets="@../css/bcbm.css">
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="5">
+            <Label text="PUESTO DE MANDO" styleClass="eyebrow"/>
+            <Label text="Unidades y dotación" styleClass="page-title"/>
+            <Label text="Consulta la disponibilidad, equipamiento y dotación de cada unidad." styleClass="subtitle"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+        <Button text="Actualizar" onAction="#cargar" styleClass="secondary"/>
+    </HBox>
+    <HBox spacing="18" VBox.vgrow="ALWAYS">
+        <VBox styleClass="list-card" spacing="14" HBox.hgrow="ALWAYS" minWidth="350">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <TextField fx:id="buscar" promptText="Buscar por código, tipo o estado…" HBox.hgrow="ALWAYS" styleClass="search-field"/>
+                <Label fx:id="contador" styleClass="count-label"/>
+            </HBox>
+            <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="46">
+                <placeholder>
+                    <Label text="No hay unidades registradas." styleClass="muted"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="codigoCol" text="Código" prefWidth="130"/>
+                    <TableColumn fx:id="tipoCol" text="Tipo de unidad" prefWidth="200"/>
+                    <TableColumn fx:id="estadoCol" text="Disponibilidad" prefWidth="155"/>
+                </columns>
+            </TableView>
+            <Label text="Selecciona una unidad para ver su detalle y dotación." styleClass="footnote"/>
+        </VBox>
+        <VBox fx:id="formulario" styleClass="form-panel" minWidth="320" prefWidth="420" maxWidth="560" HBox.hgrow="ALWAYS">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="form-scroll" minHeight="0" prefHeight="0" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox styleClass="form-card" spacing="14">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label fx:id="tituloForm" text="Nueva unidad" styleClass="card-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="Nueva unidad" onAction="#nueva" styleClass="text-button"/>
+                        </HBox>
+                        <Label text="Cada registro representa una unidad o camión. Los campos con * son obligatorios." styleClass="muted" wrapText="true"/>
+                        <Separator/>
+                        <VBox spacing="6">
+                            <Label text="Código *" styleClass="field-label"/>
+                            <TextField fx:id="codigo" promptText="Ej. B-01"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Tipo de unidad *" styleClass="field-label"/>
+                            <TextField fx:id="tipo" promptText="Ej. Cisterna"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Estado *" styleClass="field-label"/>
+                            <ComboBox fx:id="estado" maxWidth="1.7976931348623157E308"/>
+                        </VBox>
+                        <Separator/>
+                        <Label text="Herramientas y materiales" styleClass="card-title"/>
+                        <TableView fx:id="dotacion" prefHeight="180" fixedCellSize="46">
+                            <placeholder>
+                                <Label text="Sin dotación asignada." styleClass="muted"/>
+                            </placeholder>
+                            <columns>
+                                <TableColumn fx:id="nombreCol" text="Recurso" prefWidth="160"/>
+                                <TableColumn fx:id="categoriaCol" text="Categoría" prefWidth="110"/>
+                                <TableColumn fx:id="cantidadCol" text="Cant." prefWidth="60"/>
+                                <TableColumn fx:id="condicionCol" text="Estado" prefWidth="120"/>
+                            </columns>
+                        </TableView>
+                        <HBox fx:id="asignacion" spacing="8" alignment="CENTER_LEFT" styleClass="equipment-picker">
+                            <ComboBox fx:id="disponibles" prefWidth="260" promptText="Recursos disponibles" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                            <Button text="Asignar" onAction="#asignar" styleClass="secondary"/>
+                            <Button text="Retirar" onAction="#retirar" styleClass="danger-outline"/>
+                        </HBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+            <VBox styleClass="form-actions" spacing="10">
+                <Button text="Guardar unidad" onAction="#guardar" styleClass="primary" maxWidth="1.7976931348623157E308"/>
+                <Label fx:id="aviso" styleClass="footnote" wrapText="true"/>
+            </VBox>
+        </VBox>
+    </HBox>
 </VBox>
