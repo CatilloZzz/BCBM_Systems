@@ -1,0 +1,68 @@
+package edu.ni.uam.proyectofinalferrogest.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name="bombero")
+public class Bombero {
+    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Integer id;
+    @Column(length=80)
+    private String compania;
+    @Column(length=1)
+    private String escuadra;
+    public String getCompania() { return compania; }
+    public String getEscuadra() { return escuadra; }
+    public void organizar(String compania, String escuadra) {
+        if (escuadra != null && (!java.util.Set.of("A","B").contains(escuadra) || compania == null))
+            throw new IllegalArgumentException("Indica la compañía de esta escuadra.");
+        this.compania = compania;
+        this.escuadra = escuadra;
+    }
+    @Column(name="operador_todas",nullable=false)
+    private boolean operadorTodas;
+    @ElementCollection
+    @CollectionTable(name="operador_unidad",joinColumns=@JoinColumn(name="bombero_id"))
+    @Column(name="unidad_id",nullable=false)
+    private java.util.Set<Integer> unidadesOperador=new java.util.HashSet<>();
+    public boolean isOperadorTodas() { return operadorTodas; }
+    public java.util.Set<Integer> getUnidadesOperador() { return java.util.Set.copyOf(unidadesOperador); }
+    public boolean puedeOperar(Integer unidad) { return operadorTodas || unidadesOperador.contains(unidad); }
+    public void autorizarOperador(boolean todas,java.util.Set<Integer> unidades) {
+        operadorTodas=todas;
+        unidadesOperador.clear();
+        if (!todas) unidadesOperador.addAll(unidades);
+    }
+    public Bombero() {}
+    public Integer getId() { return id; }
+    @Column(nullable=false, length=100)
+    private String nombre;
+    public String getNombre() { return nombre; }
+    public void setNombre(String value) { this.nombre = value; }
+    @Column(nullable=false, length=100)
+    private String apellido;
+    public String getApellido() { return apellido; }
+    public void setApellido(String value) { this.apellido = value; }
+    @Column(nullable=false, unique=true, length=20)
+    private String cedula;
+    public String getCedula() { return cedula; }
+    public void setCedula(String value) { this.cedula = value; }
+    @Column(nullable=false, length=40)
+    private String rango;
+    public String getRango() { return rango; }
+    public void setRango(String value) { this.rango = value; }
+    @Column(length=20)
+    private String telefono;
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String value) { this.telefono = value; }
+    @Column(name="fecha_ingreso", nullable=false)
+    private LocalDate fechaIngreso = LocalDate.now();
+    public LocalDate getFechaIngreso() { return fechaIngreso; }
+    public void setFechaIngreso(LocalDate value) { this.fechaIngreso = value; }
+    @Enumerated(EnumType.STRING) @Column(nullable=false, length=20)
+    private EstadoBombero estado = EstadoBombero.DISPONIBLE;
+    public EstadoBombero getEstado() { return estado; }
+    public void setEstado(EstadoBombero value) { this.estado = value; }
+    @Override public String toString() { return nombre + " " + apellido + " (" + cedula + ")"; }
+}

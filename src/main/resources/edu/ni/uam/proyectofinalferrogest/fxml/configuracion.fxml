@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ConfiguracionController" styleClass="page" spacing="14" minHeight="660">
+ <FlowPane hgap="16" vgap="8" styleClass="page-header"><Label text="Configuración general" styleClass="page-title"/><ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/></FlowPane>
+ <TabPane styleClass="settings-tabs" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+  <Tab text="Catálogos">
+   <VBox spacing="14" styleClass="form-card">
+    <Label text="Opciones de los formularios" styleClass="card-title"/>
+    <ComboBox fx:id="grupo" maxWidth="Infinity"/>
+    <TableView fx:id="catalogo" VBox.vgrow="ALWAYS"><placeholder><Label text="Agrega la primera opción de este catálogo."/></placeholder><columns><TableColumn fx:id="nombreCol" text="Nombre" prefWidth="460"/><TableColumn fx:id="activoCol" text="Estado" prefWidth="120"/></columns></TableView>
+    <Label text="Nombre" styleClass="field-label"/><TextField fx:id="nombre" promptText="Escribe el nombre de la opción"/>
+    <FlowPane hgap="10" vgap="8"><CheckBox fx:id="activo" text="Disponible en los formularios"/><Button text="Guardar opción" onAction="#guardarCatalogo" styleClass="primary"/><Button text="Nueva opción" onAction="#nuevo" styleClass="secondary"/><Button text="Actualizar" onAction="#cargarCatalogo" styleClass="secondary"/></FlowPane>
+    <Label text="Selecciona una opción para editarla. Desactivarla conserva los registros anteriores." wrapText="true" styleClass="muted"/>
+   </VBox>
+  </Tab>
+  <Tab fx:id="operadoresTab" text="Operadores">
+   <VBox spacing="12" styleClass="form-card">
+    <Label text="Unidades autorizadas por persona" styleClass="card-title"/>
+    <Label text="Personal" styleClass="field-label"/><ComboBox fx:id="operador" maxWidth="Infinity" promptText="Seleccionar persona"/>
+    <CheckBox fx:id="todas" wrapText="true" text="Puede operar todas las unidades, incluidas las que se creen después"/>
+    <Label text="O selecciona unidades específicas con Ctrl + clic" wrapText="true"/>
+    <ListView fx:id="autorizadas" VBox.vgrow="ALWAYS" minHeight="220"><placeholder><Label text="Registra las unidades en la pestaña Unidades."/></placeholder></ListView>
+    <FlowPane hgap="10" vgap="8"><Button text="Guardar autorizaciones" onAction="#guardarOperador" styleClass="primary"/><Button text="Quitar selección" onAction="#sinUnidades" styleClass="secondary"/><Button text="Actualizar" onAction="#cargarOperadores" styleClass="secondary"/></FlowPane>
+    <Label text="Con la casilla desmarcada y ninguna unidad seleccionada, la persona queda sin autorización para operar. Puede seguir participando como tripulante." wrapText="true" styleClass="muted"/>
+   </VBox>
+  </Tab>
+  <Tab fx:id="tiposTab" text="Emergencias">
+   <VBox spacing="12" styleClass="form-card">
+    <Label text="Tipos de emergencia" styleClass="card-title"/>
+    <TableView fx:id="emergencias" VBox.vgrow="ALWAYS"><columns><TableColumn fx:id="emergenciaCol" text="Nombre" prefWidth="500"/></columns></TableView>
+    <Label text="Nombre" styleClass="field-label"/><TextField fx:id="nombreEmergencia" promptText="Tipo de emergencia"/>
+    <FlowPane hgap="10" vgap="8"><Button text="Guardar tipo" onAction="#guardarTipo" styleClass="primary"/><Button text="Nuevo tipo" onAction="#nuevoTipo" styleClass="secondary"/><Button text="Eliminar tipo sin uso" onAction="#eliminarTipo" styleClass="danger-outline"/><Button text="Actualizar" onAction="#cargarTipos" styleClass="secondary"/></FlowPane>
+   </VBox>
+  </Tab>
+  <Tab fx:id="unidadesTab" text="Unidades"/>
+ </TabPane>
+ <Label fx:id="mensaje" wrapText="true" styleClass="feedback"/>
+</VBox>
