@@ -30,9 +30,8 @@ public class Equipo {
     private LocalDate ultimoMantenimiento;
     public LocalDate getUltimoMantenimiento() { return ultimoMantenimiento; }
     public void setUltimoMantenimiento(LocalDate value) { this.ultimoMantenimiento = value; }
-    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="unidad_id")
-    private Unidad unidad;
-    public Unidad getUnidad() { return unidad; }
-    public void setUnidad(Unidad value) { this.unidad = value; }
+    @Transient private String unidadesAsignadas="Sin unidad";
+    public String getUnidadesAsignadas() { return unidadesAsignadas; }
+    public void setUnidadesAsignadas(String value) { unidadesAsignadas=value==null || value.isBlank() ? "Sin unidad" : value; }
     @Override public String toString() { return nombre; }
 }

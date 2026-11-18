@@ -53,7 +53,7 @@ Los 15 registros de `equipo` representan grupos con su propia cantidad, no un to
 
 En este equipo los scripts ya fueron ejecutados. El script de datos rechaza cargar registros si las tablas ya tienen información; no incluye el TRUNCATE del archivo original y no reinicia los datos.
 
-Para actualizar una base existente, aplicar en orden las migraciones pendientes de `database/migrations`: desde la 001 hasta la 006. Cada script se aplica una sola vez. Mantener `hibernate.hbm2ddl.auto=validate`. Consultar `DESPACHO.md` para el uso de las pantallas y la API compartida con Emergencias y Consolidado.
+Para actualizar una base existente, aplicar en orden todas las migraciones pendientes de `database/migrations` hasta la 008. La 008 traslada las asignaciones existentes a `dotacion_equipo` y permite distribuir parte del inventario a cada unidad. Aplicar cada script una sola vez y mantener `hibernate.hbm2ddl.auto=validate`. Los reportes aceptan fechas inclusivas, exportan un libro `.xlsx` con tres hojas y pueden generar PDF con JasperReports.
 
 En pgAdmin, actualiza el nodo Databases para ver `bomberos_db`. Sus tablas están en Schemas → public → Tables. Puedes utilizar tu conexión habitual de administrador para inspeccionar la base.
 
@@ -72,7 +72,7 @@ La integración de las entidades y pantallas de emergencias y asignaciones corre
 
 ## Integración de develops con Rafael y Julián
 
-Para una base existente, ejecutar en Query Tool de `bomberos_db` las migraciones pendientes de `database/migrations/` en orden. La 004 añade los campos del acta y el resultado de cierre. La 005 incorpora la compañía y la escuadra del personal. La 006 amplía los tipos de servicio y distingue las unidades en servicio de las que atienden emergencias. La 007 crea los catálogos configurables y las autorizaciones de operadores. Recupera las opciones existentes y autoriza inicialmente a cada operador únicamente las unidades presentes en sus salidas históricas. Los scripts conservan los registros existentes. No ejecutar de nuevo `schema.sql` sobre esa base.
+Para una base existente, ejecutar en Query Tool de `bomberos_db` las migraciones pendientes de `database/migrations/` en orden hasta la 008. La 004 añade campos del acta; la 005 amplía los datos del personal; la 006 amplía los servicios y estados de unidad; la 007 incorpora catálogos; la 008 crea dotaciones parciales por unidad y convierte las asignaciones anteriores. Los scripts conservan los registros existentes. No ejecutar de nuevo `schema.sql` sobre esa base.
 
 Para una instalación nueva, `database/schema.sql` ya incluye esas columnas. La configuración local sigue en `config.properties`, tomando como guía `config.properties.example`.
 

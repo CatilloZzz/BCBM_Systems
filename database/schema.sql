@@ -1,5 +1,5 @@
 -- BCBM: esquema PostgreSQL basado en las consultas compartidas.
--- Ejecutar una vez en bomberos_db VACÍA; incluye las ocho tablas.
+-- Ejecutar una vez en bomberos_db VACÍA; incluye el esquema de la aplicación.
 BEGIN;
 CREATE TABLE bombero (
  id SERIAL PRIMARY KEY, nombre VARCHAR(100) NOT NULL, apellido VARCHAR(100) NOT NULL,
@@ -38,6 +38,12 @@ CREATE TABLE equipo (
  estado VARCHAR(20) NOT NULL DEFAULT 'OPERATIVO' CHECK (estado IN ('OPERATIVO','EN_REPARACION','BAJA')),
  ultimo_mantenimiento DATE, unidad_id INT REFERENCES unidad(id)
 );
+CREATE TABLE dotacion_equipo (
+ id SERIAL PRIMARY KEY, equipo_id INTEGER NOT NULL REFERENCES equipo(id) ON DELETE CASCADE,
+ unidad_id INTEGER NOT NULL REFERENCES unidad(id), cantidad INTEGER NOT NULL CHECK (cantidad > 0),
+ CONSTRAINT uq_dotacion_equipo_unidad UNIQUE (equipo_id,unidad_id)
+);
+CREATE INDEX idx_dotacion_equipo_unidad ON dotacion_equipo(unidad_id);
 CREATE INDEX idx_emergencia_estado ON emergencia(estado);
 CREATE INDEX idx_emergencia_fecha ON emergencia(fecha_hora);
 CREATE INDEX idx_asignacion_emergencia ON asignacion(emergencia_id);

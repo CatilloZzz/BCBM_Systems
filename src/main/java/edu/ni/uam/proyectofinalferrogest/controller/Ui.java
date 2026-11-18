@@ -22,6 +22,7 @@ import edu.ni.uam.proyectofinalferrogest.util.*;
 public final class Ui {
     private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> new Thread(r,"bcbm-database"));
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(Ui.class.getName());
     private Ui() {}
     public static void visible(Node node,boolean value) { node.setVisible(value); node.setManaged(value); }
     public static String fecha(LocalDate value) { return value == null ? "Sin registro" : FECHA.format(value); }
@@ -126,7 +127,10 @@ public final class Ui {
         ButtonType aceptar=new ButtonType("Confirmar",ButtonBar.ButtonData.OK_DONE);
         return alerta(root,Alert.AlertType.CONFIRMATION,"Confirmar cambio",texto,aceptar,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)==aceptar;
     }
-    private static void error(Node root,Throwable e) { alerta(root,Alert.AlertType.ERROR,"Revisa la operación",mensaje(e),ButtonType.OK).showAndWait(); }
+    private static void error(Node root,Throwable e) {
+        LOG.log(java.util.logging.Level.SEVERE,"Falló una operación de la aplicación.",e);
+        alerta(root,Alert.AlertType.ERROR,"Revisa la operación",mensaje(e),ButtonType.OK).showAndWait();
+    }
     /** Deja terminar una operación pendiente antes de cerrar la conexión. */
     public static void cerrar() { WORKER.execute(HibernateUtil::close); WORKER.shutdown(); }
 }
