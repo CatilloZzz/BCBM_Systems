@@ -57,7 +57,7 @@
             <element kind="textField" x="665" y="0" width="109" height="27" fontName="Arial" fontSize="9.0" forecolor="#374151" bold="true" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0">
                 <expression><![CDATA[$F{total}]]></expression>
             </element>
-            <element kind="line" x="0" y="26" width="774" height="1" forecolor="#E5E7EB"/>
+            <element kind="line" positionType="FixRelativeToBottom" x="0" y="26" width="774" height="1" forecolor="#E5E7EB"/>
         </band>
     </detail>
 

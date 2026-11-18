@@ -22,6 +22,7 @@ public class ReportesCabinaController {
     private static final DateTimeFormatter FECHA=DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final SesionUsuario sesion;
     private List<Fila> filas=List.of();
+    private LocalDate consultadoDesde,consultadoHasta;
     @FXML private VBox root;
     @FXML private ProgressIndicator cargando;
     @FXML private ComboBox<String> seccion;
@@ -43,7 +44,7 @@ public class ReportesCabinaController {
         LocalDate inicio=desde.getValue(),fin=hasta.getValue();
         if (inicio==null || fin==null || inicio.isAfter(fin)) { Ui.seguro(root,()->{ throw new IllegalArgumentException("Selecciona fechas válidas: Desde no puede ser posterior a Hasta."); }); return; }
         periodo.setText(FECHA.format(inicio)+" – "+FECHA.format(fin)); filas=List.of(); mostrar();
-        Ui.ejecutar(root,()->new ReporteCabinaService(HibernateUtil.getSessionFactory()).consultar(sesion,inicio,fin),datos->{ filas=datos; mostrar(); });
+        Ui.ejecutar(root,()->new ReporteCabinaService(HibernateUtil.getSessionFactory()).consultar(sesion,inicio,fin),datos->{ filas=datos; consultadoDesde=inicio; consultadoHasta=fin; mostrar(); });
     }
     private void mostrar() {
         var visibles=filas.stream().filter(f->f.seccion().equals(seccion.getValue())).toList();
@@ -55,7 +56,7 @@ public class ReportesCabinaController {
     }
     @FXML private void exportar() {
         if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
-        LocalDate inicio=desde.getValue(),fin=hasta.getValue();
+        LocalDate inicio=consultadoDesde,fin=consultadoHasta;
         FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte de cabina en Excel");
         chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".xlsx");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Libro Excel (*.xlsx)","*.xlsx"));
@@ -89,7 +90,7 @@ public class ReportesCabinaController {
 
     @FXML private void exportarPdf() {
         if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
-        LocalDate inicio=desde.getValue(),fin=hasta.getValue();
+        LocalDate inicio=consultadoDesde,fin=consultadoHasta;
         FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte de cabina en PDF");
         chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".pdf");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF (*.pdf)","*.pdf"));
