@@ -58,7 +58,7 @@ class DespachoPostgresTest {
         cfg.setProperty("hibernate.connection.username",usuarioPg); cfg.setProperty("hibernate.connection.password",clavePg);
         cfg.setProperty("hibernate.hbm2ddl.auto","validate"); cfg.setProperty("hibernate.connection.pool_size","5");
         cfg.setProperty("hibernate.show_sql","false");
-        for (Class<?> tipo:List.of(OpcionCatalogo.class,Bombero.class,Usuario.class,Unidad.class,Emergencia.class,TipoEmergencia.class,
+        for (Class<?> tipo:List.of(DotacionEquipo.class,OpcionCatalogo.class,Bombero.class,Usuario.class,Unidad.class,Emergencia.class,TipoEmergencia.class,
             Asignacion.class,Equipo.class,MantenimientoEquipo.class,OtroServicio.class,SalidaUnidad.class)) cfg.addAnnotatedClass(tipo);
         factory=cfg.buildSessionFactory(); servicio=new DespachoService(factory);
     }
@@ -111,14 +111,14 @@ class DespachoPostgresTest {
         flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.MANTENIMIENTO);
         assertThrows(IllegalArgumentException.class,()->servicio.asignarUnidad(sesion,1,tripulacion(1,1,null)));
         flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.DISPONIBLE);
-        flota.moverEquipo(sesion,1,1,true);
-        assertEquals("U1",flota.consultar(sesion).equipos().getFirst().getUnidad().getCodigo());
-        assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,2,1,true));
-        flota.moverEquipo(sesion,1,1,false);
-        assertNull(flota.consultar(sesion).equipos().getFirst().getUnidad());
+        flota.moverEquipo(sesion,1,1,3,true);
+        assertEquals("U1",flota.consultar(sesion).dotaciones().getFirst().getUnidad().getCodigo());
+        assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,2,1,1,true));
+        flota.moverEquipo(sesion,1,1,3,false);
+        assertTrue(flota.consultar(sesion).dotaciones().isEmpty());
         servicio.registrarServicio(sesion,"A",TipoServicio.RECORRIDO,"Prueba",tripulacion(1,1,null));
         assertThrows(IllegalArgumentException.class,()->flota.guardar(sesion,1,"U1","Rescate",EstadoUnidad.MANTENIMIENTO));
-        assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,1,1,true));
+        assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,1,1,3,true));
     }
     @Test void configuracionValidaPermisosOperadoresYCatalogos() {
         var config=new ConfiguracionService(factory);

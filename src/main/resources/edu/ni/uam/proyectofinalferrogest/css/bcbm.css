@@ -84,15 +84,15 @@
 .sidebar-divider .line { -fx-border-color: #843b40; }
 .nav-section { -fx-font-size: 9px; -fx-text-fill: #d2a3a8; -fx-font-weight: bold; -fx-padding: 14 12 8; }
 .nav-button { -fx-alignment: CENTER_LEFT; -fx-padding: 12 13; -fx-graphic-text-gap: 12; -fx-background-color: transparent; -fx-text-fill: #f2dfe1; -fx-font-size: 13px; -fx-font-weight: normal; }
-.nav-icon { -fx-fill: #dcbec1; }
+.nav-icon { -fx-fill: transparent; -fx-stroke: #e0bfc2; -fx-stroke-width: 1.8; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; }
 .nav-button:hover { -fx-background-color: #7a2b32; -fx-text-fill: white; }
 .nav-active { -fx-background-color: #8e333b; -fx-border-color: #e3b447; -fx-border-width: 0 0 0 3; -fx-border-radius: 0 5 5 0; -fx-background-radius: 0 5 5 0; -fx-text-fill: white; -fx-font-weight: bold; }
-.nav-active .nav-icon { -fx-fill: #edc773; }
+.nav-active .nav-icon { -fx-stroke: #edc773; }
 .nav-button:focused, .logout-button:focused { -fx-border-color: #edc773; }
 .session-block { -fx-padding: 6 12 12; -fx-background-color: #59161c; -fx-background-radius: 6; }
 .session-block .nav-section { -fx-padding: 7 0 2; }
 .session-name { -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; }
-.logout-button { -fx-background-color: transparent; -fx-text-fill: #f1d6d9; -fx-alignment: CENTER_LEFT; -fx-padding: 10 13; }
+.logout-button { -fx-graphic-text-gap: 12; -fx-background-color: transparent; -fx-text-fill: #f1d6d9; -fx-alignment: CENTER_LEFT; -fx-padding: 10 13; }
 .logout-button:hover { -fx-background-color: #7a2b32; }
 .sidebar-footer { -fx-font-size: 9px; -fx-text-fill: #bd8e94; -fx-padding: 12 10 0; }
 .topbar { -fx-background-color: #ffffff; -fx-padding: 17 26; -fx-border-color: #e2e7eb; -fx-border-width: 0 0 1 0; }
@@ -112,12 +112,16 @@
 .equipment-picker { -fx-padding: 14 18; }
 .detail-note { -fx-background-color: #f5f7fa; -fx-padding: 12; -fx-text-fill: #687884; -fx-font-size: 12px; -fx-background-radius: 5; }
 .login-root { -fx-background-color: #ffffff; }
-.login-brand { -fx-background-color: #751b24; -fx-padding: 42 46; }
+.login-brand { -fx-background-color: #751b24; -fx-padding: 32 26; }
+.login-institution { -fx-font-family: "Bahnschrift"; -fx-font-size: 23px; -fx-text-fill: white; -fx-line-spacing: 3; }
+.login-brand .brand-copy { -fx-font-size: 13px; }
+.login-scroll, .login-scroll > .viewport { -fx-background-color: #fcfdfd; -fx-padding: 0; }
+.login-scroll { -fx-background-insets: 0; }
 .login-title { -fx-font-family: "Bahnschrift"; -fx-font-size: 47px; -fx-text-fill: white; }
 .gold-rule { -fx-background-color: #e3b447; }
 .brand-motto { -fx-font-size: 10px; -fx-text-fill: #edc773; -fx-font-weight: bold; }
 .brand-caption { -fx-font-size: 10px; -fx-text-fill: #d1a5aa; }
-.login-content { -fx-padding: 45; -fx-background-color: #fcfdfd; }
+.login-content { -fx-padding: 32 45; -fx-background-color: #fcfdfd; }
 .login-heading { -fx-font-family: "Bahnschrift"; -fx-font-size: 32px; }
 .login-input { -fx-padding: 14 13; -fx-font-size: 14px; }
 .login-submit { -fx-padding: 14; -fx-font-size: 14px; }
