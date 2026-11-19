@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="reporte_cabina_bcbm" pageWidth="842" pageHeight="595"
+              columnWidth="774" leftMargin="34" rightMargin="34" topMargin="26" bottomMargin="24"
+              whenNoDataType="AllSectionsNoDetail">
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <field name="seccion" class="java.lang.String"/>
+    <field name="grupo" class="java.lang.String"/>
+    <field name="tipo" class="java.lang.String"/>
+    <field name="cantidad" class="java.lang.Long"/>
+    <field name="total" class="java.lang.Long"/>
+
+    <title height="72">
+        <element kind="staticText" x="0" y="2" width="774" height="28" fontName="Arial" fontSize="19.0" bold="true" forecolor="#9B1C2B">
+            <text><![CDATA[CUERPO DE BOMBEROS · REPORTE DE CABINA]]></text>
+        </element>
+        <element kind="staticText" x="0" y="38" width="80" height="20" fontName="Arial" fontSize="10.0" bold="true" forecolor="#4B5563" vTextAlign="Middle">
+            <text><![CDATA[Período:]]></text>
+        </element>
+        <element kind="textField" x="78" y="38" width="450" height="20" fontName="Arial" fontSize="10.0" forecolor="#374151" vTextAlign="Middle">
+            <expression><![CDATA[$P{PERIODO}]]></expression>
+        </element>
+        <element kind="line" x="0" y="67" width="774" height="1" forecolor="#D1D5DB"/>
+    </title>
+
+    <columnHeader height="30">
+        <element kind="staticText" x="0" y="0" width="90" height="30" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Sección]]></text>
+        </element>
+        <element kind="staticText" x="90" y="0" width="195" height="30" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Unidad, persona o emergencia]]></text>
+        </element>
+        <element kind="staticText" x="285" y="0" width="280" height="30" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Tipo de actividad]]></text>
+        </element>
+        <element kind="staticText" x="565" y="0" width="100" height="30" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Cantidad]]></text>
+        </element>
+        <element kind="staticText" x="665" y="0" width="109" height="30" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Total del grupo]]></text>
+        </element>
+    </columnHeader>
+
+    <detail>
+        <band height="27" splitType="Stretch">
+            <element kind="textField" x="0" y="0" width="90" height="27" fontName="Arial" fontSize="9.0" forecolor="#374151" vTextAlign="Middle" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{seccion}]]></expression>
+            </element>
+            <element kind="textField" x="90" y="0" width="195" height="27" fontName="Arial" fontSize="9.0" forecolor="#374151" vTextAlign="Middle" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{grupo}]]></expression>
+            </element>
+            <element kind="textField" x="285" y="0" width="280" height="27" fontName="Arial" fontSize="9.0" forecolor="#374151" vTextAlign="Middle" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{tipo}]]></expression>
+            </element>
+            <element kind="textField" x="565" y="0" width="100" height="27" fontName="Arial" fontSize="9.0" forecolor="#374151" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0">
+                <expression><![CDATA[$F{cantidad}]]></expression>
+            </element>
+            <element kind="textField" x="665" y="0" width="109" height="27" fontName="Arial" fontSize="9.0" forecolor="#374151" bold="true" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0">
+                <expression><![CDATA[$F{total}]]></expression>
+            </element>
+            <element kind="line" x="0" y="26" width="774" height="1" forecolor="#E5E7EB"/>
+        </band>
+    </detail>
+
+    <pageFooter height="22">
+        <element kind="staticText" x="0" y="2" width="400" height="16" fontName="Arial" fontSize="8.0" forecolor="#6B7280" vTextAlign="Middle">
+            <text><![CDATA[BCBM Systems · Generado desde Reportes de cabina]]></text>
+        </element>
+        <element kind="textField" x="714" y="2" width="60" height="16" fontName="Arial" fontSize="8.0" forecolor="#6B7280" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+        </element>
+    </pageFooter>
+</jasperReport>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReportesCabinaController" styleClass="page" spacing="18" stylesheets="@../css/bcbm.css">
+    <FlowPane alignment="CENTER_LEFT" hgap="20" vgap="10" styleClass="page-header">
+        <VBox spacing="5">
+                        <Label text="Reportes de cabina" styleClass="page-title"/>
+            <Label text="Consulta actividad por período y genera reportes para compartir o imprimir." styleClass="subtitle" wrapText="true"/>
+        </VBox>
+
+        <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+        <Button text="Exportar a Excel" onAction="#exportar" styleClass="primary"/>
+        <Button text="Generar PDF · JasperReports" onAction="#exportarPdf" styleClass="secondary"/>
+    </FlowPane>
+
+    <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="12">
+        <Label text="Desde" styleClass="field-label"/><DatePicker fx:id="desde"/>
+        <Label text="Hasta" styleClass="field-label"/><DatePicker fx:id="hasta"/>
+        <ComboBox fx:id="seccion" prefWidth="220"/>
+        <Button text="Filtrar fechas" onAction="#cargar" styleClass="secondary"/>
+        <Label fx:id="periodo" styleClass="card-title"/>
+    </HBox>
+
+    <VBox styleClass="metric-card" spacing="4">
+        <Label fx:id="resumen" wrapText="true" styleClass="card-title"/>
+    </VBox>
+
+    <VBox styleClass="list-card" spacing="10" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tabla" VBox.vgrow="ALWAYS" fixedCellSize="46">
+            <placeholder>
+                <Label text="Sin registros para este período." styleClass="muted"/>
+            </placeholder>
+            <columns>
+                <TableColumn fx:id="grupo" text="Unidad, persona o emergencia" prefWidth="285"/>
+                <TableColumn fx:id="tipo" text="Tipo de actividad" prefWidth="250"/>
+                <TableColumn fx:id="cantidad" text="Cantidad por tipo" prefWidth="140"/>
+                <TableColumn fx:id="total" text="Total del grupo" prefWidth="140"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <Label text="El libro Excel incluye hojas separadas para Unidades, Emergencias y Personal." styleClass="footnote" wrapText="true"/>
+</VBox>
