@@ -9,8 +9,8 @@
         </VBox>
 
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
-        <Button text="Exportar a Excel" onAction="#exportar" styleClass="primary"/>
-        <Button text="Generar PDF · JasperReports" onAction="#exportarPdf" styleClass="secondary"/>
+        <Button text="Exportar reporte completo a Excel" onAction="#exportar" styleClass="primary"/>
+        <Button text="Generar PDF completo · JasperReports" onAction="#exportarPdf" styleClass="secondary"/>
     </FlowPane>
 
     <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="12">
@@ -33,11 +33,12 @@
             <columns>
                 <TableColumn fx:id="grupo" text="Unidad, persona o emergencia" prefWidth="285"/>
                 <TableColumn fx:id="tipo" text="Tipo de actividad" prefWidth="250"/>
-                <TableColumn fx:id="cantidad" text="Cantidad por tipo" prefWidth="140"/>
-                <TableColumn fx:id="total" text="Total del grupo" prefWidth="140"/>
+                <TableColumn fx:id="cantidad" text="Salidas del tipo" prefWidth="150"/>
+                <TableColumn fx:id="total" text="Total de la unidad" prefWidth="150"/>
+                <TableColumn fx:id="porcentaje" text="Porcentaje de salidas" prefWidth="120"/>
             </columns>
         </TableView>
     </VBox>
 
-    <Label text="El libro Excel incluye hojas separadas para Unidades, Emergencias y Personal." styleClass="footnote" wrapText="true"/>
+    <Label text="Las actas se cuentan por fecha de apertura; las salidas y participaciones, por fecha de salida. El selector cambia la tabla, pero ambas exportaciones incluyen las tres secciones." styleClass="footnote" wrapText="true"/>
 </VBox>
