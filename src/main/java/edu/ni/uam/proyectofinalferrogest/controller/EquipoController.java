@@ -37,7 +37,7 @@ public class EquipoController {
         }); cargar();
     }
     @FXML private void cargar() { recargar("Selecciona un equipo para consultar o editar sus datos."); }
-    private void recargar(String texto) { Ui.ejecutar(root,() -> new Datos(servicio.listar(sesion),List.of(),new ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.CATEGORIA_EQUIPO)),d -> {
+    private void recargar(String texto) { Ui.ejecutar(root,() -> new Datos(servicio.listar(sesion),List.of(),new ConsultasCabina.ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.CATEGORIA_EQUIPO)), d -> {
         categoria.getItems().setAll(d.categorias()); limpiar(); registros.setAll(d.equipos()); mensaje.setText(texto);
     }); }
     @FXML private void limpiar() { id=null; tabla.getSelectionModel().clearSelection(); tituloForm.setText("Nuevo equipo"); nombre.clear(); categoria.setValue(null); cantidad.setText("1"); estado.setValue(EstadoEquipo.OPERATIVO); }

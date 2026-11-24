@@ -25,7 +25,7 @@ public class FlotaService {
             Unidad unidad=id==null ? new Unidad() : new UnidadDao().bloquear(s,id);
             if (unidad.getEstado().enSalida())
                 throw new IllegalArgumentException("La unidad se encuentra fuera.");
-            ConfiguracionService.validar(s,GrupoCatalogo.TIPO_UNIDAD,t,unidad.getTipo());
+            ConsultasCabina.ConfiguracionService.validar(s,GrupoCatalogo.TIPO_UNIDAD,t,unidad.getTipo());
             unidad.setCodigo(c); unidad.setTipo(t); unidad.setEstado(estado);
             if (id==null) s.persist(unidad);
             return unidad.getId();

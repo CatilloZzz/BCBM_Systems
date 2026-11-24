@@ -22,13 +22,14 @@ public class ReportesCabinaController {
     private static final DateTimeFormatter FECHA=DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final SesionUsuario sesion;
     private List<Fila> filas=List.of();
+    private LocalDate consultadoDesde,consultadoHasta;
     @FXML private VBox root;
     @FXML private ProgressIndicator cargando;
     @FXML private ComboBox<String> seccion;
     @FXML private DatePicker desde,hasta;
     @FXML private Label periodo,resumen;
     @FXML private TableView<Fila> tabla;
-    @FXML private TableColumn<Fila,String> grupo,tipo,cantidad,total;
+    @FXML private TableColumn<Fila,String> grupo,tipo,cantidad,total,porcentaje;
     public ReportesCabinaController(SesionUsuario sesion) { this.sesion=sesion; }
     public Parent vista() { return Vistas.cargar("reportes-cabina.fxml",this); }
     @FXML private void initialize() {
@@ -36,27 +37,43 @@ public class ReportesCabinaController {
         Ui.fecha(desde); Ui.fecha(hasta); desde.setValue(LocalDate.now().withDayOfMonth(1)); hasta.setValue(LocalDate.now());
         Ui.carga(root,cargando);
         Ui.columna(grupo,Fila::grupo); Ui.columna(tipo,Fila::tipo); Ui.columna(cantidad,Fila::cantidad); Ui.columna(total,Fila::total);
+        Ui.columna(porcentaje,f->String.format(Locale.forLanguageTag("es-NI"),"%.1f%%",f.porcentaje()*100));
         seccion.getItems().setAll("Unidades","Emergencias","Personal"); seccion.setValue("Unidades");
-        seccion.valueProperty().addListener((o,a,b)->mostrar()); cargar();
+        seccion.valueProperty().addListener((o,a,b)->{ actualizarEtiquetas(); mostrar(); });
+        actualizarEtiquetas(); cargar();
     }
     @FXML private void cargar() {
         LocalDate inicio=desde.getValue(),fin=hasta.getValue();
         if (inicio==null || fin==null || inicio.isAfter(fin)) { Ui.seguro(root,()->{ throw new IllegalArgumentException("Selecciona fechas válidas: Desde no puede ser posterior a Hasta."); }); return; }
         periodo.setText(FECHA.format(inicio)+" – "+FECHA.format(fin)); filas=List.of(); mostrar();
-        Ui.ejecutar(root,()->new ReporteCabinaService(HibernateUtil.getSessionFactory()).consultar(sesion,inicio,fin),datos->{ filas=datos; mostrar(); });
+        Ui.ejecutar(root,()->new ReporteCabinaService(HibernateUtil.getSessionFactory()).consultar(sesion,inicio,fin),datos->{ filas=datos; consultadoDesde=inicio; consultadoHasta=fin; mostrar(); });
     }
     private void mostrar() {
         var visibles=filas.stream().filter(f->f.seccion().equals(seccion.getValue())).toList();
         tabla.getItems().setAll(visibles);
-        String titulo=switch(seccion.getValue()) { case "Personal" -> "Personal con más salidas"; case "Emergencias" -> "Emergencia más frecuente"; default -> "Unidad con más salidas"; };
-        long max=visibles.stream().mapToLong(Fila::total).max().orElse(0);
-        String lideres=String.join(", ",visibles.stream().filter(f->f.total()==max).map(Fila::grupo).distinct().toList());
-        resumen.setText(max==0 ? "Sin actividad en este período." : titulo+" · "+lideres+" ("+max+")");
+        boolean esEmergencia="Emergencias".equals(seccion.getValue());
+        String titulo=switch(seccion.getValue()) { case "Personal" -> "Personal con más participaciones"; case "Emergencias" -> "Tipo de emergencia más frecuente"; default -> "Unidad con más salidas"; };
+        long max=visibles.stream().mapToLong(esEmergencia ? Fila::cantidad : Fila::total).max().orElse(0);
+        String lideres=String.join(", ",visibles.stream().filter(f->(esEmergencia ? f.cantidad() : f.total())==max).map(Fila::grupo).distinct().toList());
+        if (max==0) { resumen.setText("Sin actividad en este período."); return; }
+        if (esEmergencia) {
+            double porcentaje=visibles.stream().filter(f->f.cantidad()==max).mapToDouble(Fila::porcentaje).findFirst().orElse(0)*100;
+            resumen.setText(titulo+" · "+lideres+" ("+max+" actas; "+String.format(Locale.forLanguageTag("es-NI"),"%.1f%%",porcentaje)+" del período)");
+        } else resumen.setText(titulo+" · "+lideres+" ("+max+")");
+    }
+
+    private void actualizarEtiquetas() {
+        String valor=seccion.getValue();
+        switch (valor==null ? "Unidades" : valor) {
+            case "Emergencias" -> { cantidad.setText("Actas del tipo"); total.setText("Actas del período"); porcentaje.setText("% de actas"); }
+            case "Personal" -> { cantidad.setText("Participaciones"); total.setText("Total de la persona"); porcentaje.setText("% de participaciones"); }
+            default -> { cantidad.setText("Salidas del tipo"); total.setText("Total de la unidad"); porcentaje.setText("% de salidas"); }
+        }
     }
     @FXML private void exportar() {
         if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
-        LocalDate inicio=desde.getValue(),fin=hasta.getValue();
-        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte de cabina en Excel");
+        LocalDate inicio=consultadoDesde,fin=consultadoHasta;
+        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte completo de cabina en Excel");
         chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".xlsx");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Libro Excel (*.xlsx)","*.xlsx"));
         File archivo=chooser.showSaveDialog(root.getScene().getWindow()); if (archivo==null) return;
@@ -66,21 +83,33 @@ public class ReportesCabinaController {
             titulo.setFont(fuenteTitulo); titulo.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex()); titulo.setFillPattern(FillPatternType.SOLID_FOREGROUND); titulo.setVerticalAlignment(VerticalAlignment.CENTER);
             CellStyle encabezado=libro.createCellStyle(); Font fuente=libro.createFont(); fuente.setBold(true); fuente.setColor(IndexedColors.WHITE.getIndex()); encabezado.setFont(fuente); encabezado.setFillForegroundColor(IndexedColors.BLUE.getIndex()); encabezado.setFillPattern(FillPatternType.SOLID_FOREGROUND); encabezado.setAlignment(HorizontalAlignment.CENTER);
             CellStyle numerico=libro.createCellStyle(); numerico.setDataFormat(libro.createDataFormat().getFormat("#,##0"));
+            CellStyle porcentajeStyle=libro.createCellStyle(); porcentajeStyle.setDataFormat(libro.createDataFormat().getFormat("0.0%"));
+            crearResumenExcel(libro,inicio,fin,filas,titulo,encabezado,numerico);
             for (String nombre:List.of("Unidades","Emergencias","Personal")) {
                 Sheet sheet=libro.createSheet(nombre.toUpperCase(Locale.ROOT));
                 Row tituloFila=sheet.createRow(0); tituloFila.setHeightInPoints(28); tituloFila.createCell(0).setCellValue("BCBM · REPORTE DE CABINA · "+nombre.toUpperCase(Locale.ROOT)); tituloFila.getCell(0).setCellStyle(titulo);
-                sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0,0,0,5));
-                Row periodoFila=sheet.createRow(1); periodoFila.createCell(0).setCellValue("Período: "+FECHA.format(inicio)+" hasta "+FECHA.format(fin)); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1,1,0,5));
-                Row header=sheet.createRow(3); String[] nombres={"Grupo","Tipo de actividad","Cantidad","Total del grupo"};
+                sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0,0,0,4));
+                Row periodoFila=sheet.createRow(1); periodoFila.createCell(0).setCellValue("Período: "+FECHA.format(inicio)+" hasta "+FECHA.format(fin)); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1,1,0,4));
+                Row criterio=sheet.createRow(2); criterio.createCell(0).setCellValue(nombre.equals("Emergencias")
+                    ? "Actas contadas por fecha de apertura; porcentaje sobre todas las actas del período."
+                    : "Salidas y participaciones contadas por fecha de salida; porcentaje dentro de cada grupo.");
+                sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2,2,0,4));
+                String[] nombres=switch(nombre) {
+                    case "Emergencias" -> new String[]{"Tipo de emergencia","Medida","Actas del tipo","Actas del período","Porcentaje de actas"};
+                    case "Personal" -> new String[]{"Persona","Tipo de actividad","Participaciones","Total de la persona","Porcentaje de participaciones"};
+                    default -> new String[]{"Unidad","Tipo de actividad","Salidas del tipo","Total de la unidad","Porcentaje de salidas"};
+                };
+                Row header=sheet.createRow(4);
                 for (int i=0;i<nombres.length;i++) { header.createCell(i).setCellValue(nombres[i]); header.getCell(i).setCellStyle(encabezado); }
-                int row=4;
+                int row=5;
                 for (Fila f:filas.stream().filter(x->x.seccion().equals(nombre)).toList()) {
                     Row r=sheet.createRow(row++); r.createCell(0).setCellValue(f.grupo()); r.createCell(1).setCellValue(f.tipo());
-                    r.createCell(2).setCellValue(f.cantidad()); r.createCell(3).setCellValue(f.total()); r.getCell(2).setCellStyle(numerico); r.getCell(3).setCellStyle(numerico);
+                    r.createCell(2).setCellValue(f.cantidad()); r.createCell(3).setCellValue(f.total()); r.createCell(4).setCellValue(f.porcentaje());
+                    r.getCell(2).setCellStyle(numerico); r.getCell(3).setCellStyle(numerico); r.getCell(4).setCellStyle(porcentajeStyle);
                 }
-                if (row==4) { Row empty=sheet.createRow(4); empty.createCell(0).setCellValue("Sin registros en el período"); }
-                sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(3,Math.max(3,row-1),0,3)); sheet.createFreezePane(0,4);
-                sheet.setColumnWidth(0,36*256); sheet.setColumnWidth(1,38*256); sheet.setColumnWidth(2,16*256); sheet.setColumnWidth(3,20*256);
+                if (row==5) { Row empty=sheet.createRow(5); empty.createCell(0).setCellValue("Sin registros en el período"); }
+                sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(4,Math.max(4,row-1),0,4)); sheet.createFreezePane(0,5);
+                sheet.setColumnWidth(0,32*256); sheet.setColumnWidth(1,34*256); sheet.setColumnWidth(2,21*256); sheet.setColumnWidth(3,24*256); sheet.setColumnWidth(4,27*256);
             }
             try (OutputStream out=Files.newOutputStream(archivo.toPath())) { libro.write(out); }
             resumen.setText("Excel guardado: "+archivo.getName());
@@ -89,8 +118,8 @@ public class ReportesCabinaController {
 
     @FXML private void exportarPdf() {
         if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
-        LocalDate inicio=desde.getValue(),fin=hasta.getValue();
-        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte de cabina en PDF");
+        LocalDate inicio=consultadoDesde,fin=consultadoHasta;
+        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte completo de cabina en PDF");
         chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".pdf");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF (*.pdf)","*.pdf"));
         File archivo=chooser.showSaveDialog(root.getScene().getWindow()); if (archivo==null) return;
@@ -101,5 +130,36 @@ public class ReportesCabinaController {
             catch (IOException|JRException ex) { throw new IllegalStateException("No se pudo generar el reporte PDF con JasperReports.",ex); }
             return nombre;
         },guardado->resumen.setText("PDF generado con JasperReports: "+guardado));
+    }
+
+    private void crearResumenExcel(Workbook libro,LocalDate inicio,LocalDate fin,List<Fila> datos,
+                                   CellStyle titulo,CellStyle encabezado,CellStyle numerico) {
+        Sheet sheet=libro.createSheet("RESUMEN");
+        Row tituloFila=sheet.createRow(0); tituloFila.setHeightInPoints(28);
+        tituloFila.createCell(0).setCellValue("BCBM · RESUMEN DEL REPORTE DE CABINA"); tituloFila.getCell(0).setCellStyle(titulo);
+        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0,0,0,1));
+        Row periodoFila=sheet.createRow(1); periodoFila.createCell(0).setCellValue("Período: "+FECHA.format(inicio)+" hasta "+FECHA.format(fin));
+        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1,1,0,1));
+        Row criterio=sheet.createRow(2); criterio.createCell(0).setCellValue("Actas: fecha de apertura. Salidas y participaciones: fecha de salida.");
+        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2,2,0,1));
+        Row header=sheet.createRow(4); header.createCell(0).setCellValue("Indicador"); header.createCell(1).setCellValue("Resultado");
+        header.getCell(0).setCellStyle(encabezado); header.getCell(1).setCellStyle(encabezado);
+
+        long actas=datos.stream().filter(f->f.seccion().equals("Emergencias")).mapToLong(Fila::cantidad).sum();
+        long salidasEmergencia=datos.stream().filter(f->f.seccion().equals("Unidades")&&f.tipo().startsWith("Emergencia · ")).mapToLong(Fila::cantidad).sum();
+        long salidasOtros=datos.stream().filter(f->f.seccion().equals("Unidades")&&f.tipo().startsWith("Servicio · ")).mapToLong(Fila::cantidad).sum();
+        long unidades=datos.stream().filter(f->f.seccion().equals("Unidades")&&f.cantidad()>0).map(Fila::grupo).distinct().count();
+        long personas=datos.stream().filter(f->f.seccion().equals("Personal")).map(Fila::grupo).distinct().count();
+        long participaciones=datos.stream().filter(f->f.seccion().equals("Personal")).mapToLong(Fila::cantidad).sum();
+        long[] resultados={actas,salidasEmergencia,salidasOtros,unidades,personas,participaciones};
+        String[] indicadores={"Actas registradas","Salidas por emergencias","Salidas por otros servicios",
+            "Unidades movilizadas","Personal participante (personas distintas)","Participaciones registradas por salida"};
+        for(int i=0;i<indicadores.length;i++) {
+            Row row=sheet.createRow(5+i); row.createCell(0).setCellValue(indicadores[i]);
+            row.createCell(1).setCellValue(resultados[i]); row.getCell(1).setCellStyle(numerico);
+        }
+        Row nota=sheet.createRow(12); nota.createCell(0).setCellValue("Una persona puede tener varias participaciones si integra más de una salida.");
+        sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(12,12,0,1));
+        sheet.setColumnWidth(0,48*256); sheet.setColumnWidth(1,22*256); sheet.createFreezePane(0,5);
     }
 }
