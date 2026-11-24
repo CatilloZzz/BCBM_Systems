@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /** Genera reportes PDF con JasperReports usando los datos ya consultados por la aplicación. */
 public class ReporteJasperService {
@@ -40,14 +41,33 @@ public class ReporteJasperService {
                 registro.put("tipo", fila.tipo());
                 registro.put("cantidad", fila.cantidad());
                 registro.put("total", fila.total());
+                registro.put("porcentaje", fila.porcentaje());
                 registros.add(registro);
             }
 
             Map<String, Object> parametros = new HashMap<>();
             parametros.put("PERIODO", FECHA.format(desde) + " al " + FECHA.format(hasta));
+            parametros.put("RESUMEN", resumen(filas));
             JasperPrint documento = JasperFillManager.fillReport(
                     reporte, parametros, new JRMapCollectionDataSource(registros));
             JasperExportManager.exportReportToPdfFile(documento, destino.toString());
         }
+    }
+
+    private String resumen(List<ReporteCabinaService.Fila> filas) {
+        long actas=suma(filas,f->f.seccion().equals("Emergencias"),ReporteCabinaService.Fila::cantidad);
+        long salidasEmergencia=suma(filas,f->f.seccion().equals("Unidades")&&f.tipo().startsWith("Emergencia · "),ReporteCabinaService.Fila::cantidad);
+        long salidasOtros=suma(filas,f->f.seccion().equals("Unidades")&&f.tipo().startsWith("Servicio · "),ReporteCabinaService.Fila::cantidad);
+        long unidades=filas.stream().filter(f->f.seccion().equals("Unidades")&&f.cantidad()>0).map(ReporteCabinaService.Fila::grupo).distinct().count();
+        long personas=filas.stream().filter(f->f.seccion().equals("Personal")).map(ReporteCabinaService.Fila::grupo).distinct().count();
+        long participaciones=suma(filas,f->f.seccion().equals("Personal"),ReporteCabinaService.Fila::cantidad);
+        return "Resumen: "+actas+" actas · "+salidasEmergencia+" salidas por emergencias · "+salidasOtros+
+                " por otros servicios · "+unidades+" unidades movilizadas · "+personas+" personas distintas · "+
+                participaciones+" participaciones";
+    }
+
+    private long suma(List<ReporteCabinaService.Fila> filas,Predicate<ReporteCabinaService.Fila> filtro,
+                      java.util.function.ToLongFunction<ReporteCabinaService.Fila> medida) {
+        return filas.stream().filter(filtro).mapToLong(medida).sum();
     }
 }

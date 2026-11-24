@@ -51,7 +51,7 @@ public class BomberoController {
         cargar();
     }
     @FXML private void cargar() { recargar("Selecciona un registro para ver sus datos."); }
-    private void recargar(String texto) { Ui.ejecutar(root,() -> new Datos(servicio.listar(sesion),new ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion)),datos -> {
+    private void recargar(String texto) { Ui.ejecutar(root,() -> new Datos(servicio.listar(sesion),new ConsultasCabina.ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion)), datos -> {
         var rows=datos.personal(); limpiar(); registros.setAll(rows);
         rango.getItems().setAll(datos.opciones().get(GrupoCatalogo.RANGO));
         compania.getItems().setAll(datos.opciones().get(GrupoCatalogo.COMPANIA));
