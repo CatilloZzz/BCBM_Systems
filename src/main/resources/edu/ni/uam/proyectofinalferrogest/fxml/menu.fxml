@@ -20,7 +20,7 @@
                 <Label text="Bomberos de Managua" styleClass="sidebar-subtitle"/>
             </VBox>
             <Separator styleClass="sidebar-divider"/>
-            <Label text="ESPACIO DE TRABAJO" styleClass="nav-section"/>
+            <Label text="PRINCIPAL" styleClass="nav-section"/>
             <Button fx:id="inicioButton" text="Inicio" onAction="#inicio" styleClass="nav-button" maxWidth="1.7976931348623157E308">
                 <graphic>
                     <StackPane minWidth="22" prefWidth="22" maxWidth="22" minHeight="22" prefHeight="22" maxHeight="22">
@@ -28,6 +28,7 @@
                     </StackPane>
                 </graphic>
             </Button>
+            <Label fx:id="operacionesSection" text="OPERACIONES" styleClass="nav-section"/>
             <Button fx:id="emergenciasButton" text="Emergencias" onAction="#emergencias" styleClass="nav-button" maxWidth="1.7976931348623157E308">
                 <graphic>
                     <StackPane minWidth="22" prefWidth="22" maxWidth="22" minHeight="22" prefHeight="22" maxHeight="22">
@@ -49,17 +50,18 @@
                     </StackPane>
                 </graphic>
             </Button>
-            <Button fx:id="unidadesButton" text="Unidades y dotación" onAction="#unidades" styleClass="nav-button" maxWidth="Infinity">
-                <graphic>
-                    <StackPane minWidth="22" prefWidth="22" maxWidth="22" minHeight="22" prefHeight="22" maxHeight="22">
-                        <SVGPath content="M2 6 H14 V18 H2 Z M14 10 H19 L22 14 V18 H14 M6 18 A2 2 0 1 0 6.01 18 M18 18 A2 2 0 1 0 18.01 18" styleClass="nav-icon" scaleX="0.78" scaleY="0.78"/>
-                    </StackPane>
-                </graphic>
-            </Button>
             <Button fx:id="reportesButton" text="Reportes de cabina" onAction="#reportes" styleClass="nav-button" maxWidth="Infinity">
                 <graphic>
                     <StackPane minWidth="22" prefWidth="22" maxWidth="22" minHeight="22" prefHeight="22" maxHeight="22">
                         <SVGPath content="M5 3 H15 L20 8 V21 H5 Z M14 3 V9 H20 M9 17 V14 M12 17 V11 M15 17 V13" styleClass="nav-icon" scaleX="0.78" scaleY="0.78"/>
+                    </StackPane>
+                </graphic>
+            </Button>
+            <Label text="RECURSOS" styleClass="nav-section"/>
+            <Button fx:id="unidadesButton" text="Unidades y dotación" onAction="#unidades" styleClass="nav-button" maxWidth="Infinity">
+                <graphic>
+                    <StackPane minWidth="22" prefWidth="22" maxWidth="22" minHeight="22" prefHeight="22" maxHeight="22">
+                        <SVGPath content="M2 6 H14 V18 H2 Z M14 10 H19 L22 14 V18 H14 M6 18 A2 2 0 1 0 6.01 18 M18 18 A2 2 0 1 0 18.01 18" styleClass="nav-icon" scaleX="0.78" scaleY="0.78"/>
                     </StackPane>
                 </graphic>
             </Button>
@@ -84,6 +86,7 @@
                     </StackPane>
                 </graphic>
             </Button>
+            <Label fx:id="administracionSection" text="ADMINISTRACIÓN" styleClass="nav-section"/>
             <Button fx:id="usuariosButton" text="Usuarios" onAction="#usuarios" styleClass="nav-button" maxWidth="1.7976931348623157E308">
                 <graphic>
                     <StackPane minWidth="22" prefWidth="22" maxWidth="22" minHeight="22" prefHeight="22" maxHeight="22">

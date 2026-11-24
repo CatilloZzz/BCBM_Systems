@@ -121,7 +121,7 @@ class DespachoPostgresTest {
         assertThrows(IllegalArgumentException.class,()->flota.moverEquipo(sesion,1,1,3,true));
     }
     @Test void configuracionValidaPermisosOperadoresYCatalogos() {
-        var config=new ConfiguracionService(factory);
+        var config=new ConsultasCabina.ConfiguracionService(factory);
         assertThrows(SecurityException.class,()->config.guardarOperador(sesion,1,true,Set.of()));
         factory.inTransaction(s->s.createNativeMutationQuery("update usuario set rol='ADMIN' where id=1").executeUpdate());
         config.guardarOperador(sesion,1,false,Set.of(1));
