@@ -47,7 +47,7 @@ class DespachoPostgresTest {
             s.execute("update bombero set operador_todas=true");
             s.execute("insert into opcion_catalogo(grupo,nombre) values ('DEPARTAMENTO','DPC'),('DEPARTAMENTO','A'),('DEPARTAMENTO','Escuadra A'),('TIPO_UNIDAD','Rescate')");
             for (TipoServicio tipo:TipoServicio.values())
-                s.execute("insert into opcion_catalogo(grupo,nombre) values ('TIPO_SERVICIO','"+tipo.name()+"')");
+                s.execute("insert into opcion_catalogo(grupo,nombre) values ('TIPO_SERVICIO','"+tipo.name()+"') ON CONFLICT DO NOTHING");
             s.execute("insert into usuario(username,password_hash,rol) values ('prueba','no-utilizable','DESPACHADOR'),('bombero','no-utilizable','BOMBERO')");
             s.execute("insert into unidad(codigo,tipo) values ('U1','Rescate'),('U2','Rescate')");
             s.execute("insert into tipo_emergencia(nombre) values ('Accidente')");
@@ -148,6 +148,22 @@ class DespachoPostgresTest {
         assertEquals("Apoyo comunitario",servicio.listarMes(sesion,YearMonth.from(fecha),true).getFirst().tipoServicio());
         var usado=config.listar(sesion,GrupoCatalogo.TIPO_SERVICIO).stream().filter(o->o.getNombre().equals("Apoyo comunitario")).findFirst().orElseThrow();
         assertThrows(IllegalArgumentException.class,()->config.guardar(sesion,usado.getId(),usado.getVersion(),usado.getGrupo(),"Otro nombre",true));
+    }
+    @Test void porcentajesDeEmergenciasUsanElTotalDelPeriodo() {
+        factory.inTransaction(s->{
+            s.createNativeMutationQuery("insert into tipo_emergencia(nombre) values ('Rescate')").executeUpdate();
+            s.createNativeMutationQuery("""
+                insert into emergencia(tipo_id,direccion,prioridad,registrado_por,fecha_hora) values
+                (1,'Managua','ALTA',1,'2025-01-15'),(1,'Managua','ALTA',1,'2025-01-16'),
+                (2,'Managua','ALTA',1,'2025-01-17')
+                """).executeUpdate();
+        });
+        var filas=new ReporteCabinaService(factory).consultar(sesion,YearMonth.of(2025,1)).stream()
+            .filter(f->f.seccion().equals("Emergencias")).toList();
+        assertEquals(2,filas.size());
+        assertTrue(filas.stream().allMatch(f->f.total()==3));
+        assertEquals(1.0,filas.stream().mapToDouble(ReporteCabinaService.Fila::porcentaje).sum(),0.00001);
+        assertEquals(2.0/3,filas.stream().filter(f->f.grupo().equals("Accidente")).findFirst().orElseThrow().porcentaje(),0.00001);
     }
     @Test void actaParcialFiltrosYDespachoDesdeLaFicha() {
         var dao = new EmergenciaDao(factory);

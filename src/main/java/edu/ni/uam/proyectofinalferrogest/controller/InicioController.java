@@ -16,6 +16,7 @@ import javafx.scene.layout.*;
 
 public class InicioController {
     @FXML private StackPane root;
+    @FXML private GridPane metricasGrid,graficosGrid,listasGrid,accesosGrid;
     @FXML private VBox panelInstitucional, panelPersonal, listaEmergencias, listaMantenimientos;
     @FXML private Label saludo, fechaResumen, nombreBombero, estadoBombero;
     @FXML private Label emergenciasActivas, emergenciasHoy, unidadesDisponibles, unidadesDetalle;
@@ -52,7 +53,29 @@ public class InicioController {
             panelPersonal.setVisible(true);
             panelPersonal.setManaged(true);
         }
+        adaptar(metricasGrid,3);
+        adaptar(graficosGrid,2);
+        adaptar(listasGrid,2);
+        adaptar(accesosGrid,3);
         actualizar();
+    }
+    private void adaptar(GridPane grid,int columnasAmplias) {
+        grid.widthProperty().addListener((o,a,b)->{
+            int columnas=b.doubleValue()<650 ? 1 : b.doubleValue()<900 ? 2 : columnasAmplias;
+            if (columnasAmplias==2 && b.doubleValue()<900) columnas=1;
+            if(grid.getColumnConstraints().size()==columnas) return;
+            grid.getColumnConstraints().clear();
+            for(int i=0;i<columnas;i++) {
+                ColumnConstraints columna=new ColumnConstraints();
+                columna.setPercentWidth(100.0/columnas); columna.setMinWidth(0);
+                grid.getColumnConstraints().add(columna);
+            }
+            int indice=0;
+            for(var nodo:grid.getChildren()) {
+                GridPane.setColumnIndex(nodo,indice%columnas);
+                GridPane.setRowIndex(nodo,indice/columnas); indice++;
+            }
+        });
     }
 
     @FXML private void actualizar() {
