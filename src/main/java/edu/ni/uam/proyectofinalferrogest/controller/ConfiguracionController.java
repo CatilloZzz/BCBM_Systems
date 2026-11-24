@@ -2,7 +2,6 @@ package edu.ni.uam.proyectofinalferrogest.controller;
 
 import edu.ni.uam.proyectofinalferrogest.model.*;
 import edu.ni.uam.proyectofinalferrogest.service.*;
-import edu.ni.uam.proyectofinalferrogest.service.ConfiguracionService.*;
 import edu.ni.uam.proyectofinalferrogest.dao.TipoEmergenciaDao;
 import edu.ni.uam.proyectofinalferrogest.util.*;
 import javafx.fxml.FXML;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class ConfiguracionController {
     private final SesionUsuario sesion;
-    private final ConfiguracionService servicio=new ConfiguracionService(HibernateUtil.getSessionFactory());
+    private final ConsultasCabina.ConfiguracionService servicio=new ConsultasCabina.ConfiguracionService(HibernateUtil.getSessionFactory());
     private final TipoEmergenciaDao tipos=new TipoEmergenciaDao(HibernateUtil.getSessionFactory());
     @FXML private VBox root;
     @FXML private ComboBox<GrupoCatalogo> grupo;
@@ -22,7 +21,7 @@ public class ConfiguracionController {
     @FXML private TableColumn<OpcionCatalogo,String> nombreCol,activoCol;
     @FXML private TextField nombre,nombreEmergencia;
     @FXML private CheckBox activo,todas;
-    @FXML private ComboBox<Operador> operador;
+    @FXML private ComboBox<ConsultasCabina.ConfiguracionService.Operador> operador;
     @FXML private ListView<Unidad> autorizadas;
     @FXML private TableView<TipoEmergencia> emergencias;
     @FXML private TableColumn<TipoEmergencia,String> emergenciaCol;
