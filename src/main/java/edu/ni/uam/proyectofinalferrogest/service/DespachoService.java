@@ -84,8 +84,8 @@ public class DespachoService {
         return transaccion(s -> {
             Usuario usuario=autorizar(s,sesion);
             Unidad unidad=reservarUnidad(s,datos);
-            ConfiguracionService.validar(s,GrupoCatalogo.TIPO_SERVICIO,tipo,null);
-            ConfiguracionService.validar(s,GrupoCatalogo.DEPARTAMENTO,escuadraDepartamento,null);
+            ConsultasCabina.ConfiguracionService.validar(s,GrupoCatalogo.TIPO_SERVICIO,tipo,null);
+            ConsultasCabina.ConfiguracionService.validar(s,GrupoCatalogo.DEPARTAMENTO,escuadraDepartamento,null);
             OtroServicio servicio=new OtroServicio(escuadraDepartamento,tipo,detalle); s.persist(servicio);
             SalidaUnidad salida=crear(s,null,servicio,unidad,usuario.getId(),datos);
             s.persist(salida); return salida.getId();

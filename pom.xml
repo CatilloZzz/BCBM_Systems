@@ -46,6 +46,24 @@
             <version>42.7.14</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.4.1</version>
+        </dependency>
+
+        <!-- Reportes PDF compilados y exportados dentro de la aplicación JavaFX. -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>7.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports-pdf</artifactId>
+            <version>7.1.1</version>
+        </dependency>
+
         <!-- Contraseñas BCrypt -->
         <dependency>
             <groupId>org.mindrot</groupId>
@@ -77,6 +95,32 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>net.sf.jasperreports</groupId>
+                <artifactId>jasperreports-maven-plugin</artifactId>
+                <version>7.0.8</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sf.jasperreports</groupId>
+                        <artifactId>jasperreports-maven-plugin-bom</artifactId>
+                        <version>7.1.1</version>
+                        <type>pom</type>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>compile-jasper-templates</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/resources/edu/ni/uam/proyectofinalferrogest/reports</sourceDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/edu/ni/uam/proyectofinalferrogest/reports</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

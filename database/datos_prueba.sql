@@ -96,6 +96,11 @@ INSERT INTO equipo (nombre, categoria, cantidad, estado, ultimo_mantenimiento, u
 ('Camilla rígida',                    'Médico',        4, 'OPERATIVO',     CURRENT_DATE - 35,  3),
 ('Botiquín de primeros auxilios',     'Médico',        6, 'OPERATIVO',     CURRENT_DATE - 15,  3);
 
+-- Mover los lotes de ejemplo a la tabla de distribución por unidad.
+INSERT INTO dotacion_equipo(equipo_id,unidad_id,cantidad)
+SELECT id,unidad_id,cantidad FROM equipo WHERE unidad_id IS NOT NULL AND cantidad>0;
+UPDATE equipo SET unidad_id=NULL WHERE unidad_id IS NOT NULL;
+
 -- Fechas de asignación coherentes con las emergencias del ejemplo.
 UPDATE asignacion a SET fecha_asignacion = e.fecha_hora
 FROM emergencia e WHERE e.id = a.emergencia_id;

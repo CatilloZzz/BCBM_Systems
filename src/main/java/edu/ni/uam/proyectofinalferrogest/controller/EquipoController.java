@@ -18,7 +18,6 @@ public class EquipoController {
     @FXML private TextField buscar,nombre,cantidad;
     @FXML private ComboBox<String> categoria;
     @FXML private ComboBox<EstadoEquipo> estado;
-    @FXML private ComboBox<Unidad> unidad;
     @FXML private Label tituloForm,contador,mensaje;
     @FXML private ProgressIndicator cargando;
     private final SesionUsuario sesion;
@@ -31,22 +30,20 @@ public class EquipoController {
     @FXML private void initialize() {
         estado.getItems().setAll(EstadoEquipo.values()); Ui.opciones(estado); Ui.visible(formulario,sesion.rol()==Rol.ADMIN); Ui.carga(root,cargando);
         Ui.columna(colNombre,Equipo::getNombre); Ui.columna(colCategoria,Equipo::getCategoria); Ui.columna(colCantidad,Equipo::getCantidad); Ui.estado(colEstado,Equipo::getEstado);
-        Ui.columna(colUnidad,e -> e.getUnidad()==null?"Sin unidad":e.getUnidad().getCodigo()); Ui.columna(colMantenimiento,e -> Ui.fecha(e.getUltimoMantenimiento()));
-        Ui.buscar(tabla,buscar,registros,e -> e.getNombre()+" "+e.getCategoria()+" "+Ui.nombre(e.getEstado())+" "+(e.getUnidad()==null?"":e.getUnidad().getCodigo()),contador);
+        Ui.columna(colUnidad,Equipo::getUnidadesAsignadas); Ui.columna(colMantenimiento,e -> Ui.fecha(e.getUltimoMantenimiento()));
+        Ui.buscar(tabla,buscar,registros,e -> e.getNombre()+" "+e.getCategoria()+" "+Ui.nombre(e.getEstado())+" "+e.getUnidadesAsignadas(),contador);
         tabla.getSelectionModel().selectedItemProperty().addListener((o,a,e) -> {
             if (e==null) return; id=e.getId(); tituloForm.setText("Editar equipo"); nombre.setText(e.getNombre()); Ui.seleccionActual(categoria,e.getCategoria()); cantidad.setText(""+e.getCantidad()); estado.setValue(e.getEstado());
-            unidad.setValue(e.getUnidad()==null?null:unidad.getItems().stream().filter(u -> u.getId().equals(e.getUnidad().getId())).findFirst().orElse(null));
         }); cargar();
     }
     @FXML private void cargar() { recargar("Selecciona un equipo para consultar o editar sus datos."); }
-    private void recargar(String texto) { Ui.ejecutar(root,() -> new Datos(servicio.listar(sesion),servicio.unidades(sesion),new ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.CATEGORIA_EQUIPO)),d -> {
-        categoria.getItems().setAll(d.categorias()); limpiar(); unidad.getItems().setAll(d.unidades()); registros.setAll(d.equipos()); mensaje.setText(texto);
+    private void recargar(String texto) { Ui.ejecutar(root,() -> new Datos(servicio.listar(sesion),List.of(),new ConsultasCabina.ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.CATEGORIA_EQUIPO)), d -> {
+        categoria.getItems().setAll(d.categorias()); limpiar(); registros.setAll(d.equipos()); mensaje.setText(texto);
     }); }
-    @FXML private void limpiar() { id=null; tabla.getSelectionModel().clearSelection(); tituloForm.setText("Nuevo equipo"); nombre.clear(); categoria.setValue(null); cantidad.setText("1"); estado.setValue(EstadoEquipo.OPERATIVO); unidad.setValue(null); }
-    @FXML private void quitarUnidad() { unidad.setValue(null); }
+    @FXML private void limpiar() { id=null; tabla.getSelectionModel().clearSelection(); tituloForm.setText("Nuevo equipo"); nombre.clear(); categoria.setValue(null); cantidad.setText("1"); estado.setValue(EstadoEquipo.OPERATIVO); }
     @FXML private void guardar() { Ui.seguro(root,() -> {
         int c; try { c=Integer.parseInt(cantidad.getText().strip()); } catch (NumberFormatException e) { throw new IllegalArgumentException("Cantidad debe ser un número entero."); }
-        Integer actual=id,uid=unidad.getValue()==null?null:unidad.getValue().getId(); String n=nombre.getText(),cat=categoria.getValue(); EstadoEquipo es=estado.getValue();
-        Ui.ejecutar(root,() -> { servicio.guardar(sesion,actual,n,cat,c,es,uid); return true; },ok -> recargar("Equipo guardado correctamente."));
+        Integer actual=id; String n=nombre.getText(),cat=categoria.getValue(); EstadoEquipo es=estado.getValue();
+        Ui.ejecutar(root,() -> { servicio.guardar(sesion,actual,n,cat,c,es); return true; },ok -> recargar("Equipo guardado correctamente."));
     }); }
 }

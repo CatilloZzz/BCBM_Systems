@@ -68,6 +68,7 @@
                         </TableView>
                         <FlowPane fx:id="asignacion" hgap="8" vgap="8" alignment="CENTER_LEFT">
                             <ComboBox fx:id="disponibles" prefWidth="260" promptText="Recursos disponibles" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                            <Spinner fx:id="cantidadAsignar" prefWidth="105"/>
                             <Button text="Asignar" onAction="#asignar" styleClass="secondary"/>
                             <Button text="Retirar" onAction="#retirar" styleClass="danger-outline"/>
                         </FlowPane>

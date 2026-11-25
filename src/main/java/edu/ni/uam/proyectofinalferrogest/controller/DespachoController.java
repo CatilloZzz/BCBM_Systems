@@ -203,7 +203,7 @@ public class DespachoController {
             acta.getItems().stream().filter(a -> a.id().equals(actaFija)).findFirst().ifPresent(acta::setValue);
             acta.setDisable(true);
         }
-        ComboBox<Persona> operador=new ComboBox<>(); operador.setPromptText("Selecciona primero la unidad");
+        ComboBox<Persona> operador=new ComboBox<>(); operador.setPromptText("Selecciona primero la unidad"); operador.disableProperty().bind(unidad.valueProperty().isNull());
         unidad.valueProperty().addListener((obs,antes,actual)->{
             operador.setValue(null);
             operador.getItems().setAll(datos.operadores(actual==null ? null : actual.id()));
@@ -213,9 +213,23 @@ public class DespachoController {
         Button quitarJefe=new Button("Sin jefe"); quitarJefe.setOnAction(e -> jefe.setValue(null));
         ListView<Persona> personal=new ListView<>(); personal.getItems().setAll(datos.personal()); personal.setPrefHeight(140);
         personal.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        ComboBox<String> escuadra=new ComboBox<>(); escuadra.setEditable(false); escuadra.setMaxWidth(Double.MAX_VALUE);
+        ComboBox<String> escuadra=new ComboBox<>(); escuadra.setEditable(false); escuadra.setMaxWidth(Double.MAX_VALUE); escuadra.setPromptText("Selecciona escuadra o departamento");
         escuadra.getItems().setAll(datos.opciones().get(edu.ni.uam.proyectofinalferrogest.model.GrupoCatalogo.DEPARTAMENTO));
-        ComboBox<String> tipo=new ComboBox<>(); tipo.getItems().setAll(datos.opciones().get(edu.ni.uam.proyectofinalferrogest.model.GrupoCatalogo.TIPO_SERVICIO));
+        ComboBox<String> tipo=new ComboBox<>();
+        tipo.getItems().setAll(datos.opciones().get(edu.ni.uam.proyectofinalferrogest.model.GrupoCatalogo.TIPO_SERVICIO));
+        tipo.setPromptText("Selecciona tipo de gestión");
+        tipo.setCellFactory(lista -> new ListCell<>() {
+            @Override protected void updateItem(String valor, boolean vacio) {
+                super.updateItem(valor,vacio);
+                setText(vacio ? null : etiquetaTipoServicio(valor));
+            }
+        });
+        tipo.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(String valor, boolean vacio) {
+                super.updateItem(valor,vacio);
+                setText(vacio ? null : etiquetaTipoServicio(valor));
+            }
+        });
         TextArea detalleText=new TextArea(); detalleText.setPrefRowCount(3); detalleText.setWrapText(true);
         FechaHora fecha=new FechaHora();
         VBox campos=new VBox(8);
@@ -230,6 +244,8 @@ public class DespachoController {
         dialog.getDialogPane().setContent(scroll); dialog.setResizable(true);
         dialog.getDialogPane().lookupButton(guardar).addEventFilter(javafx.event.ActionEvent.ACTION,e -> {
             e.consume(); Ui.seguro(root,() -> {
+                if (otros && (escuadra.getValue()==null || tipo.getValue()==null))
+                    throw new IllegalArgumentException("Selecciona una escuadra o departamento y un tipo de gestión.");
                 if (unidad.getValue()==null || operador.getValue()==null || (!otros && acta.getValue()==null))
                     throw new IllegalArgumentException("Seleccione unidad, operador y emergencia cuando corresponda.");
                 var tripulacion=new Tripulacion(unidad.getValue().id(),operador.getValue().id(),jefe.getValue()==null ? null : jefe.getValue().id(),
@@ -288,6 +304,10 @@ public class DespachoController {
             } catch (RuntimeException fallo) { error.setText(Ui.mensaje(fallo)); }
         });
         dialog.showAndWait();
+    }
+    private static String etiquetaTipoServicio(String valor) {
+        try { return TipoServicio.valueOf(valor).toString(); }
+        catch (IllegalArgumentException desconocido) { return valor.replace('_',' '); }
     }
     private void mostrarError(Throwable error) {
         Alert aviso=new Alert(Alert.AlertType.ERROR,Ui.mensaje(error),ButtonType.OK); Ui.dialogo(aviso,root); aviso.showAndWait();

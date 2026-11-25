@@ -16,17 +16,19 @@ public class UnidadesController {
     private final ObservableList<Unidad> registros = FXCollections.observableArrayList();
     private record Datos(FlotaService.Inventario inventario,List<String> tipos) {}
     private List<Equipo> equipos = List.of();
+    private List<DotacionEquipo> dotaciones=List.of();
     @FXML private VBox root;
     @FXML private VBox formulario;
     @FXML private FlowPane asignacion;
     @FXML private TableView<Unidad> tabla;
-    @FXML private TableView<Equipo> dotacion;
+    @FXML private TableView<DotacionEquipo> dotacion;
     @FXML private TableColumn<Unidad,String> codigoCol,tipoCol,estadoCol;
-    @FXML private TableColumn<Equipo,String> nombreCol,categoriaCol,cantidadCol,condicionCol;
+    @FXML private TableColumn<DotacionEquipo,String> nombreCol,categoriaCol,cantidadCol,condicionCol;
     @FXML private TextField codigo,buscar;
     @FXML private ComboBox<String> tipo;
     @FXML private ComboBox<EstadoUnidad> estado;
     @FXML private ComboBox<Equipo> disponibles;
+    @FXML private Spinner<Integer> cantidadAsignar;
     @FXML private Label aviso,tituloForm,contador;
     @FXML private ProgressIndicator cargando;
     @FXML private Button guardarUnidad,nuevaUnidad;
@@ -36,8 +38,10 @@ public class UnidadesController {
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         Ui.carga(root,cargando);
         Ui.columna(codigoCol,Unidad::getCodigo); Ui.columna(tipoCol,Unidad::getTipo); Ui.estado(estadoCol,Unidad::getEstado);
-        Ui.columna(nombreCol,Equipo::getNombre); Ui.columna(categoriaCol,Equipo::getCategoria);
-        Ui.columna(cantidadCol,Equipo::getCantidad); Ui.estado(condicionCol,Equipo::getEstado);
+        Ui.columna(nombreCol,d->d.getEquipo().getNombre()); Ui.columna(categoriaCol,d->d.getEquipo().getCategoria());
+        Ui.columna(cantidadCol,DotacionEquipo::getCantidad); Ui.estado(condicionCol,d->d.getEquipo().getEstado());
+        cantidadAsignar.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1,100000,1));
+        cantidadAsignar.setEditable(true);
         estado.getItems().setAll(EstadoUnidad.DISPONIBLE,EstadoUnidad.MANTENIMIENTO); Ui.opciones(estado);
         Ui.visible(guardarUnidad,sesion.rol()==Rol.ADMIN);
         Ui.visible(nuevaUnidad,sesion.rol()==Rol.ADMIN);
@@ -52,13 +56,19 @@ public class UnidadesController {
         return unidad==null ? null : unidad.getId();
     }
     private void recargar(Integer id) {
-        Ui.ejecutar(root,()->new Datos(servicio.consultar(sesion),new ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.TIPO_UNIDAD)),resultado->{
+        Ui.ejecutar(root,()->new Datos(servicio.consultar(sesion),new ConsultasCabina.ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.TIPO_UNIDAD)), resultado->{
             var datos=resultado.inventario(); tipo.getItems().setAll(resultado.tipos());
-            equipos=datos.equipos(); registros.setAll(datos.unidades());
-            disponibles.getItems().setAll(equipos.stream().filter(e->e.getUnidad()==null && e.getCantidad()>0 && e.getEstado()==EstadoEquipo.OPERATIVO).toList());
+            equipos=datos.equipos(); dotaciones=datos.dotaciones(); registros.setAll(datos.unidades());
+            disponibles.getItems().setAll(equipos.stream().filter(e->e.getEstado()==EstadoEquipo.OPERATIVO && disponible(e)>0).toList());
+            disponibles.setCellFactory(v->new ListCell<>() { @Override protected void updateItem(Equipo e,boolean empty) { super.updateItem(e,empty); setText(empty||e==null?null:e.getNombre()+" · "+e.getCategoria()+" · disponibles: "+disponible(e)); } });
+            disponibles.setButtonCell(new ListCell<>() { @Override protected void updateItem(Equipo e,boolean empty) { super.updateItem(e,empty); setText(empty||e==null?null:e.getNombre()+" · "+e.getCategoria()+" · disponibles: "+disponible(e)); } });
             tabla.getSelectionModel().select(datos.unidades().stream().filter(u->u.getId().equals(id)).findFirst().orElse(null));
             mostrar(tabla.getSelectionModel().getSelectedItem());
         });
+    }
+    private int disponible(Equipo equipo) {
+        int asignado=dotaciones.stream().filter(d->d.getEquipo().getId().equals(equipo.getId())).mapToInt(DotacionEquipo::getCantidad).sum();
+        return Math.max(0,equipo.getCantidad()-asignado);
     }
     private void mostrar(Unidad u) {
         codigo.setText(u==null ? "" : u.getCodigo()); Ui.seleccionActual(tipo,u==null ? null : u.getTipo());
@@ -68,7 +78,7 @@ public class UnidadesController {
         if (u!=null && u.getEstado().enSalida()) estado.getItems().add(u.getEstado());
         estado.getSelectionModel().select(u==null ? EstadoUnidad.DISPONIBLE : u.getEstado());
         tituloForm.setText(u==null ? "Nueva unidad" : "Detalle de "+u.getCodigo());
-        dotacion.getItems().setAll(equipos.stream().filter(e->u!=null && e.getUnidad()!=null && u.getId().equals(e.getUnidad().getId())).toList());
+        dotacion.getItems().setAll(dotaciones.stream().filter(d->u!=null && u.getId().equals(d.getUnidad().getId())).toList());
         asignacion.setDisable(u==null || u.getEstado().enSalida());
         aviso.setText(u==null ? "Selecciona una unidad para ver su dotación." : "Dotación de "+u.getCodigo()+" · "+dotacion.getItems().size()+" lotes");
     }
@@ -78,10 +88,16 @@ public class UnidadesController {
         Ui.ejecutar(root,()->servicio.guardar(sesion,id,c,t,valor),this::recargar);
     }
     @FXML private void asignar() { mover(disponibles.getValue(),true); }
-    @FXML private void retirar() { mover(dotacion.getSelectionModel().getSelectedItem(),false); }
+    @FXML private void retirar() {
+        DotacionEquipo seleccion=dotacion.getSelectionModel().getSelectedItem();
+        if (seleccion==null) { aviso.setText("Selecciona un recurso de la dotación."); return; }
+        mover(seleccion.getEquipo(),false);
+    }
     private void mover(Equipo e,boolean asignar) {
         Integer id=idUnidad();
         if (id==null || e==null) { aviso.setText("Selecciona una unidad y un recurso."); return; }
-        Ui.ejecutar(root,()->{ servicio.moverEquipo(sesion,id,e.getId(),asignar); return true; },ok->recargar(id));
+        int cantidad=cantidadAsignar.getValue();
+        int cantidadFinal=cantidad;
+        Ui.ejecutar(root,()->{ servicio.moverEquipo(sesion,id,e.getId(),cantidadFinal,asignar); return true; },ok->recargar(id));
     }
 }

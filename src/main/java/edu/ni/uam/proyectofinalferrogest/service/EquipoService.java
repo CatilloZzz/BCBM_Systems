@@ -13,26 +13,19 @@ public class EquipoService {
         return Transacciones.ejecutar(s -> { Acceso.usuario(s,sesion); return new UnidadDao().listar(s); });
     }
     public void guardar(SesionUsuario sesion, Integer id, String nombre, String categoria,
-                        int cantidad, EstadoEquipo estado, Integer unidadId) {
+                        int cantidad, EstadoEquipo estado) {
         String n = Validaciones.texto(nombre,"Nombre",100), c = Validaciones.texto(categoria,"Categoría",40);
         if (cantidad < 0) throw new IllegalArgumentException("La cantidad no puede ser negativa.");
         if (estado == null) throw new IllegalArgumentException("Selecciona el estado del equipo.");
         Transacciones.ejecutar(s -> {
             Acceso.admin(s,sesion);
             Equipo e = id == null ? new Equipo() : dao.bloquear(s,id);
-            Integer anterior=e.getUnidad()==null ? null : e.getUnidad().getId();
-            if (!java.util.Objects.equals(anterior,unidadId)) {
-                var flota=new UnidadDao();
-                for (var unidad : java.util.stream.Stream.of(anterior,unidadId).filter(java.util.Objects::nonNull).sorted().toList()) {
-                    if (flota.bloquear(s,unidad).getEstado().enSalida())
-                        throw new IllegalArgumentException("Registra el retorno antes de cambiar la dotación.");
-                }
-                if (unidadId!=null && (cantidad==0 || estado!=EstadoEquipo.OPERATIVO))
-                    throw new IllegalArgumentException("Selecciona un recurso operativo con existencias.");
-            }
-            ConfiguracionService.validar(s,GrupoCatalogo.CATEGORIA_EQUIPO,c,e.getCategoria());
+            long asignado=s.createSelectionQuery("select coalesce(sum(d.cantidad),0) from DotacionEquipo d where d.equipo.id=:id",Long.class)
+                .setParameter("id",id==null ? -1 : id).getSingleResult();
+            if (cantidad<asignado) throw new IllegalArgumentException("El inventario total no puede ser menor que las unidades ya distribuidas ("+asignado+"). Retira primero existencias de las unidades.");
+            if (asignado>0 && estado!=EstadoEquipo.OPERATIVO) throw new IllegalArgumentException("Retira el equipo de las unidades antes de cambiar su estado.");
+            ConsultasCabina.ConfiguracionService.validar(s,GrupoCatalogo.CATEGORIA_EQUIPO,c,e.getCategoria());
             e.setNombre(n); e.setCategoria(c); e.setCantidad(cantidad); e.setEstado(estado);
-            e.setUnidad(unidadId == null ? null : new UnidadDao().buscar(s,unidadId));
             // ultimoMantenimiento solo cambia al registrar un mantenimiento.
             if (id == null) dao.crear(s,e); return null;
         });

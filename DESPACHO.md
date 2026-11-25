@@ -1,10 +1,10 @@
 # Despacho, unidades y Otros servicios — Josué
 
-Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL, sin dependencias nuevas.
+Implementado en Java 21, JavaFX/FXML, Hibernate y PostgreSQL. La exportación Excel usa Apache POI y los reportes PDF se generan con JasperReports.
 
 ## Preparación y uso
 
-Para una base existente, aplicar las migraciones pendientes de `database/migrations/` en orden hasta la 006. La 003 crea las tablas de despacho, la 005 incorpora la disponibilidad del personal y la 006 distingue las salidas de servicio de las de emergencia. Para una base vacía, `database/schema.sql` ya incluye estas tablas: no ejecutar también la migración 003. Se conserva el historial de `asignacion`; no se inventan horarios para registros antiguos.
+Para una base existente, aplicar las migraciones pendientes de `database/migrations/` en orden hasta la 008. La 008 crea `dotacion_equipo`, copia allí las dotaciones anteriores y deja `equipo.cantidad` como existencias totales. Para una base vacía, `database/schema.sql` ya incluye las tablas y `datos_prueba.sql` carga la distribución ficticia. Mantener `hibernate.hbm2ddl.auto=validate`.
 
 Se mantiene `hibernate.hbm2ddl.auto=validate`. La conexión acepta las propiedades locales de `hibernate.properties`; las claves `db.*` de `config.properties` tienen prioridad y las variables `BCBM_DB_*` tienen prioridad sobre ambas. La contraseña vacía se admite si PostgreSQL local lo permite. No subir credenciales.
 
@@ -45,7 +45,11 @@ La ficha actual de Emergencias consulta también la tripulación de las nuevas s
 
 ## Reportes de cabina
 
-El menú Reportes de cabina permite consultar un mes y exportar sus tres resultados en CSV. Unidades y Personal cuentan salidas por tipo de actividad. Cada integrante cuenta una vez por salida, aunque también figure como jefe u operador. Emergencias cuenta actas por tipo y por mes de apertura, incluso cuando intervienen varias unidades. El resumen muestra también los empates. Las asignaciones antiguas que carecen de un movimiento de salida se conservan en la ficha de la emergencia.
+El menú Reportes de cabina permite filtrar desde/hasta (fechas inclusivas), exportar un libro `.xlsx` con hojas RESUMEN, UNIDADES, EMERGENCIAS y PERSONAL, y generar un PDF con JasperReports agrupado por sección. El selector solo cambia la tabla en pantalla; ambas exportaciones contienen el reporte completo. El Excel incluye el período, criterios de conteo, encabezados con estilo, filtros y encabezados congelados. El resumen muestra actas, salidas de emergencia, otros servicios, unidades movilizadas, personal distinto y participaciones. Unidades y Personal cuentan salidas y participaciones por fecha de salida. Cada integrante cuenta una vez por salida. Emergencias cuenta actas por tipo y fecha de apertura; muestra el total de actas del período y el porcentaje de cada tipo.
+
+En Unidades el porcentaje corresponde a las salidas por tipo dentro de cada unidad; en Personal, a las participaciones por tipo dentro de cada persona; en Emergencias, a las actas de ese tipo sobre todas las actas del período. La tabla de pantalla cambia sus encabezados según la sección para identificar qué mide cada columna.
+
+La plantilla del PDF está en `src/main/resources/edu/ni/uam/proyectofinalferrogest/reports/reporte-cabina.jrxml`; Maven la compila a `.jasper` durante `process-resources` para cargarla desde Java sin compilar expresiones al ejecutar la aplicación. El PDF incluye resumen general, criterios temporales, totales y porcentajes por sección, y paginación.
 
 ## Reglas que deben confirmar con el puesto de mando
 
