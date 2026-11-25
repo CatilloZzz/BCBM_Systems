@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<TabPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReporteEquiposDatosController" tabClosingPolicy="UNAVAILABLE" styleClass="settings-tabs">
+ <Tab text="Inventario"><TableView fx:id="inventario" fixedCellSize="44"><placeholder><Label text="Sin registros para esta consulta."/></placeholder><columns>
+  <TableColumn fx:id="iEquipo" text="Equipo" prefWidth="220"/>
+  <TableColumn fx:id="iCategoria" text="Categoría" prefWidth="150"/>
+  <TableColumn fx:id="iEstado" text="Estado" prefWidth="130"/>
+  <TableColumn fx:id="iTotal" text="Total" prefWidth="100"/>
+  <TableColumn fx:id="iAsignado" text="Asignadas" prefWidth="110"/>
+  <TableColumn fx:id="iDisponible" text="Disponibles" prefWidth="110"/>
+ </columns></TableView></Tab>
+ <Tab text="Dotación por unidad"><TableView fx:id="dotacion" fixedCellSize="44"><placeholder><Label text="Sin registros para esta consulta."/></placeholder><columns>
+  <TableColumn fx:id="dEquipo" text="Equipo" prefWidth="350"/>
+  <TableColumn fx:id="dUnidad" text="Unidad" prefWidth="200"/>
+  <TableColumn fx:id="dCantidad" text="Piezas asignadas" prefWidth="200"/>
+ </columns></TableView></Tab>
+ <Tab text="Plan y vencidos"><TableView fx:id="pendientes" fixedCellSize="44"><placeholder><Label text="Sin registros para esta consulta."/></placeholder><columns>
+  <TableColumn fx:id="pEquipo" text="Equipo" prefWidth="220"/>
+  <TableColumn fx:id="pUltima" text="Última revisión" prefWidth="130"/>
+  <TableColumn fx:id="pFecha" text="Próxima revisión" prefWidth="130"/>
+  <TableColumn fx:id="pEstado" text="Situación" prefWidth="120"/>
+  <TableColumn fx:id="pDescripcion" text="Descripción" prefWidth="300"/>
+ </columns></TableView></Tab>
+ <Tab text="Historial del período"><TableView fx:id="historial" fixedCellSize="44"><placeholder><Label text="Sin registros para esta consulta."/></placeholder><columns>
+  <TableColumn fx:id="hEquipo" text="Equipo" prefWidth="220"/>
+  <TableColumn fx:id="hFecha" text="Fecha" prefWidth="130"/>
+  <TableColumn fx:id="hProxima" text="Próxima revisión" prefWidth="130"/>
+  <TableColumn fx:id="hDescripcion" text="Descripción" prefWidth="300"/>
+  <TableColumn fx:id="hResponsable" text="Registró" prefWidth="150"/>
+ </columns></TableView></Tab>
+</TabPane>

@@ -11,6 +11,7 @@
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
         <Button text="Vista previa y exportación Excel" onAction="#exportar" styleClass="primary"/>
         <Button text="Vista previa y exportación PDF" onAction="#exportarPdf" styleClass="secondary"/>
+        <Button fx:id="reporteEquiposButton" text="Equipos y mantenimiento" onAction="#reporteEquipos" styleClass="secondary"/>
         <Button text="Participación del personal" onAction="#previsualizarPersonal" styleClass="secondary"/>
     </FlowPane>
 
