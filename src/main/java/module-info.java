@@ -5,6 +5,7 @@ module edu.ni.uam.proyectofinalferrogest {
 
     // Servicios de Java utilizados por la persistencia
     requires java.sql;
+    requires java.desktop;
     requires java.net.http;
     requires com.google.gson;
     requires java.logging;
