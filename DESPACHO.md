@@ -76,3 +76,15 @@ La pestaña Emergencias administra el catálogo compartido de tipos. Unidades pe
 En Operadores se selecciona una persona y se autorizan todas las unidades (incluidas las futuras) o unidades concretas mediante selección múltiple. Sin autorizaciones, el personal participa como tripulante. El despacho filtra operadores disponibles y autorizados, y vuelve a comprobar el permiso dentro de la transacción. Los permisos nuevos afectan a las siguientes salidas y conservan los movimientos ya registrados.
 
 La migración 007 incorpora únicamente opciones existentes y autorizaciones demostradas por salidas históricas. En una base vacía, los catálogos se completan desde Configuración antes de registrar personal, equipos, unidades y servicios.
+
+## Reporte individual de equipos y mantenimiento (Rafa)
+
+Se abre en Reportes de cabina mediante Equipos y mantenimiento. La ventana ofrece inventario, dotación por unidad, plan de mantenimiento e historial. Vista previa permite revisar el PDF paginado y los datos, y guardar PDF o un Excel de cinco hojas.
+
+El inventario es una instantánea actual de las existencias; el esquema no contiene movimientos históricos suficientes para reconstruir existencias pasadas. Total incluye piezas de baja. Disponibles cuenta solo piezas operativas sin asignar. Asignadas suma las dotaciones parciales, sin multiplicar cantidades por el número de mantenimientos. Reparación cuenta las piezas con estado EN_REPARACION.
+
+Las fechas seleccionadas filtran las revisiones registradas y las próximas revisiones programadas. El plan toma la fila más reciente por fecha de mantenimiento e ID de cada equipo, excluye bajas e incluye revisiones vencidas anteriores al inicio del período. Una revisión posterior sin próxima fecha deja sin programación al equipo. Las exportaciones usan la misma consulta inmutable que se muestra, aunque se cambien los selectores después.
+
+Las consultas exigen una cuenta activa de administración o despacho, validan el período y usan una transacción de lectura repetible. No requieren cambios en la base de datos.
+
+Pruebas adicionales verifican inventario sin duplicados, asignaciones parciales, reparación, bajas, programación reemplazada, permisos, períodos vacíos, PDF y números y fechas de Excel.
