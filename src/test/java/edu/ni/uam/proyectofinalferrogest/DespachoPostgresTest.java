@@ -165,6 +165,42 @@ class DespachoPostgresTest {
         assertEquals(1.0,filas.stream().mapToDouble(ReporteCabinaService.Fila::porcentaje).sum(),0.00001);
         assertEquals(2.0/3,filas.stream().filter(f->f.grupo().equals("Accidente")).findFirst().orElseThrow().porcentaje(),0.00001);
     }
+    @Test void reporteEquiposNoDuplicaInventarioYUsaLaUltimaProgramacion() {
+        LocalDate hoy=LocalDate.now();
+        factory.inTransaction(s->{
+            s.createNativeMutationQuery("""
+                insert into equipo(nombre,categoria,cantidad,estado) values
+                ('Manguera','Extinción',10,'OPERATIVO'),('Radio','Comunicación',4,'EN_REPARACION'),
+                ('Casco','Protección',2,'BAJA'),('Linterna','Iluminación',6,'OPERATIVO')
+                """).executeUpdate();
+            s.createNativeMutationQuery("insert into dotacion_equipo(equipo_id,unidad_id,cantidad) values (1,1,3),(1,2,2)").executeUpdate();
+            s.createNativeMutationQuery("""
+                insert into mantenimiento_equipo(equipo_id,fecha,descripcion,proxima_fecha,registrado_por) values
+                (1,current_date-20,'Anterior',current_date-1,1),
+                (1,current_date-1,'Última',current_date+5,1),
+                (2,current_date-10,'Pendiente',current_date-1,1),
+                (3,current_date-10,'Equipo dado de baja',current_date+1,1),
+                (4,current_date-20,'Programación anterior',current_date+1,1),
+                (4,current_date-1,'Sin próxima programación',null,1)
+                """).executeUpdate();
+        });
+        var servicioEquipos=new ReporteEquiposService(factory);
+        var datos=servicioEquipos.consultar(sesion,hoy.minusDays(30),hoy.plusDays(30));
+        assertEquals(22,datos.total()); assertEquals(5,datos.asignado());
+        assertEquals(11,datos.disponible()); assertEquals(4,datos.reparacion()); assertEquals(2,datos.baja());
+        assertEquals(2,datos.dotacion().size()); assertEquals(6,datos.historial().size());
+        assertEquals(2,datos.pendientes().size()); assertEquals(1,datos.vencidos());
+        assertEquals(hoy.plusDays(5),datos.pendientes().stream().filter(m->m.equipo().equals("Manguera")).findFirst().orElseThrow().proxima());
+        assertTrue(datos.inventario().stream().filter(i->i.equipo().equals("Radio")).allMatch(i->i.disponible()==0));
+        assertTrue(servicioEquipos.consultar(sesion,hoy,hoy.plusDays(30)).historial().isEmpty());
+        assertThrows(SecurityException.class,()->servicioEquipos.consultar(new SesionUsuario(2,"bombero",Rol.ADMIN),hoy,hoy));
+        assertThrows(IllegalArgumentException.class,()->servicioEquipos.consultar(sesion,hoy.plusDays(1),hoy));
+    }
+    @Test void reporteEquiposSinRegistrosProduceUnResultadoVacio() {
+        var datos=new ReporteEquiposService(factory).consultar(sesion,LocalDate.now(),LocalDate.now());
+        assertEquals(0,datos.total()); assertEquals(0,datos.disponible());
+        assertTrue(datos.pendientes().isEmpty()); assertTrue(datos.historial().isEmpty());
+    }
     @Test void actaParcialFiltrosYDespachoDesdeLaFicha() {
         var dao = new EmergenciaDao(factory);
         var parcial = new Emergencia.DatosActa("A-023", fecha, null, null, null, null, null, null, null, null, null);
