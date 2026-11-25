@@ -4,6 +4,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperPrintManager;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
@@ -22,11 +23,17 @@ import java.util.function.Predicate;
 /** Genera reportes PDF con JasperReports usando los datos ya consultados por la aplicación. */
 public class ReporteJasperService {
     private static final String REPORTE_COMPILADO = "/edu/ni/uam/proyectofinalferrogest/reports/reporte-cabina.jasper";
+    private static final String REPORTE_PERSONAL = "/edu/ni/uam/proyectofinalferrogest/reports/reporte-personal.jasper";
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public void exportarCabina(List<ReporteCabinaService.Fila> filas, LocalDate desde, LocalDate hasta, Path destino)
             throws IOException, JRException {
-        if (filas == null || desde == null || hasta == null || destino == null || desde.isAfter(hasta))
+        exportarPdf(prepararCabina(filas, desde, hasta), destino);
+    }
+
+    public JasperPrint prepararCabina(List<ReporteCabinaService.Fila> filas, LocalDate desde, LocalDate hasta)
+            throws IOException, JRException {
+        if (filas == null || desde == null || hasta == null || desde.isAfter(hasta))
             throw new IllegalArgumentException("Selecciona un período válido antes de generar el PDF.");
 
         try (InputStream reporteCompilado = ReporteJasperService.class.getResourceAsStream(REPORTE_COMPILADO)) {
@@ -48,10 +55,52 @@ public class ReporteJasperService {
             Map<String, Object> parametros = new HashMap<>();
             parametros.put("PERIODO", FECHA.format(desde) + " al " + FECHA.format(hasta));
             parametros.put("RESUMEN", resumen(filas));
-            JasperPrint documento = JasperFillManager.fillReport(
-                    reporte, parametros, new JRMapCollectionDataSource(registros));
-            JasperExportManager.exportReportToPdfFile(documento, destino.toString());
+            return JasperFillManager.fillReport(reporte, parametros, new JRMapCollectionDataSource(registros));
         }
+    }
+
+    public JasperPrint prepararPersonal(List<ReportePersonalService.Fila> filas, LocalDate desde, LocalDate hasta)
+            throws IOException, JRException {
+        if (filas == null || desde == null || hasta == null || desde.isAfter(hasta))
+            throw new IllegalArgumentException("Selecciona un período válido antes de generar el PDF.");
+        try (InputStream reporteCompilado = ReporteJasperService.class.getResourceAsStream(REPORTE_PERSONAL)) {
+            if (reporteCompilado == null) throw new IOException("No se encontró la plantilla Jasper del reporte de personal.");
+            JasperReport reporte = (JasperReport) JRLoader.loadObject(reporteCompilado);
+            List<Map<String, ?>> registros = new ArrayList<>();
+            for (ReportePersonalService.Fila fila : filas) {
+                Map<String, Object> registro = new HashMap<>();
+                registro.put("persona", fila.persona());
+                registro.put("organizacion", fila.organizacion());
+                registro.put("emergencias", fila.emergencias());
+                registro.put("otrosServicios", fila.otrosServicios());
+                registro.put("participaciones", fila.participaciones());
+                registro.put("porcentaje", fila.porcentaje());
+                registros.add(registro);
+            }
+            Map<String, Object> parametros = new HashMap<>();
+            parametros.put("PERIODO", FECHA.format(desde) + " al " + FECHA.format(hasta));
+            parametros.put("RESUMEN", resumenPersonal(filas));
+            return JasperFillManager.fillReport(reporte, parametros, new JRMapCollectionDataSource(registros));
+        }
+    }
+
+    public void exportarPdf(JasperPrint reporte, Path destino) throws JRException {
+        if (reporte == null || destino == null) throw new IllegalArgumentException("El reporte y el destino son obligatorios.");
+        JasperExportManager.exportReportToPdfFile(reporte, destino.toString());
+    }
+
+    public static java.awt.Image renderizarPagina(JasperPrint reporte, int pagina) throws JRException {
+        if (reporte == null || pagina < 0 || pagina >= reporte.getPages().size())
+            throw new IllegalArgumentException("La página solicitada no existe.");
+        return JasperPrintManager.printPageToImage(reporte, pagina, 1.25f);
+    }
+
+    private String resumenPersonal(List<ReportePersonalService.Fila> filas) {
+        long participaciones = filas.stream().mapToLong(ReportePersonalService.Fila::participaciones).sum();
+        long emergencias = filas.stream().mapToLong(ReportePersonalService.Fila::emergencias).sum();
+        long servicios = filas.stream().mapToLong(ReportePersonalService.Fila::otrosServicios).sum();
+        return "Resumen: " + filas.size() + " personas participantes · " + participaciones
+                + " participaciones · " + emergencias + " en emergencias · " + servicios + " en otros servicios.";
     }
 
     private String resumen(List<ReporteCabinaService.Fila> filas) {

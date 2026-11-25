@@ -9,8 +9,10 @@
         </VBox>
 
         <ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
-        <Button text="Exportar reporte completo a Excel" onAction="#exportar" styleClass="primary"/>
-        <Button text="Generar PDF completo · JasperReports" onAction="#exportarPdf" styleClass="secondary"/>
+        <Button text="Vista previa y exportación Excel" onAction="#exportar" styleClass="primary"/>
+        <Button text="Vista previa y exportación PDF" onAction="#exportarPdf" styleClass="secondary"/>
+        <Button fx:id="reporteEquiposButton" text="Equipos y mantenimiento" onAction="#reporteEquipos" styleClass="secondary"/>
+        <Button text="Participación del personal" onAction="#previsualizarPersonal" styleClass="secondary"/>
     </FlowPane>
 
     <HBox styleClass="equipment-picker" alignment="CENTER_LEFT" spacing="12">

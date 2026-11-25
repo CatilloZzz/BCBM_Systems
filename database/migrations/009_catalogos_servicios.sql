@@ -9,11 +9,6 @@ WITH candidatos(grupo, nombre) AS (
     SELECT 'DEPARTAMENTO', escuadra_departamento FROM otro_servicio
       WHERE escuadra_departamento IS NOT NULL AND btrim(escuadra_departamento) <> ''
     UNION ALL
-    SELECT 'DEPARTAMENTO', nombre FROM (VALUES
-        ('Compañía Central'),
-        ('Compañía Norte')
-    ) AS departamentos(nombre)
-    UNION ALL
     SELECT 'TIPO_SERVICIO', tipo FROM otro_servicio WHERE tipo IS NOT NULL AND btrim(tipo) <> ''
     UNION ALL
     SELECT 'TIPO_SERVICIO', nombre FROM (VALUES
@@ -42,4 +37,3 @@ WHERE NOT EXISTS (
 );
 
 COMMIT;
-

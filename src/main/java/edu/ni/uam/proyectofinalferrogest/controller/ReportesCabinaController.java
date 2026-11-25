@@ -6,11 +6,13 @@ import edu.ni.uam.proyectofinalferrogest.util.*;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
+import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
@@ -70,67 +72,133 @@ public class ReportesCabinaController {
             default -> { cantidad.setText("Salidas del tipo"); total.setText("Total de la unidad"); porcentaje.setText("% de salidas"); }
         }
     }
-    @FXML private void exportar() {
-        if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
-        LocalDate inicio=consultadoDesde,fin=consultadoHasta;
-        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte completo de cabina en Excel");
-        chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".xlsx");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Libro Excel (*.xlsx)","*.xlsx"));
-        File archivo=chooser.showSaveDialog(root.getScene().getWindow()); if (archivo==null) return;
-        if (!archivo.getName().toLowerCase(Locale.ROOT).endsWith(".xlsx")) archivo=new File(archivo.getParentFile(),archivo.getName()+".xlsx");
-        try (Workbook libro=new XSSFWorkbook()) {
-            CellStyle titulo=libro.createCellStyle(); Font fuenteTitulo=libro.createFont(); fuenteTitulo.setBold(true); fuenteTitulo.setFontHeightInPoints((short)16); fuenteTitulo.setColor(IndexedColors.WHITE.getIndex());
-            titulo.setFont(fuenteTitulo); titulo.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex()); titulo.setFillPattern(FillPatternType.SOLID_FOREGROUND); titulo.setVerticalAlignment(VerticalAlignment.CENTER);
-            CellStyle encabezado=libro.createCellStyle(); Font fuente=libro.createFont(); fuente.setBold(true); fuente.setColor(IndexedColors.WHITE.getIndex()); encabezado.setFont(fuente); encabezado.setFillForegroundColor(IndexedColors.BLUE.getIndex()); encabezado.setFillPattern(FillPatternType.SOLID_FOREGROUND); encabezado.setAlignment(HorizontalAlignment.CENTER);
-            CellStyle numerico=libro.createCellStyle(); numerico.setDataFormat(libro.createDataFormat().getFormat("#,##0"));
-            CellStyle porcentajeStyle=libro.createCellStyle(); porcentajeStyle.setDataFormat(libro.createDataFormat().getFormat("0.0%"));
-            crearResumenExcel(libro,inicio,fin,filas,titulo,encabezado,numerico);
-            for (String nombre:List.of("Unidades","Emergencias","Personal")) {
-                Sheet sheet=libro.createSheet(nombre.toUpperCase(Locale.ROOT));
-                Row tituloFila=sheet.createRow(0); tituloFila.setHeightInPoints(28); tituloFila.createCell(0).setCellValue("BCBM · REPORTE DE CABINA · "+nombre.toUpperCase(Locale.ROOT)); tituloFila.getCell(0).setCellStyle(titulo);
-                sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0,0,0,4));
-                Row periodoFila=sheet.createRow(1); periodoFila.createCell(0).setCellValue("Período: "+FECHA.format(inicio)+" hasta "+FECHA.format(fin)); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1,1,0,4));
-                Row criterio=sheet.createRow(2); criterio.createCell(0).setCellValue(nombre.equals("Emergencias")
-                    ? "Actas contadas por fecha de apertura; porcentaje sobre todas las actas del período."
-                    : "Salidas y participaciones contadas por fecha de salida; porcentaje dentro de cada grupo.");
-                sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2,2,0,4));
-                String[] nombres=switch(nombre) {
-                    case "Emergencias" -> new String[]{"Tipo de emergencia","Medida","Actas del tipo","Actas del período","Porcentaje de actas"};
-                    case "Personal" -> new String[]{"Persona","Tipo de actividad","Participaciones","Total de la persona","Porcentaje de participaciones"};
-                    default -> new String[]{"Unidad","Tipo de actividad","Salidas del tipo","Total de la unidad","Porcentaje de salidas"};
-                };
-                Row header=sheet.createRow(4);
-                for (int i=0;i<nombres.length;i++) { header.createCell(i).setCellValue(nombres[i]); header.getCell(i).setCellStyle(encabezado); }
-                int row=5;
-                for (Fila f:filas.stream().filter(x->x.seccion().equals(nombre)).toList()) {
-                    Row r=sheet.createRow(row++); r.createCell(0).setCellValue(f.grupo()); r.createCell(1).setCellValue(f.tipo());
-                    r.createCell(2).setCellValue(f.cantidad()); r.createCell(3).setCellValue(f.total()); r.createCell(4).setCellValue(f.porcentaje());
-                    r.getCell(2).setCellStyle(numerico); r.getCell(3).setCellStyle(numerico); r.getCell(4).setCellStyle(porcentajeStyle);
-                }
-                if (row==5) { Row empty=sheet.createRow(5); empty.createCell(0).setCellValue("Sin registros en el período"); }
-                sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(4,Math.max(4,row-1),0,4)); sheet.createFreezePane(0,5);
-                sheet.setColumnWidth(0,32*256); sheet.setColumnWidth(1,34*256); sheet.setColumnWidth(2,21*256); sheet.setColumnWidth(3,24*256); sheet.setColumnWidth(4,27*256);
-            }
-            try (OutputStream out=Files.newOutputStream(archivo.toPath())) { libro.write(out); }
-            resumen.setText("Excel guardado: "+archivo.getName());
-        } catch (IOException ex) { Ui.seguro(root,()->{ throw new IllegalStateException("No se pudo guardar el Excel. Revisa la carpeta de destino.",ex); }); }
+    @FXML private void exportar() { previsualizarCabina(); }
+    @FXML private void exportarPdf() { previsualizarCabina(); }
+
+    private void previsualizarCabina() {
+        if (filas.isEmpty() || consultadoDesde == null || consultadoHasta == null) {
+            Ui.seguro(root,()->{ throw new IllegalArgumentException("Aplica primero un período que tenga datos para previsualizar."); });
+            return;
+        }
+        LocalDate inicio=consultadoDesde, fin=consultadoHasta;
+        List<Fila> datos=List.copyOf(filas);
+        Ui.ejecutar(root,()->{
+            try { return new ReporteJasperService().prepararCabina(datos,inicio,fin); }
+            catch (IOException|JRException ex) { throw new IllegalStateException("No se pudo preparar la vista previa del reporte.",ex); }
+        },reporte->ReporteVistaPrevia.mostrar(root,"Reporte de cabina",reporte,tablaCabina(datos),
+                "BCBM-cabina-"+inicio+"-a-"+fin,
+                path->guardarPdf(reporte,path), path->guardarExcelCabina(datos,inicio,fin,path)));
     }
 
-    @FXML private void exportarPdf() {
-        if (filas.isEmpty()) { Ui.seguro(root,()->{ throw new IllegalArgumentException("No hay datos para exportar. Aplica primero el filtro de fechas."); }); return; }
-        LocalDate inicio=consultadoDesde,fin=consultadoHasta;
-        FileChooser chooser=new FileChooser(); chooser.setTitle("Guardar reporte completo de cabina en PDF");
-        chooser.setInitialFileName("BCBM-cabina-"+inicio+"-a-"+fin+".pdf");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF (*.pdf)","*.pdf"));
-        File archivo=chooser.showSaveDialog(root.getScene().getWindow()); if (archivo==null) return;
-        if (!archivo.getName().toLowerCase(Locale.ROOT).endsWith(".pdf")) archivo=new File(archivo.getParentFile(),archivo.getName()+".pdf");
-        Path destino=archivo.toPath(); String nombre=archivo.getName(); List<Fila> datos=List.copyOf(filas);
+    @FXML private void reporteEquipos() { new ReporteEquiposController(sesion).mostrar(root); }
+
+    @FXML private void previsualizarPersonal() {
+        LocalDate inicio=desde.getValue(), fin=hasta.getValue();
+        if (inicio==null || fin==null || inicio.isAfter(fin)) {
+            Ui.seguro(root,()->{ throw new IllegalArgumentException("Selecciona un rango de fechas válido antes de generar el reporte."); });
+            return;
+        }
+        periodo.setText(FECHA.format(inicio)+" – "+FECHA.format(fin));
         Ui.ejecutar(root,()->{
-            try { new ReporteJasperService().exportarCabina(datos,inicio,fin,destino); }
-            catch (IOException|JRException ex) { throw new IllegalStateException("No se pudo generar el reporte PDF con JasperReports.",ex); }
-            return nombre;
-        },guardado->resumen.setText("PDF generado con JasperReports: "+guardado));
+            try {
+                List<ReportePersonalService.Fila> datos=new ReportePersonalService(HibernateUtil.getSessionFactory()).consultar(sesion,inicio,fin);
+                JasperPrint reporte=new ReporteJasperService().prepararPersonal(datos,inicio,fin);
+                return new PreparacionPersonal(datos,reporte);
+            } catch (IOException|JRException ex) {
+                throw new IllegalStateException("No se pudo preparar el reporte de participación del personal.",ex);
+            }
+        },resultado->ReporteVistaPrevia.mostrar(root,"Participación del personal",resultado.reporte(),
+                tablaPersonal(resultado.datos()),"BCBM-personal-"+inicio+"-a-"+fin,
+                path->guardarPdf(resultado.reporte(),path),path->guardarExcelPersonal(resultado.datos(),inicio,fin,path)));
     }
+
+    private record PreparacionPersonal(List<ReportePersonalService.Fila> datos,JasperPrint reporte) {}
+
+    private Node tablaCabina(List<Fila> datos) {
+        TableView<Fila> vista=new TableView<>();
+        vista.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        TableColumn<Fila,String> cGrupo=new TableColumn<>("Unidad, persona o tipo");
+        TableColumn<Fila,String> cTipo=new TableColumn<>("Actividad");
+        TableColumn<Fila,String> cCantidad=new TableColumn<>("Cantidad");
+        TableColumn<Fila,String> cTotal=new TableColumn<>("Total");
+        TableColumn<Fila,String> cPorcentaje=new TableColumn<>("Porcentaje");
+        Ui.columna(cGrupo,Fila::grupo); Ui.columna(cTipo,Fila::tipo); Ui.columna(cCantidad,Fila::cantidad);
+        Ui.columna(cTotal,Fila::total); Ui.columna(cPorcentaje,f->String.format(Locale.forLanguageTag("es-NI"),"%.1f%%",f.porcentaje()*100));
+        vista.getColumns().setAll(cGrupo,cTipo,cCantidad,cTotal,cPorcentaje); vista.getItems().setAll(datos);
+        return vista;
+    }
+
+    private Node tablaPersonal(List<ReportePersonalService.Fila> datos) {
+        TableView<ReportePersonalService.Fila> vista=new TableView<>();
+        vista.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        TableColumn<ReportePersonalService.Fila,String> persona=new TableColumn<>("Bombero o bombera");
+        TableColumn<ReportePersonalService.Fila,String> organizacion=new TableColumn<>("Compañía y escuadra");
+        TableColumn<ReportePersonalService.Fila,String> emergencias=new TableColumn<>("Emergencias");
+        TableColumn<ReportePersonalService.Fila,String> servicios=new TableColumn<>("Otros servicios");
+        TableColumn<ReportePersonalService.Fila,String> total=new TableColumn<>("Participaciones");
+        TableColumn<ReportePersonalService.Fila,String> porcentaje=new TableColumn<>("% total");
+        Ui.columna(persona,ReportePersonalService.Fila::persona); Ui.columna(organizacion,ReportePersonalService.Fila::organizacion);
+        Ui.columna(emergencias,ReportePersonalService.Fila::emergencias); Ui.columna(servicios,ReportePersonalService.Fila::otrosServicios);
+        Ui.columna(total,ReportePersonalService.Fila::participaciones);
+        Ui.columna(porcentaje,f->String.format(Locale.forLanguageTag("es-NI"),"%.1f%%",f.porcentaje()*100));
+        vista.getColumns().setAll(persona,organizacion,emergencias,servicios,total,porcentaje);
+        vista.getItems().setAll(datos);
+        if (datos.isEmpty()) vista.setPlaceholder(new Label("Sin participaciones para este período."));
+        return vista;
+    }
+
+    private void guardarPdf(JasperPrint reporte,Path destino) {
+        try { new ReporteJasperService().exportarPdf(reporte,destino); }
+        catch (JRException ex) { throw new IllegalStateException("No se pudo guardar el PDF. Revisa la carpeta de destino.",ex); }
+    }
+
+    private void guardarExcelCabina(List<Fila> datos,LocalDate inicio,LocalDate fin,Path destino) {
+        try (Workbook libro=new XSSFWorkbook()) {
+            CellStyle titulo=libro.createCellStyle(); Font ft=libro.createFont(); ft.setBold(true); ft.setFontHeightInPoints((short)16); ft.setColor(IndexedColors.WHITE.getIndex());
+            titulo.setFont(ft); titulo.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex()); titulo.setFillPattern(FillPatternType.SOLID_FOREGROUND); titulo.setVerticalAlignment(VerticalAlignment.CENTER);
+            CellStyle encabezado=libro.createCellStyle(); Font fe=libro.createFont(); fe.setBold(true); fe.setColor(IndexedColors.WHITE.getIndex()); encabezado.setFont(fe); encabezado.setFillForegroundColor(IndexedColors.BLUE.getIndex()); encabezado.setFillPattern(FillPatternType.SOLID_FOREGROUND); encabezado.setAlignment(HorizontalAlignment.CENTER);
+            CellStyle numerico=libro.createCellStyle(); numerico.setDataFormat(libro.createDataFormat().getFormat("#,##0"));
+            CellStyle porcentajeStyle=libro.createCellStyle(); porcentajeStyle.setDataFormat(libro.createDataFormat().getFormat("0.0%"));
+            crearResumenExcel(libro,inicio,fin,datos,titulo,encabezado,numerico);
+            for (String nombre:List.of("Unidades","Emergencias","Personal")) {
+                Sheet sheet=libro.createSheet(nombre.toUpperCase(Locale.ROOT));
+                Row title=sheet.createRow(0); title.setHeightInPoints(28); title.createCell(0).setCellValue("BCBM · REPORTE DE CABINA · "+nombre.toUpperCase(Locale.ROOT)); title.getCell(0).setCellStyle(titulo);
+                sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0,0,0,4));
+                Row period=sheet.createRow(1); period.createCell(0).setCellValue("Período: "+FECHA.format(inicio)+" hasta "+FECHA.format(fin)); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1,1,0,4));
+                Row criterio=sheet.createRow(2); criterio.createCell(0).setCellValue(nombre.equals("Emergencias") ? "Actas por fecha de apertura; porcentaje sobre actas del período." : "Salidas y participaciones por fecha de salida; porcentaje dentro de cada grupo."); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2,2,0,4));
+                String[] nombres=switch(nombre) { case "Emergencias" -> new String[]{"Tipo de emergencia","Medida","Actas del tipo","Actas del período","Porcentaje de actas"}; case "Personal" -> new String[]{"Persona","Tipo de actividad","Participaciones","Total de la persona","Porcentaje de participaciones"}; default -> new String[]{"Unidad","Tipo de actividad","Salidas del tipo","Total de la unidad","Porcentaje de salidas"}; };
+                Row header=sheet.createRow(4); for(int i=0;i<nombres.length;i++){header.createCell(i).setCellValue(nombres[i]);header.getCell(i).setCellStyle(encabezado);}
+                int row=5; for(Fila f:datos.stream().filter(x->x.seccion().equals(nombre)).toList()){Row r=sheet.createRow(row++);r.createCell(0).setCellValue(f.grupo());r.createCell(1).setCellValue(f.tipo());r.createCell(2).setCellValue(f.cantidad());r.createCell(3).setCellValue(f.total());r.createCell(4).setCellValue(f.porcentaje());r.getCell(2).setCellStyle(numerico);r.getCell(3).setCellStyle(numerico);r.getCell(4).setCellStyle(porcentajeStyle);}
+                if(row==5){Row empty=sheet.createRow(5);empty.createCell(0).setCellValue("Sin registros en el período");}
+                sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(4,Math.max(4,row-1),0,4));sheet.createFreezePane(0,5);
+                sheet.setColumnWidth(0,32*256);sheet.setColumnWidth(1,34*256);sheet.setColumnWidth(2,21*256);sheet.setColumnWidth(3,24*256);sheet.setColumnWidth(4,27*256);
+            }
+            try(OutputStream out=Files.newOutputStream(destino)){libro.write(out);}
+        } catch(IOException ex) { throw new IllegalStateException("No se pudo guardar el Excel. Revisa la carpeta de destino.",ex); }
+    }
+
+    private void guardarExcelPersonal(List<ReportePersonalService.Fila> datos,LocalDate inicio,LocalDate fin,Path destino) {
+        try(Workbook libro=new XSSFWorkbook()) {
+            Sheet sheet=libro.createSheet("PERSONAL");
+            CellStyle titulo=libro.createCellStyle(); Font ft=libro.createFont(); ft.setBold(true); ft.setFontHeightInPoints((short)16); ft.setColor(IndexedColors.WHITE.getIndex());
+            titulo.setFont(ft); titulo.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex()); titulo.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            CellStyle header=libro.createCellStyle(); Font fh=libro.createFont(); fh.setBold(true); fh.setColor(IndexedColors.WHITE.getIndex()); header.setFont(fh); header.setFillForegroundColor(IndexedColors.BLUE.getIndex()); header.setFillPattern(FillPatternType.SOLID_FOREGROUND); header.setAlignment(HorizontalAlignment.CENTER);
+            CellStyle number=libro.createCellStyle(); number.setDataFormat(libro.createDataFormat().getFormat("#,##0"));
+            CellStyle percent=libro.createCellStyle(); percent.setDataFormat(libro.createDataFormat().getFormat("0.0%"));
+            Row titleRow=sheet.createRow(0); titleRow.createCell(0).setCellValue("BCBM · PARTICIPACIÓN DEL PERSONAL"); titleRow.getCell(0).setCellStyle(titulo); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0,0,0,5));
+            Row period=sheet.createRow(1); period.createCell(0).setCellValue("Período: "+FECHA.format(inicio)+" hasta "+FECHA.format(fin)); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1,1,0,5));
+            long all=datos.stream().mapToLong(ReportePersonalService.Fila::participaciones).sum(); long emergencies=datos.stream().mapToLong(ReportePersonalService.Fila::emergencias).sum(); long services=datos.stream().mapToLong(ReportePersonalService.Fila::otrosServicios).sum();
+            Row summary=sheet.createRow(2); summary.createCell(0).setCellValue("Personas participantes: "+datos.size()+" · Participaciones: "+all+" · Emergencias: "+emergencies+" · Otros servicios: "+services); sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2,2,0,5));
+            String[] labels={"Bombero o bombera","Compañía y escuadra","Salidas a emergencias","Salidas a otros servicios","Participaciones totales","% de participaciones"};
+            Row headerRow=sheet.createRow(4); for(int i=0;i<labels.length;i++){headerRow.createCell(i).setCellValue(labels[i]);headerRow.getCell(i).setCellStyle(header);}
+            int row=5; for(ReportePersonalService.Fila f:datos){Row r=sheet.createRow(row++);r.createCell(0).setCellValue(f.persona());r.createCell(1).setCellValue(f.organizacion());r.createCell(2).setCellValue(f.emergencias());r.createCell(3).setCellValue(f.otrosServicios());r.createCell(4).setCellValue(f.participaciones());r.createCell(5).setCellValue(f.porcentaje());for(int i=2;i<=4;i++)r.getCell(i).setCellStyle(number);r.getCell(5).setCellStyle(percent);}
+            if(row==5){Row empty=sheet.createRow(5);empty.createCell(0).setCellValue("Sin participaciones en el período.");}
+            sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(4,Math.max(4,row-1),0,5));sheet.createFreezePane(0,5);
+            int[] widths={31,28,22,24,23,22};for(int i=0;i<widths.length;i++)sheet.setColumnWidth(i,widths[i]*256);
+            try(OutputStream out=Files.newOutputStream(destino)){libro.write(out);}
+        } catch(IOException ex) { throw new IllegalStateException("No se pudo guardar el Excel del personal. Revisa la carpeta de destino.",ex); }
+    }
+
 
     private void crearResumenExcel(Workbook libro,LocalDate inicio,LocalDate fin,List<Fila> datos,
                                    CellStyle titulo,CellStyle encabezado,CellStyle numerico) {
