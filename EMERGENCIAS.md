@@ -30,3 +30,9 @@ En la ficha, **Cerrar acta** solicita la descripción final y el resultado, que 
 5. Abre otra acta y ciérrala como falsa alarma o no atendida sin asignarle unidades.
 
 Commit sugerido `feat: agregar actas y listado mensual de emergencias`. El PR hacia `develops` debe mencionar la migración 004, los filtros, el flujo de cierre y la reutilización del despacho compartido.
+
+## Reporte de emergencias
+
+En **Reportes de cabina**, el botón **Emergencias** abre el reporte individual con el período elegido en la pantalla. Filtra las actas por fecha de apertura, tipo, prioridad y estado, y muestra el número de acta, la dirección y el resultado. Las pestañas **Por tipo**, **Por prioridad**, **Por estado** y **Por resultado** indican cuántas actas hubo de cada categoría, su porcentaje y cuántas siguen abiertas (pendientes o en proceso). El resumen señala el tipo más frecuente y las actas abiertas de fechas anteriores al período.
+
+**Vista previa · PDF y Excel** usa la vista previa compartida de reportes. La plantilla es `reports/reporte-emergencias.jrxml` y el Excel incluye las hojas Resumen, Por tipo, Por prioridad, Por estado, Por resultado y Actas. La prueba `ReporteEmergenciasExportacionTest` verifica ambos formatos sin PostgreSQL.

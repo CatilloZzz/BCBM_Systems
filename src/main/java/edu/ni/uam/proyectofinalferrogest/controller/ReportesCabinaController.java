@@ -90,6 +90,8 @@ public class ReportesCabinaController {
                 path->guardarPdf(reporte,path), path->guardarExcelCabina(datos,inicio,fin,path)));
     }
 
+    @FXML private void reporteEmergencias() { new ReporteEmergenciasController(sesion,desde.getValue(),hasta.getValue()).mostrar(root); }
+
     @FXML private void reporteEquipos() { new ReporteEquiposController(sesion).mostrar(root); }
 
     @FXML private void previsualizarPersonal() {
