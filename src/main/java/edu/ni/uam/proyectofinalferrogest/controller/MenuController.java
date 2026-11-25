@@ -22,6 +22,7 @@ public class MenuController {
     @FXML private Button menuButton;
     @FXML private StackPane contenido;
     @FXML private Label usuario,rol,fecha,seccion;
+    @FXML private Label operacionesSection,administracionSection;
     @FXML private Button emergenciasButton,inicioButton,personalButton,equiposButton,mantenimientoButton,usuariosButton,despachoButton,serviciosButton,unidadesButton,reportesButton,configuracionButton;
     private SesionUsuario sesion;
     private Runnable salir;
@@ -29,12 +30,14 @@ public class MenuController {
     @FXML private void initialize() {
         usuario.setText(sesion.username()); rol.setText(Ui.nombre(sesion.rol()));
         root.widthProperty().addListener((o,a,b) -> {
-            if ((a.doubleValue()<1100)!=(b.doubleValue()<1100)) mostrarMenu(b.doubleValue()>=1100);
+            if (a.doubleValue()==0 || (a.doubleValue()<1100)!=(b.doubleValue()<1100)) mostrarMenu(b.doubleValue()>=1100);
             Ui.visible(fecha,b.doubleValue()>=1000);
         });
         fecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("es-NI"))));
         Ui.visible(usuariosButton,sesion.rol()==Rol.ADMIN);
         Ui.visible(configuracionButton,sesion.rol()==Rol.ADMIN);
+        Ui.visible(administracionSection,sesion.rol()==Rol.ADMIN);
+        Ui.visible(operacionesSection,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(emergenciasButton,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(despachoButton,sesion.rol()!=Rol.BOMBERO);
         Ui.visible(reportesButton,sesion.rol()!=Rol.BOMBERO);
@@ -46,7 +49,8 @@ public class MenuController {
         Ui.seguro(root,() -> {
             Parent vista=pantalla.get();
             ScrollPane scroll=new ScrollPane(vista);
-            scroll.setFitToWidth(true); scroll.setFitToHeight(true);
+            scroll.setFitToWidth(true);
+            scroll.setFitToHeight(!vista.getStyleClass().contains("dashboard-viewport"));
             scroll.getStyleClass().add("page-scroll");
             contenido.getChildren().setAll(scroll); seccion.setText(titulo);
             if (root.getWidth()>0 && root.getWidth()<1100) mostrarMenu(false);

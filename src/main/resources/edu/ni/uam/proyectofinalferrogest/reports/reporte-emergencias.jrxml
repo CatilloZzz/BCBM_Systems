@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="reporte_emergencias_bcbm" pageWidth="842" pageHeight="595" columnWidth="774" leftMargin="34" rightMargin="34" topMargin="24" bottomMargin="24" whenNoDataType="AllSectionsNoDetail">
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <parameter name="FILTROS" class="java.lang.String"/>
+    <parameter name="RESUMEN" class="java.lang.String"/>
+    <parameter name="FRECUENCIA" class="java.lang.String"/>
+    <parameter name="PENDIENTES" class="java.lang.String"/>
+    <parameter name="CORTE" class="java.lang.String"/>
+    <field name="seccion" class="java.lang.String"/>
+    <field name="h1" class="java.lang.String"/>
+    <field name="h2" class="java.lang.String"/>
+    <field name="h3" class="java.lang.String"/>
+    <field name="h4" class="java.lang.String"/>
+    <field name="h5" class="java.lang.String"/>
+    <field name="h6" class="java.lang.String"/>
+    <field name="c1" class="java.lang.String"/>
+    <field name="c2" class="java.lang.String"/>
+    <field name="c3" class="java.lang.String"/>
+    <field name="c4" class="java.lang.String"/>
+    <field name="c5" class="java.lang.String"/>
+    <field name="c6" class="java.lang.String"/>
+    <group name="Seccion" reprintHeaderOnEachPage="true">
+        <expression><![CDATA[$F{seccion}]]></expression>
+        <groupHeader><band height="52">
+            <element kind="textField" x="0" y="6" width="774" height="21" mode="Opaque" backcolor="#F1F4F6" forecolor="#741B24" fontSize="11" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{seccion}]]></expression></element>
+            <element kind="textField" x="0" y="28" width="130" height="24" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontSize="9" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{h1}]]></expression></element>
+            <element kind="textField" x="130" y="28" width="140" height="24" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontSize="9" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{h2}]]></expression></element>
+            <element kind="textField" x="270" y="28" width="90" height="24" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontSize="9" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{h3}]]></expression></element>
+            <element kind="textField" x="360" y="28" width="90" height="24" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontSize="9" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{h4}]]></expression></element>
+            <element kind="textField" x="450" y="28" width="200" height="24" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontSize="9" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{h5}]]></expression></element>
+            <element kind="textField" x="650" y="28" width="124" height="24" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontSize="9" bold="true" vTextAlign="Middle"><expression><![CDATA[$F{h6}]]></expression></element>
+        </band></groupHeader>
+    </group>
+    <title height="122">
+        <element kind="staticText" x="0" y="0" width="774" height="26" fontSize="18" bold="true" forecolor="#9B1C2B"><text><![CDATA[BCBM · REPORTE DE EMERGENCIAS]]></text></element>
+        <element kind="textField" x="0" y="30" width="774" height="17" fontSize="10"><expression><![CDATA["Período: " + $P{PERIODO} + " · " + $P{FILTROS}]]></expression></element>
+        <element kind="textField" x="0" y="50" width="774" height="18" fontSize="11" bold="true"><expression><![CDATA[$P{RESUMEN}]]></expression></element>
+        <element kind="textField" x="0" y="70" width="774" height="16" fontSize="10"><expression><![CDATA[$P{FRECUENCIA}]]></expression></element>
+        <element kind="textField" x="0" y="88" width="774" height="16" fontSize="9"><expression><![CDATA[$P{PENDIENTES}]]></expression></element>
+        <element kind="textField" x="0" y="104" width="774" height="16" fontSize="8" forecolor="#546470"><expression><![CDATA["Las actas se ubican en el período por su fecha de apertura. Estado y resultado al " + $P{CORTE} + "."]]></expression></element>
+    </title>
+    <detail><band height="30" splitType="Stretch">
+        <element kind="textField" x="0" y="3" width="124" height="24" fontSize="9" textAdjust="StretchHeight"><expression><![CDATA[$F{c1}]]></expression></element>
+        <element kind="textField" x="130" y="3" width="134" height="24" fontSize="9" textAdjust="StretchHeight"><expression><![CDATA[$F{c2}]]></expression></element>
+        <element kind="textField" x="270" y="3" width="84" height="24" fontSize="9" textAdjust="StretchHeight"><expression><![CDATA[$F{c3}]]></expression></element>
+        <element kind="textField" x="360" y="3" width="84" height="24" fontSize="9" textAdjust="StretchHeight"><expression><![CDATA[$F{c4}]]></expression></element>
+        <element kind="textField" x="450" y="3" width="194" height="24" fontSize="9" textAdjust="StretchHeight"><expression><![CDATA[$F{c5}]]></expression></element>
+        <element kind="textField" x="650" y="3" width="124" height="24" fontSize="9" textAdjust="StretchHeight"><expression><![CDATA[$F{c6}]]></expression></element>
+        <element kind="line" positionType="FixRelativeToBottom" x="0" y="29" width="774" height="1" forecolor="#E5E7EB"/>
+    </band></detail>
+    <pageFooter height="20">
+        <element kind="staticText" x="0" y="3" width="600" height="16" fontSize="8" forecolor="#546470"><text><![CDATA[BCBM Systems · Reporte de emergencias · Frecuencia por tipo, prioridad, estado y resultado.]]></text></element>
+        <element kind="textField" x="690" y="3" width="84" height="16" fontSize="8" hTextAlign="Right"><expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression></element>
+    </pageFooter>
+</jasperReport>

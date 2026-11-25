@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReporteEmergenciasController" styleClass="page" spacing="12">
+ <FlowPane hgap="16" vgap="8" styleClass="page-header" alignment="CENTER_LEFT">
+  <Label text="Reporte de emergencias" styleClass="page-title"/><ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+  <Button fx:id="previsualizar" text="Vista previa · PDF y Excel" onAction="#previsualizar" styleClass="primary" disable="true"/>
+ </FlowPane>
+ <Label text="Actas registradas en el período, por tipo, prioridad y estado, con su dirección y resultado. Sirve para ver cuáles emergencias fueron más frecuentes y cuántas siguen abiertas." wrapText="true" styleClass="subtitle"/>
+ <FlowPane hgap="10" vgap="8" alignment="CENTER_LEFT">
+  <Label text="Desde"/><DatePicker fx:id="desde"/><Label text="Hasta"/><DatePicker fx:id="hasta"/>
+  <Label text="Tipo"/><ComboBox fx:id="tipo" prefWidth="200"/>
+  <Label text="Prioridad"/><ComboBox fx:id="prioridad" prefWidth="130"/>
+  <Label text="Estado"/><ComboBox fx:id="estado" prefWidth="140"/>
+  <Button text="Consultar / Actualizar" onAction="#consultar" styleClass="secondary"/>
+ </FlowPane>
+ <VBox spacing="6" styleClass="equipment-picker">
+  <Label fx:id="resumen" wrapText="true" styleClass="card-title"/><Label fx:id="frecuencia" wrapText="true"/>
+  <Label fx:id="pendientes" wrapText="true"/><Label fx:id="corte" wrapText="true" styleClass="muted"/>
+ </VBox>
+ <StackPane fx:id="contenido" VBox.vgrow="ALWAYS" minHeight="200"/>
+ <Label text="Las actas se ubican en el período por su fecha de apertura. Abiertas = pendientes o en proceso. El estado y el resultado corresponden al momento de la consulta." wrapText="true" styleClass="footnote"/>
+</VBox>

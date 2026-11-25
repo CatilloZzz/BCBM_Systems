@@ -24,7 +24,7 @@ public class EquipoService {
                 .setParameter("id",id==null ? -1 : id).getSingleResult();
             if (cantidad<asignado) throw new IllegalArgumentException("El inventario total no puede ser menor que las unidades ya distribuidas ("+asignado+"). Retira primero existencias de las unidades.");
             if (asignado>0 && estado!=EstadoEquipo.OPERATIVO) throw new IllegalArgumentException("Retira el equipo de las unidades antes de cambiar su estado.");
-            ConfiguracionService.validar(s,GrupoCatalogo.CATEGORIA_EQUIPO,c,e.getCategoria());
+            ConsultasCabina.ConfiguracionService.validar(s,GrupoCatalogo.CATEGORIA_EQUIPO,c,e.getCategoria());
             e.setNombre(n); e.setCategoria(c); e.setCantidad(cantidad); e.setEstado(estado);
             // ultimoMantenimiento solo cambia al registrar un mantenimiento.
             if (id == null) dao.crear(s,e); return null;

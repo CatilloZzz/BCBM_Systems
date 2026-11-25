@@ -56,7 +56,7 @@ public class UnidadesController {
         return unidad==null ? null : unidad.getId();
     }
     private void recargar(Integer id) {
-        Ui.ejecutar(root,()->new Datos(servicio.consultar(sesion),new ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.TIPO_UNIDAD)),resultado->{
+        Ui.ejecutar(root,()->new Datos(servicio.consultar(sesion),new ConsultasCabina.ConfiguracionService(edu.ni.uam.proyectofinalferrogest.util.HibernateUtil.getSessionFactory()).opciones(sesion).get(GrupoCatalogo.TIPO_UNIDAD)), resultado->{
             var datos=resultado.inventario(); tipo.getItems().setAll(resultado.tipos());
             equipos=datos.equipos(); dotaciones=datos.dotaciones(); registros.setAll(datos.unidades());
             disponibles.getItems().setAll(equipos.stream().filter(e->e.getEstado()==EstadoEquipo.OPERATIVO && disponible(e)>0).toList());

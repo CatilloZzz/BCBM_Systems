@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="reporte_participacion_personal" pageWidth="842" pageHeight="595"
+              columnWidth="774" leftMargin="34" rightMargin="34" topMargin="26" bottomMargin="24"
+              whenNoDataType="AllSectionsNoDetail">
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <parameter name="RESUMEN" class="java.lang.String"/>
+    <field name="persona" class="java.lang.String"/>
+    <field name="organizacion" class="java.lang.String"/>
+    <field name="emergencias" class="java.lang.Long"/>
+    <field name="otrosServicios" class="java.lang.Long"/>
+    <field name="participaciones" class="java.lang.Long"/>
+    <field name="porcentaje" class="java.lang.Double"/>
+
+    <title height="112">
+        <element kind="staticText" x="0" y="2" width="774" height="28" fontName="Arial" fontSize="19.0" bold="true" forecolor="#9B1C2B">
+            <text><![CDATA[CUERPO DE BOMBEROS · PARTICIPACIÓN DEL PERSONAL]]></text>
+        </element>
+        <element kind="staticText" x="0" y="38" width="80" height="20" fontName="Arial" fontSize="10.0" bold="true" forecolor="#4B5563" vTextAlign="Middle">
+            <text><![CDATA[Período:]]></text>
+        </element>
+        <element kind="textField" x="78" y="38" width="450" height="20" fontName="Arial" fontSize="10.0" forecolor="#374151" vTextAlign="Middle">
+            <expression><![CDATA[$P{PERIODO}]]></expression>
+        </element>
+        <element kind="textField" x="0" y="64" width="774" height="38" fontName="Arial" fontSize="9.0" forecolor="#4B5563" vTextAlign="Middle" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{RESUMEN} + "\nLas participaciones cuentan una persona por cada salida registrada." ]]></expression>
+        </element>
+        <element kind="line" x="0" y="107" width="774" height="1" forecolor="#D1D5DB"/>
+    </title>
+
+    <columnHeader height="34">
+        <element kind="staticText" x="0" y="0" width="200" height="34" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Bombero o bombera]]></text>
+        </element>
+        <element kind="staticText" x="200" y="0" width="154" height="34" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Compañía y escuadra]]></text>
+        </element>
+        <element kind="staticText" x="354" y="0" width="105" height="34" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="8.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Emergencias]]></text>
+        </element>
+        <element kind="staticText" x="459" y="0" width="115" height="34" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="8.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Otros servicios]]></text>
+        </element>
+        <element kind="staticText" x="574" y="0" width="105" height="34" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="8.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Participaciones]]></text>
+        </element>
+        <element kind="staticText" x="679" y="0" width="95" height="34" mode="Opaque" backcolor="#741B24" forecolor="#FFFFFF" fontName="Arial" fontSize="8.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[% del total]]></text>
+        </element>
+    </columnHeader>
+
+    <detail>
+        <band height="28" splitType="Stretch">
+            <element kind="textField" x="0" y="0" width="200" height="28" fontName="Arial" fontSize="9.0" forecolor="#374151" vTextAlign="Middle" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{persona}]]></expression>
+            </element>
+            <element kind="textField" x="200" y="0" width="154" height="28" fontName="Arial" fontSize="8.5" forecolor="#374151" vTextAlign="Middle" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{organizacion}]]></expression>
+            </element>
+            <element kind="textField" x="354" y="0" width="105" height="28" fontName="Arial" fontSize="9.0" forecolor="#374151" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0">
+                <expression><![CDATA[$F{emergencias}]]></expression>
+            </element>
+            <element kind="textField" x="459" y="0" width="115" height="28" fontName="Arial" fontSize="9.0" forecolor="#374151" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0">
+                <expression><![CDATA[$F{otrosServicios}]]></expression>
+            </element>
+            <element kind="textField" x="574" y="0" width="105" height="28" fontName="Arial" fontSize="9.0" forecolor="#374151" bold="true" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0">
+                <expression><![CDATA[$F{participaciones}]]></expression>
+            </element>
+            <element kind="textField" x="679" y="0" width="95" height="28" fontName="Arial" fontSize="9.0" forecolor="#374151" hTextAlign="Right" vTextAlign="Middle" pattern="0.0%">
+                <expression><![CDATA[$F{porcentaje}]]></expression>
+            </element>
+            <element kind="line" positionType="FixRelativeToBottom" x="0" y="27" width="774" height="1" forecolor="#E5E7EB"/>
+        </band>
+    </detail>
+
+    <pageFooter height="22">
+        <element kind="staticText" x="0" y="2" width="400" height="16" fontName="Arial" fontSize="8.0" forecolor="#6B7280" vTextAlign="Middle">
+            <text><![CDATA[BCBM Systems · Participación del personal]]></text>
+        </element>
+        <element kind="textField" x="714" y="2" width="60" height="16" fontName="Arial" fontSize="8.0" forecolor="#6B7280" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+        </element>
+    </pageFooter>
+</jasperReport>

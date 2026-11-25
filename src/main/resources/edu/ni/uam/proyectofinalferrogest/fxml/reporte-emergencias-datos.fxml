@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<TabPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReporteEmergenciasDatosController" tabClosingPolicy="UNAVAILABLE" styleClass="settings-tabs">
+ <Tab text="Actas"><TableView fx:id="actas" fixedCellSize="44"><placeholder><Label text="Sin actas para esta consulta."/></placeholder><columns>
+  <TableColumn fx:id="aNumero" text="N.º de acta" prefWidth="110"/>
+  <TableColumn fx:id="aApertura" text="Apertura" prefWidth="130"/>
+  <TableColumn fx:id="aTipo" text="Tipo" prefWidth="160"/>
+  <TableColumn fx:id="aPrioridad" text="Prioridad" prefWidth="90"/>
+  <TableColumn fx:id="aEstado" text="Estado" prefWidth="100"/>
+  <TableColumn fx:id="aDireccion" text="Dirección" prefWidth="240"/>
+  <TableColumn fx:id="aResultado" text="Resultado" prefWidth="140"/>
+  <TableColumn fx:id="aCierre" text="Cierre" prefWidth="130"/>
+ </columns></TableView></Tab>
+ <Tab fx:id="porTipo" text="Por tipo"/>
+ <Tab fx:id="porPrioridad" text="Por prioridad"/>
+ <Tab fx:id="porEstado" text="Por estado"/>
+ <Tab fx:id="porResultado" text="Por resultado"/>
+</TabPane>
