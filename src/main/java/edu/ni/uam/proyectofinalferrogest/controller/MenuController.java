@@ -30,7 +30,7 @@ public class MenuController {
     @FXML private void initialize() {
         usuario.setText(sesion.username()); rol.setText(Ui.nombre(sesion.rol()));
         root.widthProperty().addListener((o,a,b) -> {
-            if ((a.doubleValue()<1100)!=(b.doubleValue()<1100)) mostrarMenu(b.doubleValue()>=1100);
+            if (a.doubleValue()==0 || (a.doubleValue()<1100)!=(b.doubleValue()<1100)) mostrarMenu(b.doubleValue()>=1100);
             Ui.visible(fecha,b.doubleValue()>=1000);
         });
         fecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("es-NI"))));

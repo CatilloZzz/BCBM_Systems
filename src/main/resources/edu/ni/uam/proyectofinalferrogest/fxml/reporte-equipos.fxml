@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="edu.ni.uam.proyectofinalferrogest.controller.ReporteEquiposController" styleClass="page" spacing="12">
+ <FlowPane hgap="16" vgap="8" styleClass="page-header" alignment="CENTER_LEFT">
+  <Label text="Equipos y mantenimiento" styleClass="page-title"/><ProgressIndicator fx:id="cargando" prefWidth="22" prefHeight="22"/>
+  <Button fx:id="previsualizar" text="Vista previa · PDF y Excel" onAction="#previsualizar" styleClass="primary" disable="true"/>
+ </FlowPane>
+ <Label text="El inventario muestra las existencias actuales. Las fechas filtran el historial y la programación de mantenimiento." wrapText="true" styleClass="subtitle"/>
+ <FlowPane hgap="10" vgap="8" alignment="CENTER_LEFT">
+  <Label text="Mantenimiento desde"/><DatePicker fx:id="desde"/><Label text="Hasta"/><DatePicker fx:id="hasta"/>
+  <Button text="Consultar / Actualizar" onAction="#consultar" styleClass="secondary"/>
+ </FlowPane>
+ <VBox spacing="6" styleClass="equipment-picker">
+  <Label fx:id="resumen" wrapText="true" styleClass="card-title"/><Label fx:id="plan" wrapText="true"/>
+  <Label fx:id="corte" wrapText="true" styleClass="muted"/>
+ </VBox>
+ <StackPane fx:id="contenido" VBox.vgrow="ALWAYS" minHeight="200"/>
+ <Label text="Disponibles = piezas operativas sin asignar. El plan usa la programación de la última revisión y también incluye revisiones vencidas anteriores al período." wrapText="true" styleClass="footnote"/>
+</VBox>

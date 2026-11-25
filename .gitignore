@@ -5,16 +5,7 @@ target/
 .kotlin
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-target/
 .idea/
-src/main/resources/hibernate.properties
-/config.properties
-/.local/
-
 *.iws
 *.iml
 *.ipr
@@ -43,3 +34,13 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Archivos locales de trabajo y conexión ###
+/.local/
+/config.properties
+/src/main/resources/hibernate.properties
+
+### Cachés de herramientas auxiliares ###
+__pycache__/
+*.pyc
+*.pyo
